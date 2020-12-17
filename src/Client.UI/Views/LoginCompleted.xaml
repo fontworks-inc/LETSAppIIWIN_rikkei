@@ -1,0 +1,34 @@
+﻿<Page x:Class="Client.UI.Views.LoginCompleted"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        mc:Ignorable="d"
+        xmlns:prism="http://prismlibrary.com/"             
+        prism:ViewModelLocator.AutoWireViewModel="True">
+
+    <DockPanel>
+        <Grid x:Name="LoginCompletedCommandPanel" DockPanel.Dock="Bottom" Height="80" Background="#F1F1F1">
+            <Button Content="{Binding FontsListButtonTitle}" FontSize="10pt"
+                    Width ="120" Height ="32" Margin="0,0,24,0" HorizontalAlignment="Right"
+                    Foreground="White" Background="#0078D7" 
+                    Command="{Binding FontsListButtonClick}"/>
+        </Grid>
+        <Grid DockPanel.Dock="Left" Width="250">
+            <Rectangle HorizontalAlignment="Left" Height="30" Width="124" 
+                       Margin="35,50,0,0" VerticalAlignment="Top">
+                <Rectangle.Fill>
+                    <ImageBrush ImageSource="{Binding ImageLogo}"/>
+                </Rectangle.Fill>
+            </Rectangle>
+        </Grid>
+        <Grid DockPanel.Dock="Right">
+            <StackPanel>
+                <Label Content="{Binding ProcessTitle}" FontSize="15pt" Margin="0,45,0,10"
+                       VerticalAlignment="Top" HorizontalAlignment="Left"/>
+                <TextBlock Text="{Binding ProcessDescription}" FontSize="10pt" Margin="5,10,0,0"
+                           VerticalAlignment="Top" HorizontalAlignment="Left"/>
+            </StackPanel>
+        </Grid>
+    </DockPanel>
+</Page>

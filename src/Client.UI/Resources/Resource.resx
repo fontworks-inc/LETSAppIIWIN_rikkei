@@ -1,0 +1,418 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="APP_04_01_2fa_BTN_SEND" xml:space="preserve">
+    <value>送信</value>
+    <comment>２段階認証画面　送信ボタン</comment>
+  </data>
+  <data name="APP_04_01_2fa_ERR_01" xml:space="preserve">
+    <value>認証コードが違います</value>
+    <comment>２段階認証画面　エラーメッセージ（認証エラー）</comment>
+  </data>
+  <data name="APP_04_01_2fa_ERR_02" xml:space="preserve">
+    <value>正しく入力されていません</value>
+    <comment>２段階認証画面　エラーメッセージ（認証コード不正）</comment>
+  </data>
+  <data name="APP_04_01_2fa_ERR_03" xml:space="preserve">
+    <value>認証コードの期限が切れています</value>
+    <comment>２段階認証画面　エラーメッセージ（認証コード期限切れ）</comment>
+  </data>
+  <data name="APP_04_01_2fa_LBL_AUTHENTICATION_CODE" xml:space="preserve">
+    <value>認証コード</value>
+    <comment>２段階認証画面　認証コード　ラベル</comment>
+  </data>
+  <data name="APP_04_01_2fa_PROC_DESCRIPTION" xml:space="preserve">
+    <value>登録されているメールアドレスに認証コードを送信しました。
+メールの本文に記載されている認証コードを入力してください。</value>
+    <comment>２段階認証画面　処理説明</comment>
+  </data>
+  <data name="APP_04_01_2fa_PROC_TITLE" xml:space="preserve">
+    <value>２要素認証コードの入力</value>
+    <comment>２段階認証画面　処理タイトル</comment>
+  </data>
+  <data name="APP_04_01_BTN_LOGIN" xml:space="preserve">
+    <value>ログイン</value>
+    <comment>ログイン画面　ログインボタン</comment>
+  </data>
+  <data name="APP_04_01_ERR_01" xml:space="preserve">
+    <value>メールアドレスまたはパスワードが違います</value>
+    <comment>ログイン画面　エラーメッセージ全体</comment>
+  </data>
+  <data name="APP_04_01_ERR_02" xml:space="preserve">
+    <value>正しく入力されていません</value>
+    <comment>ログイン画面　エラーメッセージ個別(メールアドレス)</comment>
+  </data>
+  <data name="APP_04_01_ERR_03" xml:space="preserve">
+    <value>正しく入力されていません</value>
+    <comment>ログイン画面　エラーメッセージ個別(パスワード)</comment>
+  </data>
+  <data name="APP_04_01_LBL_MAILADRESS" xml:space="preserve">
+    <value>メールアドレスID</value>
+    <comment>ログイン画面　メールアドレスID　ラベル</comment>
+  </data>
+  <data name="APP_04_01_LBL_PASSWORD" xml:space="preserve">
+    <value>パスワード</value>
+    <comment>ログイン画面　パスワード　ラベル</comment>
+  </data>
+  <data name="APP_04_01_LBL_REGISTRATION_PAGE" xml:space="preserve">
+    <value>アカウントをお持ちでない方は</value>
+    <comment>ログイン画面　アカウント登録画面案内　ラベル</comment>
+  </data>
+  <data name="APP_04_01_LBL_RESET_PASSWORD_PAGE" xml:space="preserve">
+    <value>パスワードを再設定・お忘れの方は</value>
+    <comment>ログイン画面　パスワード再設定画面案内　ラベル</comment>
+  </data>
+  <data name="APP_04_01_PROC_TITLE" xml:space="preserve">
+    <value>ログイン</value>
+    <comment>ログイン画面　処理タイトル</comment>
+  </data>
+  <data name="APP_04_ERR_EXCEPTION" xml:space="preserve">
+    <value>エラーが発生しました（{0}）</value>
+    <comment>ログイン処理　エラーメッセージ（その他）</comment>
+  </data>
+  <data name="APP_04_LNK_HERE" xml:space="preserve">
+    <value>こちら</value>
+    <comment>ログイン画面　こちらリンク</comment>
+  </data>
+  <data name="APP_04_WIN_TITLE" xml:space="preserve">
+    <value>LETS アカウント</value>
+    <comment>ログイン処理　画面タイトル</comment>
+  </data>
+  <data name="APP_05_01_BTN_NEXT" xml:space="preserve">
+    <value>次へ</value>
+    <comment>端末設定画面　次へボタン</comment>
+  </data>
+  <data name="APP_05_01_DEVICE_LIST_LOGGEDOUG" xml:space="preserve">
+    <value>ログアウト済み</value>
+    <comment>端末設定画面　端末一覧　ログアウト済み</comment>
+  </data>
+  <data name="APP_05_01_DEVICE_LIST_LOGOUG" xml:space="preserve">
+    <value>ログアウト</value>
+    <comment>端末設定画面　端末一覧　ログアウトボタン</comment>
+  </data>
+  <data name="APP_05_01_DEVICE_LIST_TITLE" xml:space="preserve">
+    <value>LETSのフォントを使用中のデバイス</value>
+    <comment>端末設定画面　端末一覧タイトル</comment>
+  </data>
+  <data name="APP_05_01_ERR_01" xml:space="preserve">
+    <value>デバイスのログアウトに失敗しました</value>
+    <comment>端末設定画面　ログアウトボタン押下時　ログアウトエラー</comment>
+  </data>
+  <data name="APP_05_01_ERR_02" xml:space="preserve">
+    <value>デバイスのログインに失敗しました</value>
+    <comment>端末設定画面　次へボタン押下時　ログインエラー</comment>
+  </data>
+  <data name="APP_05_01_PROC_DESCRIPTION" xml:space="preserve">
+    <value>LETSのフォントは最大２台のデバイスで同時に使用できます。このデバイスで使用したい場合
+は、「デバイス管理」より１台以上のデバイスをログアウトしてください。</value>
+    <comment>端末設定画面　処理説明</comment>
+  </data>
+  <data name="APP_05_01_PROC_DESCRIPTION2" xml:space="preserve">
+    <value>LETSウェブサイトのデバイス管理ページからも同様に確認・変更ができます。</value>
+    <comment>端末設定画面　下部説明</comment>
+  </data>
+  <data name="APP_05_01_PROC_TITLE" xml:space="preserve">
+    <value>現在、２台のデバイスでLETSを使用しています</value>
+    <comment>端末設定画面　処理タイトル</comment>
+  </data>
+  <data name="APP_06_01_BTN_FONTLIST" xml:space="preserve">
+    <value>フォント一覧へ</value>
+    <comment>ログイン完了画面　フォント一覧へボタン</comment>
+  </data>
+  <data name="APP_06_01_PROC_DESCRIPTION" xml:space="preserve">
+    <value>フォント一覧ページから使用するフォントをアクティベートしましょう。</value>
+    <comment>ログイン完了画面　処理説明</comment>
+  </data>
+  <data name="APP_06_01_PROC_TITLE" xml:space="preserve">
+    <value>ログイン完了しました</value>
+    <comment>ログイン完了画面　処理タイトル</comment>
+  </data>
+  <data name="APP_07_01_BTN_OK" xml:space="preserve">
+    <value>OK</value>
+    <comment>強制アップデートダイアログ　OKボタン</comment>
+  </data>
+  <data name="APP_07_01_PROC_DESCRIPTION" xml:space="preserve">
+    <value>アップデート中もLETSのフォントは使用可能です。</value>
+    <comment>強制アップデートダイアログ　処理説明</comment>
+  </data>
+  <data name="APP_07_01_PROC_TITLE" xml:space="preserve">
+    <value>LETSデスクトップアプリの強制アップデートを開始します</value>
+    <comment>強制アップデートダイアログ　処理タイトル</comment>
+  </data>
+  <data name="APP_08_01_BTN_LOGOUT" xml:space="preserve">
+    <value>ログアウト</value>
+    <comment>強制ログアウトダイアログ　ログアウトボタン</comment>
+  </data>
+  <data name="APP_08_01_PROC_DESCRIPTION" xml:space="preserve">
+    <value>現在行っている作業を保存し、以下の「ログアウト」ボタンを押下してください。
+引き続きLETSのフォントを使用する場合は、クイックメニューからログインしてください。</value>
+    <comment>強制ログアウトダイアログ　処理説明</comment>
+  </data>
+  <data name="APP_08_01_PROC_TITLE" xml:space="preserve">
+    <value>このデバイスがログアウトされたため、LETSデスクトップアプリを
+ログアウトします</value>
+    <comment>強制ログアウトダイアログ　処理タイトル</comment>
+  </data>
+  <data name="APP_08_01_WIN_TITLE" xml:space="preserve">
+    <value>LETS アカウント</value>
+    <comment>強制ログアウトダイアログ　タイトル</comment>
+  </data>
+  <data name="APP_09_01_BTN_CANCEL" xml:space="preserve">
+    <value>キャンセル</value>
+    <comment>ログアウト確認ダイアログ　キャンセルボタン</comment>
+  </data>
+  <data name="APP_09_01_BTN_LOGOUT" xml:space="preserve">
+    <value>ログアウト</value>
+    <comment>ログアウト確認ダイアログ　ログアウトボタン</comment>
+  </data>
+  <data name="APP_09_01_PROC_DESCRIPTION" xml:space="preserve">
+    <value>LETSデスクトップアプリをログアウトすると、再度ログインするまでこのデバイスで
+すべてのLETSのフォントが使えなくなります。</value>
+    <comment>ログアウト確認ダイアログ　処理説明</comment>
+  </data>
+  <data name="APP_09_01_PROC_TITLE" xml:space="preserve">
+    <value>ログアウトします</value>
+    <comment>ログアウト確認ダイアログ　処理タイトル</comment>
+  </data>
+  <data name="APP_ERR_UnhandledException" xml:space="preserve">
+    <value>致命的なエラーが発生したので、プログラムを終了します</value>
+    <comment>グローバル例外時に表示するメッセージ</comment>
+  </data>
+  <data name="FUNC_01_02_16_ERR_StartAsAdministrators" xml:space="preserve">
+    <value>管理者権限で起動してください</value>
+    <comment>管理者権限での起動確認処理エラー</comment>
+  </data>
+  <data name="FUNC_01_02_17_ERR_UpdateFailed" xml:space="preserve">
+    <value>アップデートできませんでした</value>
+    <comment>アップデート失敗</comment>
+  </data>
+  <data name="FUNC_01_03_01_NOTIFIED_FailedToDownloadFonts" xml:space="preserve">
+    <value>フォントのダウンロードに失敗しました</value>
+    <comment>[通知センター]フォントのダウンロード失敗</comment>
+  </data>
+  <data name="FUNC_01_03_01_NOTIFIED_LackOfDistSpace" xml:space="preserve">
+    <value>ディスク容量が不足しています</value>
+    <comment>[通知センター]インストール対象のフォントサイズに対してディスク容量が不足</comment>
+  </data>
+  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="ICON_APP" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>ICON_APP.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ICON_COMPLETED" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>ICON_COMPLETED.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ICON_LOADING_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>ICON_LOADING_0.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ICON_LOADING_1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>ICON_LOADING_1.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ICON_LOADING_2" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>ICON_LOADING_2.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ICON_LOADING_3" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>ICON_LOADING_3.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ICON_LOGIN" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>ICON_LOGIN.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ICON_LOGOUT" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>ICON_LOGOUT.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ICON_NOTIFIED" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>ICON_NOTIFIED.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ICON_SELECTED" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>ICON_SELECTED.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="IMG_DEVICE_PC" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>IMG_DEVICE_PC.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="IMG_LOGO" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>IMG_LOGO.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="LOG_ERR_AuthenticationService_Logout_InvalidOperationException" xml:space="preserve">
+    <value>ログアウト処理を利用する場合はコンストラクタの引数にIAuthenticationInformationRepository, IUserStatusRepository, IReceiveNotificationRepository, IVolatileSettingRepository, IUserFontsSettingRepository, IFontActivationServiceを設定してください</value>
+    <comment>ログアウト処理　正しいコンストラクタを設定していない場合のログメッセージ</comment>
+  </data>
+  <data name="LOG_ERR_StartupService_GetAllDevicesException" xml:space="preserve">
+    <value>ログイン状態確認時の全端末情報取得処理で例外が発生しました</value>
+    <comment>ログイン状態確認処理　全端末情報を取得処理で例外発生時のログメッセージ</comment>
+  </data>
+  <data name="LOG_ERR_StartupService_GetContractsAggregateException" xml:space="preserve">
+    <value>起動時チェック処理の契約情報取得で例外が発生しました</value>
+    <comment>起動時チェック処理　契約情報取得処理で例外発生時のログメッセージ</comment>
+  </data>
+  <data name="LOG_ERR_StartupService_IsCheckedStartup_InvalidOperationException" xml:space="preserve">
+    <value>起動時チェック処理を利用する場合はコンストラクタの引数にIFontManagerService, IContractsAggregateRepositoryを設定してください</value>
+    <comment>起動時チェック処理　利用するインスタンスの設定が不足時にで例外発生時ログメッセージ</comment>
+  </data>
+  <data name="MENU_ACCOUNT" xml:space="preserve">
+    <value>アカウント</value>
+    <comment>クイックメニュー[アカウント]</comment>
+  </data>
+  <data name="MENU_ANNOUNCE" xml:space="preserve">
+    <value>お知らせ</value>
+    <comment>クイックメニュー[お知らせ]</comment>
+  </data>
+  <data name="MENU_ANNOUNCE_COUNTER" xml:space="preserve">
+    <value>( {0} 件)</value>
+    <comment>クイックメニュー[お知らせ]　未読件数表示部</comment>
+  </data>
+  <data name="MENU_DOWNLOAD_FONTNAME" xml:space="preserve">
+    <value>FontName</value>
+    <comment>クイックメニュー[ダウンロード中(状態表示)]　フォント名表示部</comment>
+  </data>
+  <data name="MENU_DOWNLOAD_LOADING" xml:space="preserve">
+    <value>ダウンロード中...</value>
+    <comment>クイックメニュー[ダウンロード中(状態表示)]　処理中</comment>
+  </data>
+  <data name="MENU_FONT" xml:space="preserve">
+    <value>フォント</value>
+    <comment>クイックメニュー[フォント]</comment>
+  </data>
+  <data name="MENU_LOGIN_MAILADDRESS" xml:space="preserve">
+    <value>MailAddress</value>
+    <comment>クイックメニュー[ログイン中(状態表示)]　メールアドレス表示部</comment>
+  </data>
+  <data name="MENU_LOGIN_USERNAME" xml:space="preserve">
+    <value>UserName</value>
+    <comment>クイックメニュー[ログイン中(状態表示)]　利用者氏名表示部</comment>
+  </data>
+  <data name="MENU_LOGOUT" xml:space="preserve">
+    <value>ログアウト</value>
+    <comment>クイックメニュー[ログアウト]</comment>
+  </data>
+  <data name="MENU_PROGRESS_RATE" xml:space="preserve">
+    <value>( {0} %)</value>
+    <comment>クイックメニュー[XXX中(状態表示)]　進捗表示部</comment>
+  </data>
+  <data name="MENU_UPDATE" xml:space="preserve">
+    <value>アップデート</value>
+    <comment>クイックメニュー[アップデートする]</comment>
+  </data>
+  <data name="MENU_UPDATE_COMPLETED" xml:space="preserve">
+    <value>アップデートが完了しました。</value>
+    <comment>クイックメニュー[アップデート中(状態表示)]　完了</comment>
+  </data>
+  <data name="MENU_UPDATE_LOADING" xml:space="preserve">
+    <value>アップデート中...</value>
+    <comment>クイックメニュー[アップデート中(状態表示)]　処理中</comment>
+  </data>
+</root>

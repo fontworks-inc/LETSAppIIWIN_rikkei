@@ -1,0 +1,21 @@
+{
+  "Fonts": [
+    {
+      "Id": "aaa",
+      "Path": "c:\file",
+      "IsLETS": true,
+      "IsActivated": true,
+      "DisplayName": "テストフォント",
+      "Version": "1.0.0",
+      "RegistryKey": "aaabbbccc123"
+    },
+    {
+      "Id": "",
+      "Path": "c:\file2",
+      "IsLETS": false,
+      "IsActivated": null,
+      "DisplayName": "テストフォント2",
+      "Version": "1.0.1",
+      "RegistryKey": ""
+    }
+  ]

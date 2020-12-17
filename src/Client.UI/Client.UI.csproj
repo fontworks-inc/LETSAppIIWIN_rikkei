@@ -1,0 +1,173 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <AssemblyName>LETS</AssemblyName>
+    <Platforms>AnyCPU;x86</Platforms>
+    <EnableDefaultItems Condition=" '$(EnableDefaultItems)' == '' ">false</EnableDefaultItems>
+    <EnableDefaultCompileItems Condition=" '$(EnableDefaultCompileItems)' == '' ">false</EnableDefaultCompileItems>
+    <ApplicationIcon>ICON_APP.ico</ApplicationIcon>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Remove="StyleCop.Analyzers.editorconfig" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="App.xaml.cs" />
+    <Compile Include="Behaviors\PasswordBindingBehavior.cs" />
+    <Compile Include="Components\ApplicationIconComponent.cs" />
+    <Compile Include="Components\ApplicationIconMode.cs" />
+    <Compile Include="Components\ComponentManager.cs" />
+    <Compile Include="Components\ComponentManager.Designer.cs" />
+    <Compile Include="Components\LParamType.cs" />
+    <Compile Include="Components\MenuItem\MenuItemAccountPage.cs" />
+    <Compile Include="Components\MenuItem\MenuItemAnnouncePage.cs" />
+    <Compile Include="Components\MenuItem\MenuItemBase.cs" />
+    <Compile Include="Components\MenuItem\MenuItemDownloadStatus.cs" />
+    <Compile Include="Components\MenuItem\MenuItemFontListPage.cs" />
+    <Compile Include="Components\MenuItem\MenuItemLoginStatus.cs" />
+    <Compile Include="Components\MenuItem\MenuItemLogout.cs" />
+    <Compile Include="Components\MenuItem\MenuItemUpdate.cs" />
+    <Compile Include="Components\MenuItem\MenuItemUpdateStatus.cs" />
+    <Compile Include="Components\QuickMenuComponent.cs" />
+    <Compile Include="Components\WindowMessageType.cs" />
+    <Compile Include="Interfaces\ILoginWindowWrapper.cs" />
+    <Compile Include="Resources\Resource.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resource.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Shell.cs" />
+    <Compile Include="ViewModels\DeviceSettingsViewModel.cs" />
+    <Compile Include="ViewModels\DeviceViewModel.cs" />
+    <Compile Include="ViewModels\ForceLogoutNotificationViewModel.cs" />
+    <Compile Include="ViewModels\LoginCompletedViewModel.cs" />
+    <Compile Include="ViewModels\LoginViewModel.cs" />
+    <Compile Include="ViewModels\LogoutConfirmationViewModel.cs" />
+    <Compile Include="ViewModels\ForceUpdateNotificationViewModel.cs" />
+    <Compile Include="ViewModels\LoginWindowViewModel.cs" />
+    <Compile Include="ViewModels\MainWindowViewModel.cs" />
+    <Compile Include="ViewModels\TwoFactAuthenticationViewModel.cs" />
+    <Compile Include="Views\DeviceSettings.xaml.cs" />
+    <Compile Include="Views\ForceLogoutNotification.xaml.cs" />
+    <Compile Include="Views\ForceUpdateNotification.xaml.cs" />
+    <Compile Include="Views\Helper\WindowHelper.cs" />
+    <Compile Include="Views\Login.xaml.cs" />
+    <Compile Include="Views\LoginCompleted.xaml.cs" />
+    <Compile Include="Views\LoginWindow.xaml.cs" />
+    <Compile Include="Views\LogoutConfirmation.xaml.cs" />
+    <Compile Include="Views\MainWindow.xaml.cs" />
+    <Compile Include="Views\TwoFactAuthentication.xaml.cs" />
+    <Compile Include="Wrappers\LoginWindowWrapper.cs" />
+    <Compile Include="Wrappers\ResourceWrapper.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="appsettings.json">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ICON_APP.ico" />
+    <None Include="nlog.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="References\PresentationCore.dll" />
+    <None Include="References\PresentationFramework.dll" />
+    <None Include="References\WindowsBase.dll" />
+    <None Include="Resources\IMG_DEVICE_PC.png" />
+    <None Include="Resources\IMG_LOGO.png" />
+    <None Include="Resources\ICON_APP.ico" />
+    <None Include="Resources\ICON_COMPLETED.ico" />
+    <None Include="Resources\ICON_LOADING_3.ico" />
+    <None Include="Resources\ICON_LOADING_2.ico" />
+    <None Include="Resources\ICON_LOADING_1.ico" />
+    <None Include="Resources\ICON_LOADING_0.ico" />
+    <None Include="Resources\ICON_LOGIN.ico" />
+    <None Include="Resources\ICON_LOGOUT.ico" />
+    <None Include="Resources\ICON_NOTIFIED.ico" />
+    <None Include="Resources\ICON_SELECTED.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Components\ComponentManager.resx" />
+    <EmbeddedResource Include="Resources\Resource.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resource.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Toolkit.Uwp.Notifications" Version="6.1.1" />
+    <PackageReference Include="NLog" Version="4.7.5" />
+    <PackageReference Include="Prism.Unity" Version="7.2.0.1422" />
+    <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="App.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\DeviceSettings.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\ForceLogoutNotification.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\ForceUpdateNotification.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Login.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\LoginCompleted.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\LoginWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\LogoutConfirmation.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\MainWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\TwoFactAuthentication.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ApplicationService\ApplicationService.csproj" />
+    <ProjectReference Include="..\Core\Core.csproj" />
+    <ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="References\System.Drawing.Common.dll" />
+    <None Include="References\System.Drawing.dll" />
+    <None Include="References\System.Windows.Forms.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="PresentationCore">
+      <HintPath>References\PresentationCore.dll</HintPath>
+    </Reference>
+    <Reference Include="PresentationFramework">
+      <HintPath>References\PresentationFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Drawing">
+      <HintPath>References\System.Drawing.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Drawing.Common">
+      <HintPath>References\System.Drawing.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Windows.Forms">
+      <HintPath>References\System.Windows.Forms.dll</HintPath>
+    </Reference>
+    <Reference Include="WindowsBase">
+      <HintPath>References\WindowsBase.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="mkdir &quot;$(TargetDir)..\config&quot;&#xD;&#xA;xcopy &quot;$(ProjectDir)appsettings.json&quot; &quot;$(TargetDir)..\config&quot; /Y" />
+  </Target>
+</Project>

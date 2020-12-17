@@ -1,0 +1,35 @@
+# NOTE: Requires **VS2019 16.3** or later
+
+# Microsoft のすべての規則 のコピー
+# Description: この規則セットにはすべての規則が含まれます。この規則セットを実行すると、多数の警告が報告される可能性があります。この規則セットは、コード内のすべての問題を全体的に把握する場合に使用してください。これは、用途を絞った各規則セットのうち、どれがプロジェクトに対して最も適切かを判断するのに役立ちます。
+
+# Code files
+[*.{cs,vb}]
+
+
+# Default severity for analyzer diagnostics - Requires **VS2019 16.5** or later
+dotnet_diagnostic.CA1020.severity = none
+
+dotnet_diagnostic.CA1024.severity = none
+
+dotnet_diagnostic.CA1062.severity = none
+
+dotnet_diagnostic.CA1304.severity = none
+
+dotnet_diagnostic.CA1305.severity = none
+
+dotnet_diagnostic.CA1822.severity = none
+
+dotnet_diagnostic.CA2210.severity = none
+
+dotnet_diagnostic.SA0001.severity = none
+
+dotnet_diagnostic.SA1200.severity = none
+
+dotnet_diagnostic.SA1623.severity = none
+
+dotnet_diagnostic.SA1629.severity = none
+
+dotnet_diagnostic.SA1633.severity = none
+
+dotnet_diagnostic.SA1642.severity = none
