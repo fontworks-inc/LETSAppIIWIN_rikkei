@@ -36,6 +36,7 @@ namespace Client.UI.Views
         /// 画面が閉じるときの処理
         /// </summary>
         /// <param name="e">EventArgs</param>
+        /// <remarks>本画面の中でログアウト処理は実施せず、画面を閉じたときにログアウト処理が実施される</remarks>
         protected override void OnClosing(CancelEventArgs e)
         {
             // アプリケーションを終了しない
@@ -51,8 +52,14 @@ namespace Client.UI.Views
         {
             base.OnSourceInitialized(e);
 
+            // アイコン非表示
             WindowHelper.RemoveIcon(this);
-            WindowHelper.RemoveFrameButton(this);
+
+            // 閉じるボタンの無効化（閉じるメニューを削除することで実現している）
+            WindowHelper.RemoveCloseMenu(this);
+
+            // タイトルバーのボタン削除 上記の閉じるボタンの無効化で対応するが、下記の場合はボタン全削除に対応
+            // WindowHelper.RemoveFrameButton(this);
         }
     }
 }

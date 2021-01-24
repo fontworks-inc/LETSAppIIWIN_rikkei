@@ -5,6 +5,7 @@ using Client.UI.Interfaces;
 using Core.Entities;
 using Core.Exceptions;
 using Core.Interfaces;
+using NLog;
 using Prism.Commands;
 using Prism.Mvvm;
 
@@ -16,6 +17,11 @@ namespace Client.UI.ViewModels
     /// <remarks>端末設定画面の端末一覧項目</remarks>
     public class DeviceViewModel : BindableBase
     {
+        /// <summary>
+        /// ロガー
+        /// </summary>
+        private static readonly Logger Logger = LogManager.GetLogger("nlog.config");
+
         /// <summary>
         /// メモリ上で保存する情報を格納するリポジトリ
         /// </summary>
@@ -37,6 +43,21 @@ namespace Client.UI.ViewModels
         private readonly AuthenticationInformation authenticationInformation;
 
         /// <summary>
+        /// (メイン)ログイン画面
+        /// </summary>
+        private readonly ILoginWindowWrapper loginWindow;
+
+        /// <summary>
+        /// リソース読込み
+        /// </summary>
+        private readonly IResourceWrapper resouceWrapper;
+
+        /// <summary>
+        /// 端末設定画面ViewModel
+        /// </summary>
+        private readonly DeviceSettingsViewModel settingsViewModel;
+
+        /// <summary>
         /// ログアウトボタンの表示状態
         /// </summary>
         private Visibility visibilityLogout;
@@ -50,21 +71,6 @@ namespace Client.UI.ViewModels
         /// 端末情報
         /// </summary>
         private Device device;
-
-        /// <summary>
-        /// 端末設定画面ViewModel
-        /// </summary>
-        private DeviceSettingsViewModel settingsViewModel;
-
-        /// <summary>
-        /// (メイン)ログイン画面
-        /// </summary>
-        private ILoginWindowWrapper loginWindow;
-
-        /// <summary>
-        /// リソース読込み
-        /// </summary>
-        private IResourceWrapper resouceWrapper;
 
         /// <summary>
         /// インスタンスを初期化する
@@ -127,9 +133,13 @@ namespace Client.UI.ViewModels
                             break;
                     }
                 }
-                catch (InvalidOSTypeException)
+                catch (InvalidOSTypeException ex)
                 {
-                    // 【TODO】ログ出力
+                    // OS種類が不正な場合、ログを出力
+                    Logger.Warn(ex, string.Format(
+                        this.resouceWrapper.GetString("LOG_WARN_DeviceViewModel_InvalidOSTypeException"), this.Name));
+
+                    // 【Phase1】ではPCのみであるため、PC用アイコンを設定して続行
                     resouceId = "IMG_DEVICE_PC";
                 }
 
@@ -211,13 +221,18 @@ namespace Client.UI.ViewModels
         /// </summary>
         public void OnLogoutButtonClick()
         {
+            Logger.Info(string.Format(
+            this.resouceWrapper.GetString("LOG_INFO_DeviceViewModel_ButtonClick"),
+            this.resouceWrapper.GetString("APP_09_01_BTN_LOGOUT"),
+            this.Name));
+
             // 該当端末を解除する
             if (!this.DeactivateDevice())
             {
                 return;
             }
 
-            // 端末のログアウト状態を更新
+            // 該当端末のログアウトボタンをログアウト済みに変更する
             this.VisibilityLogout = Visibility.Collapsed;
             this.VisibilityLoggedout = Visibility.Visible;
             this.IsLoggingOut = true;
@@ -240,20 +255,22 @@ namespace Client.UI.ViewModels
 
                 return true;
             }
-            catch (InvalidResponseCodeException)
+            catch (InvalidResponseCodeException ex)
             {
                 // レスポンスコードが正常以外の場合、エラーメッセージを表示
-                MessageBox.Show(this.resouceWrapper.GetString("APP_05_01_ERR_01"));
-
-                // 【TODO：ログ出力】
-                // ログイン画面を閉じる
-                this.loginWindow.Close();
+                string errorMessage = this.resouceWrapper.GetString("APP_05_01_ERR_01");
+                MessageBox.Show(errorMessage);
+                Logger.Error(ex, errorMessage);
                 return false;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // 【TODO：ログ出力】
-                // 予期せぬ例外発生時は、ログイン画面を閉じる
+                // 配信サーバアクセスでエラーが発生したときは、画面を閉じ以後の処理を行わない
+                var exception = new Exception(
+                    string.Format(
+                        this.resouceWrapper.GetString("LOG_ERR_DeviceViewModel_DeactivateDevice_Exception"),
+                        this.Name), ex);
+                Logger.Error(exception);
                 this.loginWindow.Close();
                 return false;
             }

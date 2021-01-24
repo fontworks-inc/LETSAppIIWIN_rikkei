@@ -1,7 +1,11 @@
-﻿using System.Windows;
+﻿using System;
 using System.Windows.Media;
+using Client.UI.Entities;
+using Client.UI.Exceptions;
 using Client.UI.Interfaces;
+using Core.Entities;
 using Core.Interfaces;
+using NLog;
 using Prism.Commands;
 using Prism.Mvvm;
 
@@ -14,6 +18,11 @@ namespace Client.UI.ViewModels
     public class LoginCompletedViewModel : BindableBase
     {
         /// <summary>
+        /// ロガー
+        /// </summary>
+        private static readonly Logger Logger = LogManager.GetLogger("nlog.config");
+
+        /// <summary>
         /// (メイン)ログイン画面
         /// </summary>
         private ILoginWindowWrapper loginWindow;
@@ -24,18 +33,52 @@ namespace Client.UI.ViewModels
         private IResourceWrapper resouceWrapper;
 
         /// <summary>
+        /// URLアドレスを格納するリポジトリ
+        /// </summary>
+        private IUrlRepository urlRepository;
+
+        /// <summary>
+        /// メモリで保持する情報を格納するリポジトリ
+        /// </summary>
+        private IVolatileSettingRepository volatileSettingRepository;
+
+        /// <summary>
+        /// ユーザ別ステータス情報を格納するリポジトリ
+        /// </summary>
+        private IUserStatusRepository userStatusRepository;
+
+        /// <summary>
+        /// ブラウザ
+        /// </summary>
+        private WebBrowser webBrowser;
+
+        /// <summary>
         /// インスタンスを初期化する
         /// </summary>
         /// <param name="loginWindowWrapper">LoginWindowのラッパー</param>
         /// <param name="resouceWrapper">Resourceのラッパー</param>
+        /// <param name="urlRepository">URLアドレスを格納するリポジトリ</param>
+        /// <param name="volatileSettingRepository">メモリで保持する情報を格納するリポジトリ</param>
+        /// <param name="userStatusRepository">ユーザ別ステータス情報を格納するリポジトリ</param>
         public LoginCompletedViewModel(
             ILoginWindowWrapper loginWindowWrapper,
-            IResourceWrapper resouceWrapper)
+            IResourceWrapper resouceWrapper,
+            IUrlRepository urlRepository,
+            IVolatileSettingRepository volatileSettingRepository,
+            IUserStatusRepository userStatusRepository)
         {
             this.loginWindow = loginWindowWrapper;
             this.resouceWrapper = resouceWrapper;
+            this.urlRepository = urlRepository;
+            this.volatileSettingRepository = volatileSettingRepository;
+            this.userStatusRepository = userStatusRepository;
+
+            this.webBrowser = new WebBrowser();
 
             this.FontsListButtonClick = new DelegateCommand(this.OnFontsListButtonClick);
+
+            Logger.Info(string.Format(
+                this.resouceWrapper.GetString("LOG_INFO_LoginCompletedViewModel_Start")));
         }
 
         /// <summary>
@@ -92,9 +135,44 @@ namespace Client.UI.ViewModels
         /// </summary>
         private void OnFontsListButtonClick()
         {
-            MessageBox.Show("フォント一覧ページを表示");
+            Logger.Info(string.Format(
+               this.resouceWrapper.GetString("LOG_INFO_LoginCompletedViewModel_ButtonClick"),
+               this.resouceWrapper.GetString("APP_06_01_BTN_FONTLIST")));
 
-            this.loginWindow.Close();
+            try
+            {
+                // フォント一覧画面をブラウザで表示
+                string deviceId = this.userStatusRepository.GetStatus().DeviceId;
+                string accessToken = this.volatileSettingRepository.GetVolatileSetting().AccessToken;
+                this.webBrowser.Navigate(this.GetFontListPageUrl(deviceId, accessToken));
+            }
+            catch (GetFontListPageUrlException e)
+            {
+                // 配信サーバアクセスでエラーが発生したときは、画面を閉じ以後の処理を行わない
+                Logger.Error(e);
+            }
+            finally
+            {
+                this.loginWindow.Close();
+            }
+        }
+
+        /// <summary>
+        /// フォント一覧画面URLを取得する
+        /// </summary>
+        /// <param name="deviceId">デバイスID</param>
+        /// <param name="accessToken">アクセストークン</param>
+        /// <returns>フォント一覧画面URL</returns>
+        private Url GetFontListPageUrl(string deviceId, string accessToken)
+        {
+            try
+            {
+                return this.urlRepository.GetFontListPageUrl(deviceId, accessToken);
+            }
+            catch (Exception e)
+            {
+                throw new GetFontListPageUrlException(this.resouceWrapper.GetString("LOG_ERR_LoginCompletedViewModel_GetFontListPageUrlException"), e);
+            }
         }
     }
 }

@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Linq;
 using System.Net;
 using ApplicationService.Interfaces;
 using Core.Entities;
 using Core.Interfaces;
 using NLog;
-using OS.Interfaces;
 using Prism.Ioc;
 
 namespace ApplicationService.Authentication
@@ -51,14 +49,14 @@ namespace ApplicationService.Authentication
         private readonly IVolatileSettingRepository volatileSettingRepository = null;
 
         /// <summary>
-        /// フォント情報のリポジトリ
+        /// お客様情報のリポジトリ
         /// </summary>
-        private readonly IUserFontsSettingRepository userFontsSettingRepository = null;
+        private readonly ICustomerRepository customerRepository = null;
 
         /// <summary>
-        /// フォントアクティベートサービス
+        /// フォント管理サービス
         /// </summary>
-        private readonly IFontActivationService fontActivationService = null;
+        private readonly IFontManagerService fontManagerService = null;
 
         /// <summary>
         /// インスタンスを初期化する
@@ -71,6 +69,10 @@ namespace ApplicationService.Authentication
             this.devicesRepository = containerProvider.Resolve<IDevicesRepository>();
             this.userStatusRepository = containerProvider.Resolve<IUserStatusRepository>();
             this.volatileSettingRepository = containerProvider.Resolve<IVolatileSettingRepository>();
+            this.receiveNotificationRepository = containerProvider.Resolve<IReceiveNotificationRepository>();
+            this.volatileSettingRepository = containerProvider.Resolve<IVolatileSettingRepository>();
+            this.customerRepository = containerProvider.Resolve<ICustomerRepository>();
+            this.fontManagerService = containerProvider.Resolve<IFontManagerService>();
         }
 
         /// <summary>
@@ -81,6 +83,7 @@ namespace ApplicationService.Authentication
         /// <param name="devicesRepository">端末情報を格納するリポジトリ</param>
         /// <param name="userStatusRepository">ユーザ別ステータス情報を格納するリポジトリ</param>
         /// <param name="volatileSettingRepository">メモリ上で保持する情報のリポジトリ</param>
+        /// <remarks>ログイン処理用</remarks>
         public AuthenticationService(
             IResourceWrapper resourceWrapper,
             IAuthenticationInformationRepository authenticationInformationRepository,
@@ -103,8 +106,8 @@ namespace ApplicationService.Authentication
         /// <param name="userStatusRepository">ユーザ別ステータス情報を格納するリポジトリ</param>
         /// <param name="receiveNotificationRepository">通知受信機能を格納するリポジトリ</param>
         /// <param name="volatileSettingRepository">メモリ上で保持する情報のリポジトリ</param>
-        /// <param name="userFontsSettingRepository">フォント情報のリポジトリ</param>
-        /// <param name="fontActivationService">フォントアクティベートサービス</param>
+        /// <param name="customerRepository">お客様情報のリポジトリ</param>
+        /// <param name="fontManagerService">フォント管理サービス</param>
         /// <remarks>ログアウト処理用</remarks>
         public AuthenticationService(
             IResourceWrapper resourceWrapper,
@@ -112,16 +115,16 @@ namespace ApplicationService.Authentication
             IUserStatusRepository userStatusRepository,
             IReceiveNotificationRepository receiveNotificationRepository,
             IVolatileSettingRepository volatileSettingRepository,
-            IUserFontsSettingRepository userFontsSettingRepository,
-            IFontActivationService fontActivationService)
+            ICustomerRepository customerRepository,
+            IFontManagerService fontManagerService)
         {
             this.resourceWrapper = resourceWrapper;
             this.authenticationInformationRepository = authenticationInformationRepository;
             this.userStatusRepository = userStatusRepository;
             this.receiveNotificationRepository = receiveNotificationRepository;
             this.volatileSettingRepository = volatileSettingRepository;
-            this.userFontsSettingRepository = userFontsSettingRepository;
-            this.fontActivationService = fontActivationService;
+            this.customerRepository = customerRepository;
+            this.fontManagerService = fontManagerService;
         }
 
         /// <summary>
@@ -132,7 +135,18 @@ namespace ApplicationService.Authentication
         /// <returns>認証情報</returns>
         public AuthenticationInformationResponse Login(string mailAddress, string password)
         {
+            Logger.Info(string.Format(
+                "AuthenticationService:Login Enter",
+                "Enter"));
+            if (this.devicesRepository == null)
+            {
+                throw new InvalidOperationException(this.resourceWrapper.GetString("LOG_ERR_AuthenticationService_Login_InvalidOperationException"));
+            }
+
             // ユーザ別保存：デバイスIDを取得
+            Logger.Info(string.Format(
+                "AuthenticationService:Login ユーザ別保存：デバイスIDを取得",
+                "ユーザ別保存：デバイスIDを取得"));
             var userStatus = this.userStatusRepository.GetStatus();
             var deviceId = userStatus.DeviceId;
 
@@ -140,6 +154,9 @@ namespace ApplicationService.Authentication
             if (string.IsNullOrEmpty(deviceId))
             {
                 // 配信サービスよりデバイスIDを発行
+                Logger.Info(string.Format(
+                    "AuthenticationService:Login 配信サービスよりデバイスIDを発行",
+                    "配信サービスよりデバイスIDを発行"));
                 var user = new User()
                 {
                     MailAddress = mailAddress,
@@ -147,17 +164,35 @@ namespace ApplicationService.Authentication
                     HostName = Dns.GetHostName(),
                     OSUserName = Environment.UserName,
                 };
-                deviceId = this.devicesRepository.GetDeviceId(user);
+                try
+                {
+                    deviceId = this.devicesRepository.GetDeviceId(user);
+                }
+                catch (SystemException ret)
+                {
+                    return new AuthenticationInformationResponse()
+                    {
+                        Code = int.Parse(ret.Message),
+                    };
+                }
 
                 // ユーザ別保存：デバイスIDに保存
+                Logger.Info(string.Format(
+                    "AuthenticationService:Login ユーザ別保存：デバイスIDに保存",
+                    "ユーザ別保存：デバイスIDに保存"));
                 userStatus.DeviceId = deviceId;
                 this.userStatusRepository.SaveStatus(userStatus);
             }
 
             // ログイン処理を実行
+            Logger.Info(string.Format(
+                "AuthenticationService:Login ログイン処理を実行",
+                "ログイン処理を実行"));
             return this.authenticationInformationRepository.Login(
                     deviceId, mailAddress, password);
         }
+
+        static private bool isFirstLogined = false; // インストールから未ログインを示す（暫定処置）
 
         /// <summary>
         /// ログイン情報を保存する（ログイン完了処理）
@@ -169,6 +204,11 @@ namespace ApplicationService.Authentication
             // [メモリ：アクセストークン]に「アクセストークン」を保存
             var volatileSetting = this.volatileSettingRepository.GetVolatileSetting();
             volatileSetting.AccessToken = authenticationInformation.AccessToken;
+            volatileSetting.RefreshToken = authenticationInformation.RefreshToken;
+
+            Logger.Info("AccessToken = " + volatileSetting.AccessToken, string.Empty);
+            Logger.Info("UserAgent = " + volatileSetting.UserAgent, string.Empty);
+            Logger.Info("RefreshToken = " + volatileSetting.RefreshToken, string.Empty);
 
             // ユーザ別保存情報取得
             var userStatus = this.userStatusRepository.GetStatus();
@@ -177,6 +217,24 @@ namespace ApplicationService.Authentication
             userStatus.RefreshToken = authenticationInformation.RefreshToken;
             userStatus.IsLoggingIn = true;
             this.userStatusRepository.SaveStatus(userStatus);
+
+            ////  起動時チェック済みをfalseにする
+            //volatileSetting.IsCheckedStartup = false;
+
+            if(!isFirstLogined) {
+                // ユーザー配下のフォントフォルダ
+                var local = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+                var userFontsDir = @$"{local}\Microsoft\Windows\Fonts";
+
+                // フォント一覧の更新
+                this.fontManagerService.UpdateFontsList(userFontsDir);
+            }
+
+            isFirstLogined = true;
+
+            //this.fontManagerService.Synchronize(false);
+
+            volatileSetting.IsCheckedStartup = false;
         }
 
         /// <summary>
@@ -186,8 +244,8 @@ namespace ApplicationService.Authentication
         public bool Logout()
         {
             if (this.receiveNotificationRepository == null
-                || this.userFontsSettingRepository == null
-                || this.fontActivationService == null)
+                || this.customerRepository == null
+                || this.fontManagerService == null)
             {
                 throw new InvalidOperationException(this.resourceWrapper.GetString("LOG_ERR_AuthenticationService_Logout_InvalidOperationException"));
             }
@@ -214,24 +272,14 @@ namespace ApplicationService.Authentication
             this.receiveNotificationRepository.Stop();
 
             // [フォント：フォント情報]でアクティベートされているLETSフォントをディアクティベート
-            var setting = this.userFontsSettingRepository.GetUserFontsSetting();
-            setting.Fonts = setting.Fonts
-                .Select(font =>
-                {
-                    if (font.IsLETS && font.IsActivated == true)
-                    {
-                        this.fontActivationService.Deactivate(font);
-                    }
-
-                    return font;
-                }).ToList();
-
-            // [フォント：フォント情報]の更新は、
-            // fontActivationService.Deactivate内で実施されるためこの位置では保存しない
+            this.fontManagerService.DeactivateSettingFonts();
 
             // [ユーザー別保存：ログイン状態]に「ログアウト」を保存する
             userStatus.IsLoggingIn = false;
             this.userStatusRepository.SaveStatus(userStatus);
+
+            // お客様情報の削除
+            this.customerRepository.Delete();
 
             return true;
         }

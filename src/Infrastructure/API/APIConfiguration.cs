@@ -9,9 +9,11 @@
         /// インスタンスの初期化を行う
         /// </summary>
         /// <param name="basePath">API接続先のベースURL</param>
-        public APIConfiguration(string basePath)
+        /// <param name="userAgent">User-Agent</param>
+        public APIConfiguration(string basePath, string notifyBasePath)
         {
             this.BasePath = basePath;
+            this.NotifyBasePath = notifyBasePath;
         }
 
         /// <summary>
@@ -19,5 +21,7 @@
         /// </summary>
         /// <example>"http://api/v1</example>
         public string BasePath { get; }
+
+        public string NotifyBasePath { get; }
     }
 }

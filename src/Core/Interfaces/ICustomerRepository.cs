@@ -14,6 +14,12 @@ namespace Core.Interfaces
         Customer GetCustomer();
 
         /// <summary>
+        /// お客様情報を取得する
+        /// </summary>
+        /// <returns>お客様情報</returns>
+        Customer GetCustomer(string deviceid);
+
+        /// <summary>
         /// お客様情報を保存する
         /// </summary>
         /// <param name="customer">お客様情報</param>

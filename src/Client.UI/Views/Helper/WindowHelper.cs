@@ -51,25 +51,35 @@ namespace Client.UI.Views.Helper
         private const uint WMSETICON = 0x0080;
 
         /// <summary>
-        /// ウィンドウスタイルを示す
+        /// ウィンドウを閉じる（閉じるメニュー削除で利用）
+        /// </summary>
+        private const int SCCLOSE = 0xf060;
+
+        /// <summary>
+        /// 項目のID（閉じるメニュー削除で利用）
+        /// </summary>
+        private const int MFBYCOMMAND = 0x0000;
+
+        /// <summary>
+        /// ウィンドウスタイルを示す（ボタン削除で利用）
         /// </summary>
         private const int GWLSTYLE = -16;
 
         /// <summary>
-        /// ウィンドウメニューボックスを示す
+        /// ウィンドウメニューボックスを示す（ボタン削除で利用）
         /// </summary>
         private const int WSSYSMENU = 0x80000;
 
         /// <summary>
-        /// フレームのボタンを削除する
+        /// 閉じるメニューを削除する（フレームの閉じるボタンを無効化する）
         /// </summary>
         /// <param name="window">対象のWindow</param>
-        public static void RemoveFrameButton(Window window)
+        public static void RemoveCloseMenu(Window window)
         {
             IntPtr handle = new WindowInteropHelper(window).Handle;
-            int style = GetWindowLong(handle, GWLSTYLE);
-            style = style & (~WSSYSMENU);
-            SetWindowLong(handle, GWLSTYLE, style);
+
+            IntPtr hMenu = GetSystemMenu(handle, false);
+            RemoveMenu(hMenu, SCCLOSE, MFBYCOMMAND);
         }
 
         /// <summary>
@@ -95,13 +105,16 @@ namespace Client.UI.Views.Helper
         }
 
         /// <summary>
-        /// アイコンを解除する
+        /// フレームのボタンを削除する
         /// </summary>
-        /// <param name="sender">アイコンを表示しているWindow</param>
-        /// <param name="e">イベント</param>
-        public static void RemoveIcon(object sender, EventArgs e)
+        /// <param name="window">対象のWindow</param>
+        /// <remarks>利用していないが仕様変更の可能性のために残している</remarks>
+        public static void RemoveFrameButton(Window window)
         {
-            RemoveIcon(sender as Window);
+            IntPtr handle = new WindowInteropHelper(window).Handle;
+            int style = GetWindowLong(handle, GWLSTYLE);
+            style = style & (~WSSYSMENU);
+            SetWindowLong(handle, GWLSTYLE, style);
         }
 
         /// <summary>
@@ -147,5 +160,24 @@ namespace Client.UI.Views.Helper
         /// <returns>メッセージ処理の結果</returns>
         [DllImport("user32.dll", SetLastError = true)]
         private static extern IntPtr SendMessage(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);
+
+        /// <summary>
+        /// メニューのハンドル取得
+        /// </summary>
+        /// <param name="hWnd">ウィンドウのハンドル</param>
+        /// <param name="bRevert">falseの場合はシステムメニューのハンドル、trueはデフォルトに戻す</param>
+        /// <returns>メニューのハンドル</returns>
+        [DllImport("user32.dll")]
+        private static extern IntPtr GetSystemMenu(IntPtr hWnd, bool bRevert);
+
+        /// <summary>
+        /// メニュー項目の削除
+        /// </summary>
+        /// <param name="hMenu">メニューのハンドル</param>
+        /// <param name="uPosition">項目のID</param>
+        /// <param name="uFlags">uPosition の値</param>
+        /// <returns>成否</returns>
+        [DllImport("user32.dll")]
+        private static extern bool RemoveMenu(IntPtr hMenu, uint uPosition, uint uFlags);
     }
 }

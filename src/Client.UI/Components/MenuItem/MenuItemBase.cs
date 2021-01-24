@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
@@ -24,12 +23,12 @@ namespace Client.UI.Components.MenuItem
         /// <summary>
         /// コンストラクタ
         /// </summary>
-        /// <param name="manager">ComponentManager</param>
-        public MenuItemBase(ComponentManager manager)
+        /// <param name="quickMenu">QuickMenuComponent</param>
+        public MenuItemBase(QuickMenuComponent quickMenu)
         {
-            this.Manager = manager;
-            this.Manager.Container.Add(this);
-            this.Resource = this.Manager.GetResource();
+            this.QuickMenu = quickMenu;
+            this.QuickMenu.Manager.Container.Add(this);
+            this.Resource = this.QuickMenu.Manager.GetResource();
 
             this.InitializeComponent();
         }
@@ -44,9 +43,9 @@ namespace Client.UI.Components.MenuItem
         }
 
         /// <summary>
-        /// ComponentManager
+        /// QuickMenuComponent
         /// </summary>
-        protected ComponentManager Manager
+        protected QuickMenuComponent QuickMenu
         {
             get;
             private set;
@@ -59,14 +58,6 @@ namespace Client.UI.Components.MenuItem
         {
             get;
             private set;
-        }
-
-        /// <summary>
-        /// クイックメニューにアイテムを追加する
-        /// </summary>
-        /// <param name="quickMenu">クイックメニュー</param>
-        public virtual void SetMenu(QuickMenuComponent quickMenu)
-        {
         }
 
         /// <summary>
@@ -92,9 +83,16 @@ namespace Client.UI.Components.MenuItem
         }
 
         /// <summary>
-        /// クイックメニュー初期化処理
+        /// クイックメニューアイテム初期化処理
         /// </summary>
         protected virtual void InitializeComponent()
+        {
+        }
+
+        /// <summary>
+        /// クイックメニューにアイテムを追加する
+        /// </summary>
+        protected virtual void SetMenu()
         {
         }
 

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Windows.Forms;
+using NLog;
 
 namespace Client.UI.Components.MenuItem
 {
@@ -8,6 +9,11 @@ namespace Client.UI.Components.MenuItem
     /// </summary>
     public class MenuItemAccountPage : MenuItemBase
     {
+        /// <summary>
+        /// ロガー
+        /// </summary>
+        private static readonly Logger Logger = LogManager.GetLogger("nlog.config");
+
         /// <summary>アカウント</summary>
         private ToolStripMenuItem account;
 
@@ -17,9 +23,9 @@ namespace Client.UI.Components.MenuItem
         /// <summary>
         /// コンストラクタ
         /// </summary>
-        /// <param name="manager">ComponentManager</param>
-        public MenuItemAccountPage(ComponentManager manager)
-             : base(manager)
+        /// <param name="quickMenu">QuickMenuComponent</param>
+        public MenuItemAccountPage(QuickMenuComponent quickMenu)
+             : base(quickMenu)
         {
             this.account.Click += (s, e) =>
             {
@@ -43,22 +49,23 @@ namespace Client.UI.Components.MenuItem
         }
 
         /// <summary>
-        /// クイックメニューにアイテムを追加する
-        /// </summary>
-        /// <param name="quickMenu">クイックメニュー</param>
-        public override void SetMenu(QuickMenuComponent quickMenu)
-        {
-            quickMenu.ContextMenu.Items.Add(this.separator);
-            quickMenu.ContextMenu.Items.Add(this.account);
-        }
-
-        /// <summary>
         /// クイックメニュー初期化処理
         /// </summary>
         protected override void InitializeComponent()
         {
             this.separator = this.CreateSeparator();
             this.account = this.Create("MENU_ACCOUNT", this.Resource.GetString("MENU_ACCOUNT"));
+
+            this.SetMenu();
+        }
+
+        /// <summary>
+        /// クイックメニューにアイテムを追加する
+        /// </summary>
+        protected override void SetMenu()
+        {
+            this.QuickMenu.ContextMenu.Items.Add(this.separator);
+            this.QuickMenu.ContextMenu.Items.Add(this.account);
         }
 
         /// <summary>
@@ -66,6 +73,8 @@ namespace Client.UI.Components.MenuItem
         /// </summary>
         private void OnAccountMenuItemClick()
         {
+            Logger.Info(this.QuickMenu.Manager.GetResource().GetString("LOG_INFO_MenuItemAccountPage_OnAccountMenuItemClick"));
+
             // ユーザーのホーム画面を表示する
         }
     }

@@ -14,8 +14,6 @@ namespace Client.UI
         [STAThread]
         public static void Main()
         {
-            // 二重起動チェック
-
             // 常駐アプリケーションを起動
             Shell shell = new Shell();
             shell.Run();

@@ -10,7 +10,7 @@
         /// </summary>
         /// <param name="accessToken">アクセストークン</param>
         /// <returns>SSE接続の成否</returns>
-        bool Start(string accessToken);
+        bool Start(string accessToken, string deviceid);
 
         /// <summary>
         /// 接続中か確認する

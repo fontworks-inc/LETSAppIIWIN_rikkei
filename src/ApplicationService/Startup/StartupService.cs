@@ -51,6 +51,11 @@ namespace ApplicationService.Startup
         private IDevicesRepository devicesRepository = null;
 
         /// <summary>
+        /// ユーザ別ステータス情報を格納するリポジトリ
+        /// </summary>
+        private IUserStatusRepository userStatusRepository = null;
+
+        /// <summary>
         /// インスタンスを初期化する
         /// </summary>
         /// <param name="resourceWrapper">文言の取得を行うインスタンス</param>
@@ -59,13 +64,15 @@ namespace ApplicationService.Startup
         /// <param name="contractsAggregateRepository">契約情報を格納するリポジトリ</param>
         /// <param name="contractsAggregateCacheRepository">契約情報を格納するキャッシュリポジトリ</param>
         /// <param name="devicesRepository">端末情報を格納するリポジトリ</param>
+        /// <param name="userStatusRepository">ユーザ別ステータス情報を格納するリポジトリ</param>
         public StartupService(
             IResourceWrapper resourceWrapper,
             IFontManagerService fontManagerService,
             IVolatileSettingRepository volatileSettingRepository,
             IContractsAggregateRepository contractsAggregateRepository,
             IContractsAggregateRepository contractsAggregateCacheRepository,
-            IDevicesRepository devicesRepository)
+            IDevicesRepository devicesRepository,
+            IUserStatusRepository userStatusRepository)
         {
             this.resourceWrapper = resourceWrapper;
             this.fontManagerService = fontManagerService;
@@ -73,6 +80,7 @@ namespace ApplicationService.Startup
             this.contractsAggregateRepository = contractsAggregateRepository;
             this.contractsAggregateCacheRepository = contractsAggregateCacheRepository;
             this.devicesRepository = devicesRepository;
+            this.userStatusRepository = userStatusRepository;
         }
 
         /// <summary>
@@ -94,41 +102,45 @@ namespace ApplicationService.Startup
         /// <summary>
         /// 起動時チェック処理
         /// </summary>
-        /// <param name="deviceId">デバイスID</param>
-        /// <param name="contractUpdateRequiredEvent">契約更新の必要があった場合に呼び出されるイベント</param>
         /// <param name="notContainsDeviceEvent">自デバイスの情報が端末情報に含まれていない場合に呼び出されるイベント</param>
         /// <returns>チェック結果を返す</returns>
-        public bool IsCheckedStartup(
-            string deviceId,
-            ContractUpdateRequiredEvent contractUpdateRequiredEvent,
-            NotContainsDeviceEvent notContainsDeviceEvent)
+        public bool IsCheckedStartup(NotContainsDeviceEvent notContainsDeviceEvent)
         {
             try
             {
+                Logger.Info(this.resourceWrapper.GetString("LOG_INFO_StartupService_IsCheckedStartup_Start"));
+
+                // 開始時に起動時チェック処理を「未設定」に設定する
+                this.volatileSettingRepository.GetVolatileSetting().IsCheckedStartup = false;
+
                 if (this.fontManagerService == null
                     || this.contractsAggregateRepository == null
-                    || this.contractsAggregateCacheRepository == null)
+                    || this.contractsAggregateCacheRepository == null
+                    || this.userStatusRepository == null)
                 {
                     throw new InvalidOperationException(this.resourceWrapper.GetString("LOG_ERR_StartupService_IsCheckedStartup_InvalidOperationException"));
                 }
 
                 // ログイン状態確認処理を実行し、ログアウト中になる場合は以後の起動時チェックを行わない
-                if (!this.ConfirmLoginStatus(deviceId, notContainsDeviceEvent))
+                UserStatus userStatus = this.userStatusRepository.GetStatus();
+                if (!userStatus.IsLoggingIn || !this.ConfirmLoginStatus(userStatus.DeviceId, notContainsDeviceEvent))
                 {
+                    Logger.Info(this.resourceWrapper.GetString("LOG_INFO_StartupService_IsCheckedStartup_LoggingOut"));
                     return false;
                 }
 
                 // ライセンス更新チェック
-                ContractsResult contractsResult = this.GetContractsAggregate(deviceId);
+                ContractsResult contractsResult = this.GetContractsAggregate(userStatus.DeviceId);
                 if (!contractsResult.IsCashed && contractsResult.ContractsAggregate.NeedContractRenewal)
                 {
                     // キャッシュを利用していない かつ 契約更新の必要があった場合、メモリ情報を通知ありとしイベントを実行
+                    // 実際のアイコン表示変更は呼び出し元で行う
+                    Logger.Info(this.resourceWrapper.GetString("LOG_INFO_StartupService_IsCheckedStartup_IsNoticed"));
                     this.volatileSettingRepository.GetVolatileSetting().IsNoticed = true;
-                    contractUpdateRequiredEvent();
                 }
 
                 // 契約切れフォントのディアクティベート
-                this.DeactivateExpiredFonts();
+                this.fontManagerService.DeactivateExpiredFonts(contractsResult.ContractsAggregate.Contracts);
 
                 // フォントアクティブ/ディアクティブ情報の同期
                 this.fontManagerService.Synchronize(true);
@@ -137,6 +149,8 @@ namespace ApplicationService.Startup
                 VolatileSetting volatileSetting = this.volatileSettingRepository.GetVolatileSetting();
                 volatileSetting.CheckedStartupAt = DateTime.Now;
                 volatileSetting.IsCheckedStartup = true;
+
+                Logger.Info(this.resourceWrapper.GetString("LOG_INFO_StartupService_IsCheckedStartup_Result_True"));
 
                 return true;
             }
@@ -159,28 +173,29 @@ namespace ApplicationService.Startup
             try
             {
                 IList<Device> devices = this.GetAllDevices(deviceId);
+                if (devices.Count <= 0)
+                {
+                    Logger.Info(string.Format("ConfirmLoginStatus:デバイスリストが存在しない場合はログアウト状態と判断する", ""));
+                    return false;   // デバイスリストが存在しない場合はログアウト状態と判断する
+                }
 
                 if (!devices.Any(device => device.DeviceId == deviceId))
                 {
                     // 自デバイスの情報が含まれていない場合、イベントを実行する
+                    Logger.Info(string.Format("ConfirmLoginStatus:自デバイスの情報が含まれていない場合、イベントを実行する", ""));
                     notContainsDeviceEvent();
                     return false;
                 }
 
+                Logger.Info(string.Format("ConfirmLoginStatus:trye", ""));
                 return true;
             }
             catch (GetAllDevicesException)
             {
                 // 全端末情報を取得で例外が発生した場合は失敗扱い
+                Logger.Info(string.Format("ConfirmLoginStatus:全端末情報を取得で例外が発生した場合は失敗扱い", ""));
                 return false;
             }
-        }
-
-        /// <summary>
-        /// 契約切れフォントのディアクティベート
-        /// </summary>
-        public void DeactivateExpiredFonts()
-        {
         }
 
         /// <summary>
@@ -197,7 +212,7 @@ namespace ApplicationService.Startup
             }
             catch (Exception e)
             {
-                string message = this.resourceWrapper.GetString("LOG_ERR_StartupService_GetAllDevicesException");
+                string message = this.resourceWrapper.GetString("LOG_WARN_StartupService_GetAllDevicesException");
                 Logger.Warn(e, message);
                 throw new GetAllDevicesException(message, e);
             }
@@ -218,7 +233,7 @@ namespace ApplicationService.Startup
             catch (Exception e)
             {
                 // 取得に失敗した場合はキャッシュから情報を取得する
-                Logger.Warn(e, this.resourceWrapper.GetString("LOG_ERR_StartupService_GetContractsAggregateException"));
+                Logger.Warn(e, this.resourceWrapper.GetString("LOG_WARN_StartupService_GetContractsAggregateException"));
                 return new ContractsResult(this.contractsAggregateCacheRepository.GetContractsAggregate(), true);
             }
         }

@@ -1,5 +1,4 @@
 ﻿using System.Windows.Media;
-using Client.UI.Interfaces;
 using Core.Interfaces;
 using Prism.Mvvm;
 

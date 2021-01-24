@@ -3,11 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Media;
+using ApplicationService.Interfaces;
+using Client.UI.Components;
 using Client.UI.Interfaces;
 using Client.UI.Views;
 using Core.Entities;
 using Core.Exceptions;
 using Core.Interfaces;
+using NLog;
 using Prism.Commands;
 using Prism.Mvvm;
 
@@ -19,6 +22,11 @@ namespace Client.UI.ViewModels
     /// <remarks>画面ID：APP_05_01</remarks>
     public class DeviceSettingsViewModel : BindableBase
     {
+        /// <summary>
+        /// ロガー
+        /// </summary>
+        private static readonly Logger Logger = LogManager.GetLogger("nlog.config");
+
         /// <summary>
         /// ユーザ別ステータス情報を格納するリポジトリ
         /// </summary>
@@ -38,6 +46,21 @@ namespace Client.UI.ViewModels
         /// 認証情報
         /// </summary>
         private readonly AuthenticationInformation authenticationInformation;
+
+        /// <summary>
+        /// (メイン)ログイン画面
+        /// </summary>
+        private readonly ILoginWindowWrapper loginWindow;
+
+        /// <summary>
+        /// アプリケーションコンポーネント
+        /// </summary>
+        private readonly ComponentManager componentManager;
+
+        /// <summary>
+        /// リソース読込み
+        /// </summary>
+        private readonly IResourceWrapper resouceWrapper;
 
         /// <summary>
         /// 端末情報一覧
@@ -60,32 +83,25 @@ namespace Client.UI.ViewModels
         private bool nextButtonIsEnabled;
 
         /// <summary>
-        /// (メイン)ログイン画面
-        /// </summary>
-        private ILoginWindowWrapper loginWindow;
-
-        /// <summary>
-        /// リソース読込み
-        /// </summary>
-        private IResourceWrapper resouceWrapper;
-
-        /// <summary>
         /// インスタンスを初期化する
         /// </summary>
         /// <param name="loginWindowWrapper">LoginWindowのラッパー</param>
         /// <param name="resouceWrapper">Resourceのラッパー</param>
+        /// <param name="componentManagerWrapper">ComponentManagerWrapperのラッパー</param>
         /// <param name="userStatusRepository">ユーザ別ステータス情報を格納するリポジトリ</param>
         /// <param name="volatileSettingRepository">メモリ上で保存する情報を格納するリポジトリ</param>
         /// <param name="devicesRepository">端末情報を格納するリポジトリ</param>
         public DeviceSettingsViewModel(
             ILoginWindowWrapper loginWindowWrapper,
             IResourceWrapper resouceWrapper,
+            IComponentManagerWrapper componentManagerWrapper,
             IUserStatusRepository userStatusRepository,
             IVolatileSettingRepository volatileSettingRepository,
             IDevicesRepository devicesRepository)
         {
             this.loginWindow = loginWindowWrapper;
             this.resouceWrapper = resouceWrapper;
+            this.componentManager = componentManagerWrapper.Manager;
 
             this.userStatusRepository = userStatusRepository;
             this.volatileSettingRepository = volatileSettingRepository;
@@ -93,10 +109,15 @@ namespace Client.UI.ViewModels
 
             this.authenticationInformation = this.loginWindow.GetAuthenticationInformation();
 
+            // 端末一覧を初期化
+            if (!this.InitializeDeviceList())
+            {
+                return;
+            }
+
             this.NextButtonClick = new DelegateCommand(this.OnNextButtonClick, this.CanExecute);
 
-            // 端末一覧を初期化
-            this.InitializeDeviceList();
+            Logger.Info(this.resouceWrapper.GetString("LOG_INFO_DeviceSettingsViewModel_Start"));
         }
 
         /// <summary>
@@ -233,28 +254,18 @@ namespace Client.UI.ViewModels
         /// <returns>次へボタン実行可否</returns>
         public bool CanExecute()
         {
-            try
+            if (this.DevicesSource.Any(device => device.IsLoggingOut))
             {
-                if (this.DevicesSource.Any(device => device.IsLoggingOut))
-                {
-                    this.NextButtonForeground = Brushes.Black;
-                    this.NextButtonIsEnabled = true;
-                }
-                else
-                {
-                    this.NextButtonForeground = Brushes.Gray;
-                    this.NextButtonIsEnabled = false;
-                }
+                this.NextButtonForeground = Brushes.Black;
+                this.NextButtonIsEnabled = true;
+            }
+            else
+            {
+                this.NextButtonForeground = Brushes.Gray;
+                this.NextButtonIsEnabled = false;
+            }
 
-                return this.NextButtonIsEnabled;
-            }
-            catch (Exception)
-            {
-                // 【TODO：ログ出力】
-                // 予期せぬ例外発生時は、ログイン画面を閉じる
-                this.loginWindow.Close();
-                return false;
-            }
+            return this.NextButtonIsEnabled;
         }
 
         /// <summary>
@@ -262,6 +273,10 @@ namespace Client.UI.ViewModels
         /// </summary>
         private void OnNextButtonClick()
         {
+            Logger.Info(string.Format(
+            this.resouceWrapper.GetString("LOG_INFO_DeviceSettingsViewModel_ButtonClick"),
+            this.resouceWrapper.GetString("APP_05_01_BTN_NEXT")));
+
             // 自端末を使用中に設定する
             var newAuthenticationInformation = this.ActivateUserDevice();
             if (newAuthenticationInformation == null)
@@ -269,18 +284,27 @@ namespace Client.UI.ViewModels
                 return;
             }
 
-            // ログイン完了処理
-            if (this.CompleteLoginProcess(newAuthenticationInformation))
+            try
             {
+                // ログイン完了処理を実行
+                this.componentManager.LoginCompleted(newAuthenticationInformation);
+
                 // ログイン完了画面に遷移
                 this.loginWindow.NavigationService.Navigate(new LoginCompleted());
+            }
+            catch (Exception ex)
+            {
+                // 配信サーバアクセスでエラーが発生したときは、画面を閉じ以後の処理を行わない
+                var exception = new Exception(this.resouceWrapper.GetString("LOG_ERR_DeviceSettingsViewModel_LoginCompleted_Exception"), ex);
+                Logger.Error(exception);
+                this.loginWindow.Close();
             }
         }
 
         /// <summary>
         /// 自端末を使用中に設定する
         /// </summary>
-        /// <returns>成否</returns>
+        /// <returns>認証情報</returns>
         private AuthenticationInformation ActivateUserDevice()
         {
             try
@@ -292,50 +316,29 @@ namespace Client.UI.ViewModels
 
                 return newAuthenticationInformation;
             }
-            catch (InvalidResponseCodeException)
+            catch (InvalidResponseCodeException ex)
             {
                 // レスポンスコードが正常以外の場合、エラーメッセージを表示
-                MessageBox.Show(this.resouceWrapper.GetString("APP_05_01_ERR_02"));
-
-                // 【TODO：ログ出力】
-                // ログイン画面を閉じる
-                this.loginWindow.Close();
+                string errorMessage = this.resouceWrapper.GetString("APP_05_01_ERR_02");
+                MessageBox.Show(errorMessage);
+                Logger.Error(ex, errorMessage);
                 return null;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // 【TODO：ログ出力】
-                // 予期せぬ例外発生時は、ログイン画面を閉じる
+                // 配信サーバアクセスでエラーが発生したときは、画面を閉じ以後の処理を行わない
+                var exception = new Exception(this.resouceWrapper.GetString("LOG_ERR_DeviceSettingsViewModel_ActivateUserDevice_Exception"), ex);
+                Logger.Error(exception);
                 this.loginWindow.Close();
                 return null;
-            }
-        }
-
-        /// <summary>
-        /// ログイン完了処理を実行
-        /// </summary>
-        /// <param name="newAuthenticationInformation">認証情報</param>
-        /// <returns>成否</returns>
-        private bool CompleteLoginProcess(AuthenticationInformation newAuthenticationInformation)
-        {
-            try
-            {
-                // ログイン完了処理を実行【TODO:ログイン完了処理】
-                return true;
-            }
-            catch (Exception)
-            {
-                // 【TODO：ログ出力】
-                // 予期せぬ例外発生時は、ログイン画面を閉じる
-                this.loginWindow.Close();
-                return false;
             }
         }
 
         /// <summary>
         /// 端末一覧を初期化する
         /// </summary>
-        private void InitializeDeviceList()
+        /// <returns>成否</returns>
+        private bool InitializeDeviceList()
         {
             try
             {
@@ -356,12 +359,16 @@ namespace Client.UI.ViewModels
                         this,
                         device));
                 }
+
+                return true;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // 【TODO：ログ出力】
-                // 予期せぬ例外発生時は、ログイン画面を閉じる
+                // 配信サーバアクセスでエラーが発生したときは、画面を閉じ以後の処理を行わない
+                var exception = new Exception(this.resouceWrapper.GetString("LOG_ERR_DeviceSettingsViewModel_InitializeDeviceList_Exception"), ex);
+                Logger.Error(exception);
                 this.loginWindow.Close();
+                return false;
             }
         }
     }

@@ -15,7 +15,7 @@
                     Command="{Binding SendButtonClick}"/>
             </Grid>
             <Grid DockPanel.Dock="Left" Width="250">
-                <Rectangle HorizontalAlignment="Left" Height="30" Width="124" 
+                <Rectangle HorizontalAlignment="Left" Height="89" Width="82" 
                        Margin="35,50,0,0" VerticalAlignment="Top">
                     <Rectangle.Fill>
                         <ImageBrush ImageSource="{Binding ImageLogo}"/>
@@ -39,6 +39,7 @@
                     <TextBox Name ="AuthenticationCodeBox" FontSize="10.5pt" Width="300" Height="32" Margin="5,0,0,0"
                          VerticalAlignment="Center" HorizontalAlignment="Left"
                          VerticalContentAlignment="Center"
+                         BorderBrush="#666666"
                          Text="{Binding AuthenticationCode, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                 </StackPanel>
             </Grid>

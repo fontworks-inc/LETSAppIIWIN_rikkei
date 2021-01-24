@@ -31,5 +31,22 @@ namespace ApplicationService.Fonts
         {
             this.fontManagerService.Synchronize(font);
         }
+
+        /// <summary>
+        /// フォントディアクティベート通知処理
+        /// </summary>
+        /// <param name="fontId">ディアクティベートするフォントID</param>
+        public void Deactivate(string fontId)
+        {
+            this.fontManagerService.DeactivateFont(fontId);
+        }
+
+        /// <summary>
+        /// ディアクティブフォントの一括アンインストール
+        /// </summary>
+        public void AllUninstall()
+        {
+            this.fontManagerService.DeactivateSettingFonts();
+        }
     }
 }

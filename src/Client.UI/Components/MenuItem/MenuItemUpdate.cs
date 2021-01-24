@@ -1,6 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Windows.Forms;
+using NLog;
 
 namespace Client.UI.Components.MenuItem
 {
@@ -9,6 +9,11 @@ namespace Client.UI.Components.MenuItem
     /// </summary>
     public class MenuItemUpdate : MenuItemBase
     {
+        /// <summary>
+        /// ロガー
+        /// </summary>
+        private static readonly Logger Logger = LogManager.GetLogger("nlog.config");
+
         /// <summary>アップデート</summary>
         private ToolStripMenuItem update;
 
@@ -18,9 +23,9 @@ namespace Client.UI.Components.MenuItem
         /// <summary>
         /// コンストラクタ
         /// </summary>
-        /// <param name="manager">ComponentManager</param>
-        public MenuItemUpdate(ComponentManager manager)
-             : base(manager)
+        /// <param name="quickMenu">QuickMenuComponent</param>
+        public MenuItemUpdate(QuickMenuComponent quickMenu)
+             : base(quickMenu)
         {
             this.update.Click += (s, e) =>
             {
@@ -44,22 +49,23 @@ namespace Client.UI.Components.MenuItem
         }
 
         /// <summary>
-        /// クイックメニューにアイテムを追加する
-        /// </summary>
-        /// <param name="quickMenu">クイックメニュー</param>
-        public override void SetMenu(QuickMenuComponent quickMenu)
-        {
-            quickMenu.ContextMenu.Items.Add(this.separator);
-            quickMenu.ContextMenu.Items.Add(this.update);
-        }
-
-        /// <summary>
         /// クイックメニュー初期化処理
         /// </summary>
         protected override void InitializeComponent()
         {
             this.separator = this.CreateSeparator();
             this.update = this.Create("MENU_UPDATE", this.Resource.GetString("MENU_UPDATE"));
+
+            this.SetMenu();
+        }
+
+        /// <summary>
+        /// クイックメニューにアイテムを追加する
+        /// </summary>
+        protected override void SetMenu()
+        {
+            this.QuickMenu.ContextMenu.Items.Add(this.separator);
+            this.QuickMenu.ContextMenu.Items.Add(this.update);
         }
 
         /// <summary>
@@ -67,25 +73,10 @@ namespace Client.UI.Components.MenuItem
         /// </summary>
         private void OnUpdateMenuItemClick()
         {
-            var menuUpdateStatus = this.Manager.MenuUpdateStatus;
-            MenuItemUpdateStatus.UpdateProgress progress = menuUpdateStatus.SetProgressStatus;
-            MenuItemUpdateStatus.UpdateCompleted completed = menuUpdateStatus.SetCompleted;
+            Logger.Info(this.QuickMenu.Manager.GetResource().GetString("LOG_INFO_MenuItemUpdate_OnUpdateMenuItemClick"));
 
             // アップデート開始
-            this.Manager.StartUpdate();
-
-            // アップデート処理を実行するサービスを呼出し
-            // XXXXXService.Update(progress, completed);
-
-            // アップデート処理内で、進捗率を更新する処理を呼出し
-            // 例）50％
-            progress(50);
-
-            // アップデート処理内で、完了処理を呼出し
-            // completed();
-
-            // アップデート完了
-            // this.Manager.UpdateCompleted();
+            this.QuickMenu.Manager.StartUpdate();
         }
     }
 }

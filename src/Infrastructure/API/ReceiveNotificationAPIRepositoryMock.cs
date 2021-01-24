@@ -39,7 +39,7 @@ namespace Infrastructure.API
         /// </summary>
         /// <param name="accessToken">アクセストークン</param>
         /// <returns>SSE接続の成否：常に接続</returns>
-        public bool Start(string accessToken)
+        public bool Start(string accessToken, string deviceid)
         {
             return true;
         }

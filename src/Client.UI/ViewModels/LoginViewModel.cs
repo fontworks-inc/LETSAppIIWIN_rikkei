@@ -2,11 +2,15 @@
 using System.Windows;
 using System.Windows.Media;
 using ApplicationService.Interfaces;
+using Client.UI.Components;
+using Client.UI.Entities;
+using Client.UI.Exceptions;
 using Client.UI.Interfaces;
 using Client.UI.Views;
 using Core.Entities;
 using Core.Exceptions;
 using Core.Interfaces;
+using NLog;
 using Prism.Commands;
 using Prism.Mvvm;
 
@@ -19,9 +23,44 @@ namespace Client.UI.ViewModels
     public class LoginViewModel : BindableBase
     {
         /// <summary>
+        /// ロガー
+        /// </summary>
+        private static readonly Logger Logger = LogManager.GetLogger("nlog.config");
+
+        /// <summary>
+        /// メールアドレスの最大入力文字数
+        /// </summary>
+        private static readonly int MaxLengthOfMailAddress = 121;
+
+        /// <summary>
+        /// パスワードの最大入力文字数
+        /// </summary>
+        private static readonly int MaxLengthOfPassword = 128;
+
+        /// <summary>
         /// 認証サービス
         /// </summary>
         private readonly IAuthenticationService authenticationService;
+
+        /// <summary>
+        /// (メイン)ログイン画面
+        /// </summary>
+        private readonly ILoginWindowWrapper loginWindow;
+
+        /// <summary>
+        /// アプリケーションコンポーネント
+        /// </summary>
+        private readonly ComponentManager componentManager;
+
+        /// <summary>
+        /// リソース読込み
+        /// </summary>
+        private readonly IResourceWrapper resouceWrapper;
+
+        /// <summary>
+        /// URLアドレスを格納するリポジトリ
+        /// </summary>
+        private readonly IUrlRepository urlRepository;
 
         /// <summary>
         /// メールアドレス
@@ -74,30 +113,32 @@ namespace Client.UI.ViewModels
         private Visibility passwordErrorMessageVisibility;
 
         /// <summary>
-        /// (メイン)ログイン画面
+        /// ブラウザ
         /// </summary>
-        private ILoginWindowWrapper loginWindow;
-
-        /// <summary>
-        /// リソース読込み
-        /// </summary>
-        private IResourceWrapper resouceWrapper;
+        private WebBrowser webBrowser;
 
         /// <summary>
         /// インスタンスを初期化する
         /// </summary>
         /// <param name="loginWindowWrapper">LoginWindowのラッパー</param>
         /// <param name="resouceWrapper">Resourceのラッパー</param>
+        /// <param name="componentManagerWrapper">ComponentManagerWrapperのラッパー</param>
         /// <param name="authenticationService">認証サービス</param>
+        /// <param name="urlRepository">URLアドレスを格納するリポジトリ</param>
         public LoginViewModel(
             ILoginWindowWrapper loginWindowWrapper,
             IResourceWrapper resouceWrapper,
-            IAuthenticationService authenticationService)
+            IComponentManagerWrapper componentManagerWrapper,
+            IAuthenticationService authenticationService,
+            IUrlRepository urlRepository)
         {
             this.loginWindow = loginWindowWrapper;
             this.resouceWrapper = resouceWrapper;
+            this.componentManager = componentManagerWrapper.Manager;
 
             this.authenticationService = authenticationService;
+
+            this.urlRepository = urlRepository;
 
             this.errorMessageVisibility = Visibility.Hidden;
             this.mailAddressErrorMessageVisibility = Visibility.Hidden;
@@ -106,6 +147,12 @@ namespace Client.UI.ViewModels
             this.ResetPasswordPageLinkClick = new DelegateCommand(this.OnResetPasswordPageLinkClick);
             this.AccountRegistrationPageLinkClick = new DelegateCommand(this.OnAccountRegistrationPageLinkClick);
             this.LoginButtonClick = new DelegateCommand(this.OnLoginButtonClick, this.CanLogin);
+
+            this.webBrowser = new WebBrowser();
+
+            Logger.Info(string.Format(
+                this.resouceWrapper.GetString("LOG_INFO_LoginViewModel_Start"),
+                this.resouceWrapper.GetString("APP_04_01_PROC_TITLE")));
         }
 
         /// <summary>
@@ -373,48 +420,69 @@ namespace Client.UI.ViewModels
         /// </summary>
         private void OnLoginButtonClick()
         {
+            Logger.Info(string.Format(
+                this.resouceWrapper.GetString("LOG_INFO_LoginViewModel_ButtonClick"),
+                this.resouceWrapper.GetString("APP_04_01_BTN_LOGIN")));
+
             try
             {
-                // ログイン処理を実行
-                var authenticationInformation = this.authenticationService.Login(
-                    this.MailAddress, this.Password);
+                // 前回のエラーメッセージを非表示
+                this.ErrorMessageVisibility = Visibility.Hidden;
+                this.MailAddressErrorMessageVisibility = Visibility.Hidden;
+                this.PasswordErrorMessageVisibility = Visibility.Hidden;
 
-                var responseCode = authenticationInformation.GetResponseCode();
-                var responseMessage = authenticationInformation.Message;
+                // 入力値のチェック
+                if (!this.ValidateInputValues())
+                {
+                    return;
+                }
+
+                // ログイン処理を実行
+                Logger.Info(string.Format(
+                    this.resouceWrapper.GetString("LOG_INFO_LoginViewModel_ButtonClick"),
+                    "ログイン処理を実行"));
+                var authenticationInformationResponse = this.authenticationService.Login(
+                    this.MailAddress, this.Password);
+                Logger.Info(string.Format(
+                    this.resouceWrapper.GetString("LOG_INFO_LoginViewModel_ButtonClick"),
+                    "ログイン処理を実行:After"));
+
+                var responseCode = authenticationInformationResponse.GetResponseCode();
+                var responseMessage = authenticationInformationResponse.Message;
 
                 switch (responseCode)
                 {
                     case ResponseCode.Succeeded:
-                        // ログイン完了処理を実行【TODO:ログイン完了処理】
+                        // ログイン完了処理を実行
+                        this.componentManager.LoginCompleted(authenticationInformationResponse.Data);
+
                         // ログイン完了画面に遷移
                         this.loginWindow.NavigationService.Navigate(new LoginCompleted());
                         break;
+
                     case ResponseCode.TwoFAIsRequired:
-                        // 二段階認証画面に遷移
+                        // ２要素認証画面に遷移
                         this.loginWindow.NavigationService.Navigate(new TwoFactAuthentication());
                         break;
 
-                    // case ResponseCode.InvalidArgument:
-                    //    // 引数不正 ※機能仕様書に記載がないため対応不明
-                    //    this.MailAddressErrorMessage = this.resouceWrapper.GetString("APP_04_01_ERR_02");
-                    //    this.MailAddressErrorMessageVisibility = Visibility.Visible;
-                    //    this.PasswordErrorMessage = this.resouceWrapper.GetString("APP_04_01_ERR_03");
-                    //    this.PasswordErrorMessageVisibility = Visibility.Visible;
-                    //    break;
                     case ResponseCode.AuthenticationFailed:
                         // 認証エラー
                         this.ErrorMessage = this.resouceWrapper.GetString("APP_04_01_ERR_01");
                         this.ErrorMessageVisibility = Visibility.Visible;
+                        Logger.Error(this.ErrorMessage);
                         break;
+
                     case ResponseCode.MaximumNumberOfDevicesInUse:
                         // 端末設定画面に遷移
-                        this.loginWindow.SetAuthenticationInformation(authenticationInformation.Data);
+                        this.loginWindow.SetAuthenticationInformation(authenticationInformationResponse.Data);
                         this.loginWindow.NavigationService.Navigate(new DeviceSettings());
                         break;
+
                     default:
                         // その他
                         this.ErrorMessage = string.Format(this.resouceWrapper.GetString("APP_04_ERR_EXCEPTION"), responseMessage);
                         this.ErrorMessageVisibility = Visibility.Visible;
+                        Logger.Error(this.ErrorMessage);
                         break;
                 }
             }
@@ -423,13 +491,42 @@ namespace Client.UI.ViewModels
                 // その他のレスポンスコードの場合、エラーメッセージを表示
                 this.ErrorMessage = string.Format(this.resouceWrapper.GetString("APP_04_ERR_EXCEPTION"), ex.Message);
                 this.ErrorMessageVisibility = Visibility.Visible;
+                Logger.Error(ex, this.ErrorMessage);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // 【TODO：ログ出力】
-                // 予期せぬ例外発生時は、ログイン画面を閉じる
+                // 配信サーバアクセスでエラーが発生したときは、画面を閉じ以後の処理を行わない
+                var exception = new Exception(this.resouceWrapper.GetString("LOG_ERR_LoginViewModel_Login_Exception"), ex);
+                Logger.Error(exception);
                 this.loginWindow.Close();
             }
+        }
+
+        /// <summary>
+        /// 入力値のチェック処理
+        /// </summary>
+        /// <returns>結果</returns>
+        private bool ValidateInputValues()
+        {
+            var result = true;
+
+            // メールアドレスの入力文字数チェック
+            if (this.MailAddress.Length >= LoginViewModel.MaxLengthOfMailAddress)
+            {
+                this.MailAddressErrorMessage = this.resouceWrapper.GetString("APP_04_01_ERR_02");
+                this.MailAddressErrorMessageVisibility = Visibility.Visible;
+                result = false;
+            }
+
+            // パスワードの入力文字数チェック
+            if (this.Password.Length >= LoginViewModel.MaxLengthOfPassword)
+            {
+                this.PasswordErrorMessage = this.resouceWrapper.GetString("APP_04_01_ERR_03");
+                this.PasswordErrorMessageVisibility = Visibility.Visible;
+                result = false;
+            }
+
+            return result;
         }
 
         /// <summary>
@@ -437,7 +534,19 @@ namespace Client.UI.ViewModels
         /// </summary>
         private void OnResetPasswordPageLinkClick()
         {
-            MessageBox.Show("パスワード再設定ページを表示");
+            Logger.Info(string.Format(
+                this.resouceWrapper.GetString("LOG_INFO_LoginViewModel_ResetPasswordLinkClick")));
+
+            try
+            {
+                this.webBrowser.Navigate(this.GetResetPasswordPageUrl());
+            }
+            catch (GetResetPasswordPageUrlException e)
+            {
+                // 配信サーバアクセスでエラーが発生したときは、画面を閉じ以後の処理を行わない
+                Logger.Error(e);
+                this.loginWindow.Close();
+            }
         }
 
         /// <summary>
@@ -445,7 +554,51 @@ namespace Client.UI.ViewModels
         /// </summary>
         private void OnAccountRegistrationPageLinkClick()
         {
-            MessageBox.Show("会員登録ページを表示");
+            Logger.Info(string.Format(
+                this.resouceWrapper.GetString("LOG_INFO_LoginViewModel_RegistrationPageLinkClick")));
+
+            try
+            {
+                this.webBrowser.Navigate(this.GetUserRegistrationPageUrl());
+            }
+            catch (GetUserRegistrationPageUrlException e)
+            {
+                // 配信サーバアクセスでエラーが発生したときは、画面を閉じ以後の処理を行わない
+                Logger.Error(e);
+                this.loginWindow.Close();
+            }
+        }
+
+        /// <summary>
+        /// パスワード再設定ページURLを取得する
+        /// </summary>
+        /// <returns>パスワード再設定ページURL</returns>
+        private Url GetResetPasswordPageUrl()
+        {
+            try
+            {
+                return this.urlRepository.GetResetPasswordPageUrl();
+            }
+            catch (Exception e)
+            {
+                throw new GetResetPasswordPageUrlException(this.resouceWrapper.GetString("LOG_ERR_LoginViewModel_GetResetPasswordPageUrlException"), e);
+            }
+        }
+
+        /// <summary>
+        /// 会員登録ページURLを取得する
+        /// </summary>
+        /// <returns>会員登録ページURL</returns>
+        private Url GetUserRegistrationPageUrl()
+        {
+            try
+            {
+                return this.urlRepository.GetUserRegistrationPageUrl();
+            }
+            catch (Exception e)
+            {
+                throw new GetUserRegistrationPageUrlException(this.resouceWrapper.GetString("LOG_ERR_LoginViewModel_GetUserRegistrationPageUrlException"), e);
+            }
         }
     }
 }

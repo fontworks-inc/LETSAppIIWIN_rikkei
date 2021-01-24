@@ -7,7 +7,7 @@ namespace Infrastructure.File
     /// <summary>
     /// 共通保存情報を格納するファイルリポジトリ
     /// </summary>
-    public class ApplicationRuntimeFileRepository : FileRepositoryBase, IApplicationRuntimeRepository
+    public class ApplicationRuntimeFileRepository : TextFileRepositoryBase, IApplicationRuntimeRepository
     {
         /// <summary>
         /// インスタンスを初期化する

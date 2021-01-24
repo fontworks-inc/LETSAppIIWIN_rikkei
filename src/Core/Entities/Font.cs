@@ -18,6 +18,15 @@ namespace Core.Entities
         /// <summary>
         /// インスタンスの初期化を行う
         /// </summary>
+        /// <param name="fontId">フォントID</param>
+        public Font(string fontId)
+        {
+            this.Id = fontId;
+        }
+
+        /// <summary>
+        /// インスタンスの初期化を行う
+        /// </summary>
         /// <param name="id">フォントID</param>
         /// <param name="path">ファイルパス</param>
         /// <param name="isLETS">LETSフォントかどうかを表す</param>
@@ -26,7 +35,8 @@ namespace Core.Entities
         /// <param name="version">バージョン</param>
         /// <param name="registryKey">レジストリキー</param>
         /// <param name="contractIds">契約IDリスト</param>
-        public Font(string id, string path, bool isLETS, bool? isActivated, string displayName, string version, string registryKey, IList<string> contractIds)
+        /// <param name="isRemove">削除対象</param>
+        public Font(string id, string path, bool isLETS, bool? isActivated, string displayName, string version, string registryKey, bool isFreemium, IList<string> contractIds, bool? isRemove = false)
         {
             this.Id = id;
             this.Path = path;
@@ -35,25 +45,27 @@ namespace Core.Entities
             this.DisplayName = displayName;
             this.Version = version;
             this.RegistryKey = registryKey;
+            this.IsFreemium = isFreemium;
             this.ContractIds = contractIds;
+            this.IsRemove = isRemove;
         }
 
         /// <summary>
         /// フォントID
         /// </summary>
         /// <remarks>LETSフォントのみを対象として情報を保存する</remarks>
-        public string Id { get; set; }
+        public string Id { get; set; } = string.Empty;
 
         /// <summary>
         /// ファイルパス
         /// </summary>
-        public string Path { get; set; }
+        public string Path { get; set; } = string.Empty;
 
         /// <summary>
         /// LETSフォントかどうかを表す
         /// </summary>
         /// <remarks>LETSフォントの時にtrue, LETSフォント以外の時にfalseを返す</remarks>
-        public bool IsLETS { get; set; }
+        public bool IsLETS { get; set; } = false;
 
         /// <summary>
         /// アクティベート状態
@@ -62,28 +74,36 @@ namespace Core.Entities
         /// アクティベート状態の時にtrue, ディアクティベート状態の時にfalseを返す
         /// LETSフォントのみを対象として情報を保存する
         /// </remarks>
-        public bool? IsActivated { get; set; }
+        public bool? IsActivated { get; set; } = null;
 
         /// <summary>
         /// 表示用フォント名
         /// </summary>
-        public string DisplayName { get; set; }
+        public string DisplayName { get; set; } = string.Empty;
 
         /// <summary>
         /// バージョン
         /// </summary>
-        public string Version { get; set; }
+        public string Version { get; set; } = string.Empty;
 
         /// <summary>
         /// 契約IDリスト
         /// </summary>
-        public IList<string> ContractIds { get; set; }
+        public IList<string> ContractIds { get; set; } = new List<string>();
 
         /// <summary>
         /// レジストリキー
         /// </summary>
         /// <remarks>アクティベート時に登録したレジストリのキー</remarks>
-        public string RegistryKey { get; set; }
+        public string RegistryKey { get; set; } = string.Empty;
+
+        public bool IsFreemium { get; set; } = false;
+
+        /// <summary>
+        /// 削除対象
+        /// </summary>
+        /// <remarks>削除対象の時にTRUE, 起動時に削除するフォント</remarks>>
+        public bool? IsRemove { get; set; }
 
         /// <summary>
         /// このオブジェクトが指定されたオブジェクトと等しいかどうかを判定する

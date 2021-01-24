@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System;
+using System.Text.Json;
 using Core.Entities;
 using Core.Interfaces;
 
@@ -10,12 +11,21 @@ namespace Infrastructure.File
     public class CustomerFileRepository : EncryptFileBase, ICustomerRepository
     {
         /// <summary>
+        /// お客様情報APIリポジトリ
+        /// </summary>
+        private readonly ICustomerRepository customerAPIRepository;
+
+        /// <summary>
         /// インスタンスを初期化する
         /// </summary>
         /// <param name="filePath">ファイルパス</param>
-        public CustomerFileRepository(string filePath)
+        /// <param name="customerAPIRepository">お客様情報APIリポジトリ</param>
+        public CustomerFileRepository(
+            string filePath,
+            ICustomerRepository customerAPIRepository)
             : base(filePath)
         {
+            this.customerAPIRepository = customerAPIRepository;
         }
 
         /// <summary>
@@ -35,6 +45,20 @@ namespace Infrastructure.File
                 // ファイルが存在しない場合、新規のオブジェクトを返す
                 return new Customer();
             }
+        }
+
+        /// <summary>
+        /// お客様情報の取得
+        /// </summary>
+        /// <param name="deviceId">デバイスID</param>
+        /// <returns>お客様情報</returns>
+        /// <remarks>API呼び出し時のみ実装</remarks>
+        public Customer GetCustomer(string deviceId)
+        {
+            Customer customer = this.customerAPIRepository.GetCustomer(deviceId);
+            this.SaveCustomer(customer);
+
+            return customer;
         }
 
         /// <summary>

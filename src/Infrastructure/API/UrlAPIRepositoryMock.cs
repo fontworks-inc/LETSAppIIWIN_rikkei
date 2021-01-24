@@ -25,7 +25,7 @@ namespace Infrastructure.API
         /// <returns>パスワード再設定ページのURL</returns>
         public Url GetResetPasswordPageUrl()
         {
-            throw new NotImplementedException();
+            return new Url("https://www.amazon.co.jp/");
         }
 
         /// <summary>
@@ -34,7 +34,7 @@ namespace Infrastructure.API
         /// <returns>会員登録ページのURL</returns>
         public Url GetUserRegistrationPageUrl()
         {
-            throw new NotImplementedException();
+            return new Url("https://www.apple.com/jp/");
         }
 
         /// <summary>
@@ -67,7 +67,7 @@ namespace Infrastructure.API
         /// <returns>フォント一覧画面URL</returns>
         public Url GetFontListPageUrl(string uuid, string accessToken)
         {
-            throw new NotImplementedException();
+            return new Url("https://ja-jp.facebook.com/");
         }
     }
 }

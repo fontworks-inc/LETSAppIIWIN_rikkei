@@ -18,7 +18,11 @@ namespace Infrastructure.API
         /// <remarks>APIリポジトリではこのメソッドは実装しない</remarks>
         public ContractsAggregate GetContractsAggregate()
         {
-            throw new NotImplementedException();
+            return new ContractsAggregate(true, new List<Contract>()
+            {
+                new Contract("AAA1234", DateTime.Parse("2021/12/08 15:38")),
+                new Contract("ABC999", DateTime.Parse("2022/12/08 15:38")),
+            });
         }
 
         /// <summary>

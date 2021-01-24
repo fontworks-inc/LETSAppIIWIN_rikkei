@@ -7,7 +7,7 @@ namespace Infrastructure.File
     /// <summary>
     /// 暗号化ファイルリポジトリ基底クラス
     /// </summary>
-    public abstract class EncryptFileBase : FileRepositoryBase
+    public abstract class EncryptFileBase : TextFileRepositoryBase
     {
         /// <summary>
         /// AESで使用するIV

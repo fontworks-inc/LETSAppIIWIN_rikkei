@@ -12,7 +12,12 @@ namespace OS.Services
         /// フォントをインストールする
         /// </summary>
         /// <param name="font">対象フォント</param>
-        public void Install(Font font)
+        public bool Install(Font font)
+        {
+            return true;
+        }
+
+        public void BroadcastFont()
         {
         }
 
@@ -20,8 +25,9 @@ namespace OS.Services
         /// フォントをアクティベートする
         /// </summary>
         /// <param name="font">対象フォント</param>
-        public void Activate(Font font)
+        public bool Activate(Font font)
         {
+            return true;
         }
 
         /// <summary>
@@ -30,6 +36,7 @@ namespace OS.Services
         /// <param name="font">対象フォント</param>
         public void Deactivate(Font font)
         {
+            font.IsActivated = false;
         }
 
         /// <summary>

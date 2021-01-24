@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using System.Windows;
 using ApplicationService.Authentication;
 using ApplicationService.Fonts;
 using ApplicationService.Interfaces;
+using ApplicationService.Schedulers;
 using ApplicationService.Startup;
 using Client.UI.Components;
 using Client.UI.Interfaces;
@@ -18,8 +21,6 @@ using OS.Interfaces;
 using OS.Services;
 using Prism.Ioc;
 using Prism.Unity;
-using Windows.Data.Xml.Dom;
-using Windows.UI.Notifications;
 
 namespace Client.UI
 {
@@ -29,7 +30,7 @@ namespace Client.UI
     public class Shell : PrismApplication
     {
         /// <summary>
-        /// ロガー。
+        /// ロガー
         /// </summary>
         private static readonly Logger Logger = LogManager.GetLogger("nlog.config");
 
@@ -55,7 +56,12 @@ namespace Client.UI
         /// </summary>
         public Shell()
         {
+            // グローバル例外に対応するイベントハンドラを追加（WPF用）
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+
+            // グローバル例外に対応するイベントハンドラを追加（Windowsフォーム用）
+            System.Windows.Forms.Application.ThreadException +=
+                new ThreadExceptionEventHandler(Application_ThreadException);
         }
 
         /// <summary>
@@ -64,9 +70,13 @@ namespace Client.UI
         /// <param name="containerRegistry">コンテナレジストリ</param>
         protected override void RegisterTypes(IContainerRegistry containerRegistry)
         {
+            File.WriteAllText(Path.GetTempPath() + @"\username.txt", Environment.UserName);
+            File.WriteAllText(Path.GetTempPath() + @"\basedir.txt", Environment.CurrentDirectory);
+
             // メモリ上で保存する情報
             var volatileSettingMemoryRepository = new VolatileSettingMemoryRepository();
             containerRegistry.RegisterInstance<IVolatileSettingRepository>(volatileSettingMemoryRepository);
+            volatileSettingMemoryRepository.GetVolatileSetting().ClientApplicationPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "LETS.exe");
 
             // 共通設定情報
             var applicationSettingRepository = new ApplicationSettingFileRepository(Path.Combine(ApplicationSettingFolder, "appsettings.json"));
@@ -79,18 +89,15 @@ namespace Client.UI
             // ユーザー別保存情報
             var userStatusFileRepository = new UserStatusFileRepository(Path.Combine(UserDataDirectory, "status.dat"));
             containerRegistry.RegisterInstance<IUserStatusRepository>(userStatusFileRepository);
+            volatileSettingMemoryRepository.GetVolatileSetting().RefreshToken = userStatusFileRepository.GetStatus().RefreshToken;
+            Logger.Info(string.Format("RefreshToken=" + volatileSettingMemoryRepository.GetVolatileSetting().RefreshToken, string.Empty));
+
+            string deviceid = userStatusFileRepository.GetStatus().DeviceId;
+            Logger.Info(string.Format("deviceid=" + deviceid, string.Empty));
 
             // フォント情報
-            containerRegistry.RegisterInstance<IUserFontsSettingRepository>(
-                new UserFontsSettingFileRepository(Path.Combine(UserDataDirectory, "fonts.dat")));
-
-            // 契約情報
-            var contractsAggregateRepository = new ContractsAggregateAPIRepositoryMock();
-            containerRegistry.RegisterInstance<IContractsAggregateRepository>(contractsAggregateRepository);
-
-            // キャッシュ情報 FUNCTION_08_02_01(お客様情報取得APIのレスポンス)
-            containerRegistry.RegisterInstance<ICustomerRepository>(
-                new CustomerFileRepository(Path.Combine(UserDataDirectory, "FUNCTION_08_02_01.dat")));
+            var userFontsSettingFileRepository = new UserFontsSettingFileRepository(Path.Combine(UserDataDirectory, "fonts.dat"));
+            containerRegistry.RegisterInstance<IUserFontsSettingRepository>(userFontsSettingFileRepository);
 
             // キャッシュ情報 FUNCTION_08_05_02(クライアントアプリの起動Ver情報取得APIのレスポンス)
             containerRegistry.RegisterInstance<IClientApplicationVersionRepository>(
@@ -98,57 +105,137 @@ namespace Client.UI
 
             // APIConfiguration
             ApplicationSetting applicationSetting = applicationSettingRepository.GetSetting();
-            var apiConfiguration = new APIConfiguration(applicationSetting.FontDeliveryServerUri);
-
-            // 認証情報(モック)
-            containerRegistry.RegisterInstance<IAuthenticationInformationRepository>(
-               new AuthenticationInformationRepositoryMock(apiConfiguration));
-
-            // URL情報(モック)
-            containerRegistry.RegisterInstance<IUrlRepository>(new UrlAPIRepositoryMock(apiConfiguration));
-
-            // 端末情報(モック)
-            var devicesRepository = new DevicesRepositoryMock(apiConfiguration);
-            containerRegistry.RegisterInstance<IDevicesRepository>(devicesRepository);
-
-            // フォント管理サービス(モック)
-            var fontManagerService = new FontManagerServiceMock();
-            containerRegistry.RegisterInstance<IFontManagerService>(fontManagerService);
-
-            // フォントのアクティベート通知サービス
-            var fontNotificationService = new FontNotificationService(fontManagerService);
-            containerRegistry.RegisterInstance<IFontNotificationService>(fontNotificationService);
-
-            // フォントのアクティベートサービス(モック)
-            containerRegistry.Register<IFontActivationService, FontActivationServiceMock>();
-
-            // 通知受信処理(モック)
-            containerRegistry.RegisterInstance<IReceiveNotificationRepository>(
-                new ReceiveNotificationAPIRepositoryMock(
-                    apiConfiguration,
-                    userStatusFileRepository,
-                    fontNotificationService));
+            var apiConfiguration = new APIConfiguration(applicationSetting.FontDeliveryServerUri, applicationSetting.NotificationServerUri);
 
             // 各種画面で利用する情報
             var resourceWrapper = new ResourceWrapper();
             containerRegistry.RegisterInstance<IResourceWrapper>(resourceWrapper);
             containerRegistry.RegisterInstance<ILoginWindowWrapper>(new LoginWindowWrapper());
 
+            // 認証情報
+            containerRegistry.RegisterInstance<IAuthenticationInformationRepository>(
+               new AuthenticationInformationAPIRepository(apiConfiguration));
+
+            // キャッシュ情報 FUNCTION_08_02_01(お客様情報取得APIのレスポンス)
+            containerRegistry.RegisterInstance<ICustomerRepository>(
+                new CustomerFileRepository(Path.Combine(UserDataDirectory, "FUNCTION_08_02_01.dat"), new CustomerAPIRepository(apiConfiguration)));
+
+            // URL情報
+            containerRegistry.RegisterInstance<IUrlRepository>(new UrlAPIRepository(apiConfiguration));
+
+            // フォント情報
+            FontsAPIRepository fontsAPIRepository = new FontsAPIRepository(apiConfiguration);
+            containerRegistry.RegisterInstance<IFontsRepository>(fontsAPIRepository);
+
+            // 端末情報
+            var devicesRepository = new DevicesAPIRepository(apiConfiguration);
+            containerRegistry.RegisterInstance<IDevicesRepository>(devicesRepository);
+
+            // フォントのアクティベートサービス
+            var fontActivationService = new FontActivationService(userFontsSettingFileRepository);
+            containerRegistry.Register<IFontActivationService, FontActivationService>();
+
+            // フォントの内部情報リポジトリ
+            var fontInfoRepository = new FontFileRepository(resourceWrapper);
+            containerRegistry.Register<IFontFileRepository, FontFileRepository>();
+
+            // フォント管理サービス
+            var fontManagerService = new FontManagerService(
+                resourceWrapper,
+                applicationSettingRepository,
+                volatileSettingMemoryRepository,
+                userFontsSettingFileRepository,
+                userStatusFileRepository,
+                fontsAPIRepository,
+                fontActivationService,
+                fontInfoRepository);
+            containerRegistry.RegisterInstance<IFontManagerService>(fontManagerService);
+
+            // フォントのアクティベート通知サービス
+            var fontNotificationService = new FontNotificationService(fontManagerService);
+            containerRegistry.RegisterInstance<IFontNotificationService>(fontNotificationService);
+
+            // 通知受信処理
+            var receiveNotificationRepository = new ReceiveNotificationAPIRepository(
+                apiConfiguration,
+                userStatusFileRepository,
+                fontNotificationService);
+            containerRegistry.RegisterInstance<IReceiveNotificationRepository>(receiveNotificationRepository);
+
             // 認証サービス
             containerRegistry.RegisterInstance<IAuthenticationService>(
                 new AuthenticationService((Application.Current as PrismApplication).Container));
 
+            // アプリケーションコンポーネントを生成
+            this.componentManager = new ComponentManager();
+            var componentManagerWrapper = new ComponentManagerWrapper();
+            componentManagerWrapper.Manager = this.componentManager;
+            containerRegistry.RegisterInstance<IComponentManagerWrapper>(componentManagerWrapper);
+
+            fontManagerService.ShowErrorDialogEvent = (string text, string caption) =>
+            {
+                Current.Dispatcher.Invoke(() =>
+                {
+                    ToastNotificationWrapper.Show(text, caption);
+                });
+            };
+            fontManagerService.FontStartDownloadEvent = (InstallFont font, double compFileSize, double totalFileSize) =>
+            {
+                Current.Dispatcher.Invoke(() =>
+                {
+                    this.componentManager.StartFontDownload(font, compFileSize, totalFileSize);
+                });
+            };
+            fontManagerService.FontDownloadCompletedEvent = (IList<InstallFont> fontList) =>
+             {
+                Current.Dispatcher.Invoke(() =>
+                {
+                    this.componentManager.FontDownloadCompleted(fontList);
+                });
+            };
+
             // キャッシュ情報 FUNCTION_08_03_02(契約情報取得APIのレスポンス)
-            var contractsAggregateFileRepository = new ContractsAggregateFileRepository(Path.Combine(UserDataDirectory, "FUNCTION_08_03_02.dat"));
+            var contractsAggregateFileRepository = new ContractsAggregateFileRepository(Path.Combine(UserDataDirectory, "FUNCTION_08_03_02.dat"), new ContractsAggregateAPIRepository(apiConfiguration));
 
             // 起動時処理サービス
-            containerRegistry.RegisterInstance<IStartupService>(new StartupService(
+            var startupService = new StartupService(
                 resourceWrapper,
                 fontManagerService,
                 volatileSettingMemoryRepository,
-                contractsAggregateRepository,
                 contractsAggregateFileRepository,
-                devicesRepository));
+                contractsAggregateFileRepository,
+                devicesRepository,
+                userStatusFileRepository);
+            containerRegistry.RegisterInstance<IStartupService>(startupService);
+
+            // 定期確認処理
+            containerRegistry.RegisterInstance<IFixedTermScheduler>(
+                new FixedTermScheduler(
+                    applicationSetting.FixedTermConfirmationInterval,
+                    (Exception exception) =>
+                    {
+                        // 例外発生時の処理(UIスレッドで実行)
+                        Current.Dispatcher.Invoke(() =>
+                        {
+                            ExceptionNotifier.Notify(exception);
+                            this.Shutdown();
+                        });
+                    },
+                    resourceWrapper,
+                    volatileSettingMemoryRepository,
+                    userStatusFileRepository,
+                    startupService,
+                    receiveNotificationRepository,
+                    fontManagerService,
+                    contractsAggregateFileRepository,
+                    () =>
+                    {
+                        // 強制ログアウト画面の表示(UIスレッドで実行)
+                        Current.Dispatcher.Invoke(() =>
+                        {
+                            this.componentManager.ForcedLogout();
+                        });
+                    }));
         }
 
         /// <summary>
@@ -159,26 +246,58 @@ namespace Client.UI
         {
             base.OnStartup(e);
 
-            // アプリケーションコンポーネントを生成
-            this.componentManager = new ComponentManager();
-
             // コンテナに登録したオブジェクトを取得する
             IContainerProvider container = (Current as PrismApplication).Container;
 
-            // 起動処理
-
-            // TODO 「5. クイックメニュー設定」の「ログイン中の場合」の処理を記載後、SetLoginStatusを適切な場所に移動してください
-            // アカウント情報を表示する
-            var customerRepository = container.Resolve<ICustomerRepository>();
-            var customer = customerRepository.GetCustomer();
-            this.componentManager.MenuLoginStatus.SetLoginStatus(customer);
-
-            // 状態によってクイックメニューの表示を切替
-            this.componentManager.MenuUpdateStatus.Hide();
-            this.componentManager.MenuDownloadStatus.Hide();
-            this.componentManager.ApplicationIcon.SetNormalMode();
-
+            // ウィンドウメッセージ受信用画面を表示
             this.componentManager.Show();
+
+            // フォント管理
+            var fontService = container.Resolve<IFontManagerService>();
+
+            // [ユーザー別保存：ログイン状態]を取得する
+            Logger.Debug(string.Format("OnStartup:[ユーザー別保存：ログイン状態]を取得する", string.Empty));
+            var userStatusRepository = container.Resolve<IUserStatusRepository>();
+            if (userStatusRepository.GetStatus().IsLoggingIn)
+            {
+                // ユーザー配下のフォントフォルダ
+                var local = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+                var userFontsDir = @$"{local}\Microsoft\Windows\Fonts";
+
+                // フォント一覧の更新
+                fontService.UpdateFontsList(userFontsDir);
+
+                // 起動時チェック処理
+                var receiveNotificationRepository = container.Resolve<IReceiveNotificationRepository>();
+                var volatileSettingRepository = container.Resolve<IVolatileSettingRepository>();
+                var startupService = container.Resolve<IStartupService>();
+                if (startupService.IsCheckedStartup(this.componentManager.ForcedLogout))
+                {
+                    // 起動時チェック処理が処理済みとなった場合、通知受信処理を開始する
+                    receiveNotificationRepository.Start(volatileSettingRepository.GetVolatileSetting().AccessToken, userStatusRepository.GetStatus().DeviceId);
+                }
+            }
+            else
+            {
+                // ログアウト中の場合、LETSフォントをディアクティベートし、[フォント：フォント一覧]に保存
+                Logger.Info(string.Format("OnStartup:ログアウト中の場合、LETSフォントをディアクティベートし、[フォント：フォント一覧]に保存", ""));
+                fontService.DeactivateSettingFonts();
+            }
+
+            // クイックメニューを設定
+            this.componentManager.ApplicationIcon.Enabled = true;
+            if (userStatusRepository.GetStatus().IsLoggingIn)
+            {
+                // 状態表示：ログイン中を表示する
+                this.componentManager.QuickMenu.ShowLoginStatus();
+            }
+
+            // アイコン表示ルールに従いアイコンを設定
+            this.componentManager.SetIcon();
+
+            // 定期確認処理の開始
+            var fixedTermScheduler = container.Resolve<IFixedTermScheduler>();
+            fixedTermScheduler.Start();
         }
 
         /// <summary>
@@ -203,63 +322,32 @@ namespace Client.UI
 
         /// <summary>
         /// グローバル例外への対応確認
-        /// 未処理例外を処理する
+        /// 未処理例外を処理する（WPF用）
         /// </summary>
         /// <param name="sender">sender</param>
         /// <param name="e">UnhandledExceptionEventArgs</param>
         private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
-            // 例外発生時、エラーを通知してアプリケーションを終了する
+            // 例外発生時、エラーを通知する
             var exception = e.ExceptionObject as Exception;
-            ExceptionHandling(exception);
+            ExceptionNotifier.Notify(exception);
 
-            // アプリケーション終了処理
+            // アプリケーションを終了する
             Shell shell = (Shell)(System.Windows.Application.Current as PrismApplication);
             shell.Shutdown();
         }
 
         /// <summary>
         /// グローバル例外への対応確認
-        /// 例外発生時処理
-        /// </summary>
-        /// <param name="exception">例外</param>
-        private static void ExceptionHandling(Exception exception)
+        /// 未処理例外を処理する（Windowsフォーム用）
+        private static void Application_ThreadException(object sender, ThreadExceptionEventArgs e)
         {
-            // 例外発生時の処理のため、コンテナを経由せず直接インスタンスを生成する
-            var resourceWrapper = new ResourceWrapper();
-            string message = resourceWrapper.GetString("APP_ERR_UnhandledException");
-            Logger.Error(exception, message);
+            // 例外発生時、エラーを通知する
+            ExceptionNotifier.Notify(e.Exception);
 
-            var xml = ToastNotificationManager.GetTemplateContent(ToastTemplateType.ToastImageAndText04);
-            var stringElements = xml.GetElementsByTagName("text");
-            stringElements[0].AppendChild(xml.CreateTextNode("LETS"));
-            stringElements[1].AppendChild(xml.CreateTextNode(message));
-
-            // アプリアイコンは実行ファイルと同じディレクトリにコピーする(コンテンツ－常にコピーする)
-            var images = xml.GetElementsByTagName("image");
-            var imagePath = "file:///" + Path.GetFullPath("ICON_APP.ico");
-            ((Windows.Data.Xml.Dom.XmlElement)images[0]).SetAttribute("src", imagePath);
-
-            // 表示間隔をロングに(デフォルトはショート)
-            IXmlNode toastNode = xml.SelectSingleNode("/toast");
-            ((Windows.Data.Xml.Dom.XmlElement)toastNode).SetAttribute("duration", "short");
-
-            var appId = "LETS";
-            var toast = new ToastNotification(xml);
-            ToastNotificationManager.CreateToastNotifier(appId).Show(toast);
-        }
-
-        /// <summary>
-        /// 起動時チェック処理
-        /// </summary>
-        /// <param name="container">DIコンテナ</param>
-        /// <returns>チェック結果を返す</returns>
-        private bool IsCheckedStartup(IContainerProvider container)
-        {
-            var startupService = container.Resolve<IStartupService>();
-            var userStatusRepository = container.Resolve<IUserStatusRepository>();
-            UserStatus userStatus = userStatusRepository.GetStatus();
-            return startupService.IsCheckedStartup(userStatus.DeviceId, this.componentManager.Notice, this.componentManager.ForcedLogout);
+            // アプリケーションを終了する
+            Shell shell = (Shell)(System.Windows.Application.Current as PrismApplication);
+            shell.Shutdown();
         }
     }
 }

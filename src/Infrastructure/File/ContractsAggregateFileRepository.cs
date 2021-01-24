@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
 using Core.Entities;
 using Core.Interfaces;
+using Infrastructure.API;
 
 namespace Infrastructure.File
 {
@@ -9,13 +10,16 @@ namespace Infrastructure.File
     /// </summary>
     public class ContractsAggregateFileRepository : EncryptFileBase, IContractsAggregateRepository
     {
+        private ContractsAggregateAPIRepository contractsAggregateAPIRepository;
+
         /// <summary>
         /// インスタンスを初期化する
         /// </summary>
         /// <param name="filePath">ファイルパス</param>
-        public ContractsAggregateFileRepository(string filePath)
+        public ContractsAggregateFileRepository(string filePath, ContractsAggregateAPIRepository contractsAggregateAPIRepository)
             : base(filePath)
         {
+            this.contractsAggregateAPIRepository = contractsAggregateAPIRepository;
         }
 
         /// <summary>
@@ -43,10 +47,13 @@ namespace Infrastructure.File
         /// <param name="deviceId">デバイスID</param>
         /// <param name="accessToken">アクセストークン</param>
         /// <returns>契約情報の集合体</returns>
-        /// <remarks>ファイルリポジトリではこのメソッドは実装しない</remarks>
+        /// <remarks>API呼び出し時のみ実装</remarks>
         public ContractsAggregate GetContractsAggregate(string deviceId, string accessToken)
         {
-            throw new System.NotImplementedException();
+            ContractsAggregate contractsAggregate = this.contractsAggregateAPIRepository.GetContractsAggregate(deviceId, accessToken);
+            this.SaveContractsAggregate(contractsAggregate);
+
+            return contractsAggregate;
         }
 
         /// <summary>

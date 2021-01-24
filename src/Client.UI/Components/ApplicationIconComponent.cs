@@ -3,7 +3,11 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Reflection;
 using System.Windows.Forms;
+using Core.Entities;
 using Core.Interfaces;
+using NLog;
+using Prism.Ioc;
+using Prism.Unity;
 
 namespace Client.UI.Components
 {
@@ -13,9 +17,29 @@ namespace Client.UI.Components
     public class ApplicationIconComponent : Component
     {
         /// <summary>
+        /// ロガー
+        /// </summary>
+        private static readonly Logger Logger = LogManager.GetLogger("nlog.config");
+
+        /// <summary>
+        /// メモリで保持する情報を格納するリポジトリ
+        /// </summary>
+        private readonly IVolatileSettingRepository volatileSettingRepository;
+
+        /// <summary>
+        /// ユーザ別ステータス情報を格納するリポジトリ
+        /// </summary>
+        private readonly IUserStatusRepository userStatusRepository;
+
+        /// <summary>
         /// タスクトレイアイコン
         /// </summary>
         private NotifyIcon tasktrayIcon;
+
+        /// <summary>
+        /// タスクトレイアイコンの有効無効状態
+        /// </summary>
+        private bool enabled = true;
 
         /// <summary>
         /// ローディングアイコン
@@ -33,11 +57,6 @@ namespace Client.UI.Components
         private Timer loadingTimer;
 
         /// <summary>
-        /// ログインしているかどうか
-        /// </summary>
-        private bool isLogin = true;
-
-        /// <summary>
         /// コンストラクタ
         /// </summary>
         /// <param name="manager">ComponentManager</param>
@@ -47,25 +66,63 @@ namespace Client.UI.Components
             this.Manager.Container.Add(this);
             this.Resource = this.Manager.GetResource();
 
+            IContainerProvider containerProvider = (System.Windows.Application.Current as PrismApplication).Container;
+            this.volatileSettingRepository = containerProvider.Resolve<IVolatileSettingRepository>();
+            this.userStatusRepository = containerProvider.Resolve<IUserStatusRepository>();
+
             this.InitializeComponent();
 
             this.tasktrayIcon.Click += (s, e) =>
             {
                 var mouseEvent = e as MouseEventArgs;
 
-                if (!this.isLogin)
+                if (!this.userStatusRepository.GetStatus().IsLoggingIn)
                 {
-                    this.Login();
+                    // (ログアウト時)ログイン画面を起動する
+                    this.Manager.ShowLoginWindow();
                 }
                 else
                 {
+                    // [メモリ：ダウンロード完了]をFALSEに設定する
+                    this.volatileSettingRepository.GetVolatileSetting().CompletedDownload = false;
+
+                    // (ログイン時)クイックメニューを起動する
+                    Logger.Info(this.Manager.GetResource().GetString("LOG_INFO_ApplicationIconComponent_tasktrayIcon_Click"));
                     if (mouseEvent.Button == MouseButtons.Left)
                     {
+                        // 左クリック時もクイックメニュー(タスクトレイアイコンに設定されたコンテキストメニュー)を表示
                         MethodInfo mi = typeof(NotifyIcon).GetMethod("ShowContextMenu", BindingFlags.Instance | BindingFlags.NonPublic);
                         mi.Invoke(this.tasktrayIcon, null);
                     }
                 }
             };
+        }
+
+        /// <summary>
+        /// タスクトレイアイコンの有効無効状態
+        /// </summary>
+        public bool Enabled
+        {
+            get
+            {
+                return this.enabled;
+            }
+
+            set
+            {
+                this.enabled = value;
+                if (this.enabled && this.userStatusRepository.GetStatus().IsLoggingIn)
+                {
+                    // タスクトレイアイコンが有効かつログイン中の場合
+                    // タスクトレイアイコンにクイックメニューをセットする
+                    this.SetQuickMenu();
+                }
+                else
+                {
+                    // タスクトレイアイコンからクイックメニューを外す
+                    this.RemoveQuickMenu();
+                }
+            }
         }
 
         /// <summary>
@@ -87,103 +144,87 @@ namespace Client.UI.Components
         }
 
         /// <summary>
-        /// ログイン画面を表示
+        /// アイコン表示ルールに従いアイコンを設定する
         /// </summary>
-        public void Login()
+        /// <param name="selected">選択中かどうか（デフォルト：選択中でない）</param>
+        public void SetIcon(bool selected = false)
         {
-            this.Manager.ShowLoginWindow();
-
-            MessageBox.Show("ログイン完了");
-            this.SetLoginMode();
-        }
-
-        /// <summary>
-        /// 通常アイコンを表示
-        /// </summary>
-        public void SetNormalMode()
-        {
+            // ローディングアイコンのタイマーをOFF
             this.loadingTimer.Enabled = false;
-            if (this.isLogin)
+
+            // メモリで保持する情報を取得
+            VolatileSetting volatileSetting = this.volatileSettingRepository.GetVolatileSetting();
+
+            // 選択アイコン表示（クイックメニューの表示状態変更時処理内で切替え）
+            if (selected)
             {
-                this.SetLoginMode();
-            }
-            else
-            {
-                this.SetLogoutMode();
-            }
-        }
-
-        /// <summary>
-        /// 通知アイコンを表示
-        /// </summary>
-        public void SetNoticeMode()
-        {
-            this.loadingTimer.Enabled = false;
-            this.tasktrayIcon.Icon = this.Resource.GetIcon("ICON_NOTIFIED");
-        }
-
-        /// <summary>
-        /// ローディングアイコンを表示
-        /// </summary>
-        public void SetLoadingMode()
-        {
-            this.currentLoadingIconIndex = 0;
-            this.loadingTimer.Enabled = true;
-        }
-
-        /// <summary>
-        /// 完了アイコンを表示
-        /// </summary>
-        public void SetCompleteMode()
-        {
-            this.loadingTimer.Enabled = false;
-        }
-
-        /// <summary>
-        /// 選択中アイコンを表示
-        /// </summary>
-        public void SetSelectedMode()
-        {
-            // ローディングアイコン表示中は選択中アイコンは表示しない
-            if (this.loadingTimer.Enabled)
-            {
+                this.SetSelectedMode();
                 return;
             }
 
-            this.tasktrayIcon.Icon = this.Resource.GetIcon("ICON_SELECTED");
+            // 完了アイコン表示（ダウンロード完了時、または、アップデート完了時）
+            // 【Phase2】アップデート完了時を追加
+            if (volatileSetting.CompletedDownload)
+            {
+                this.SetCompleteMode();
+                return;
+            }
+
+            // ローディングアイコン表示（ダウンロード中、または、アップデート中）
+            // 【Phase2】アップデート中を追加
+            if (volatileSetting.IsDownloading)
+            {
+                this.SetLoadingMode();
+                return;
+            }
+
+            // 通知アイコン表示（通知あり）
+            if (volatileSetting.IsNoticed)
+            {
+                this.SetNoticeMode();
+                return;
+            }
+
+            // ユーザー別に保持する情報を取得
+            UserStatus userStatus = this.userStatusRepository.GetStatus();
+
+            // ログイン中アイコン表示（ログイン状態：ログイン中）
+            if (userStatus.IsLoggingIn)
+            {
+                this.SetLoginMode();
+                return;
+            }
+
+            // ログアウト中アイコン表示（ログイン状態：ログアウト中）
+            if (!userStatus.IsLoggingIn)
+            {
+                this.SetLogoutMode();
+                return;
+            }
+
+            // 通常アイコン表示（起動中）
+            this.SetStartupMode();
         }
 
         /// <summary>
-        /// ログイン状態にする
+        /// タスクトレイアイコンにクイックメニューをセットする
         /// </summary>
-        public void SetLoginMode()
+        public void SetQuickMenu()
         {
-            this.loadingTimer.Enabled = false;
-
-            this.isLogin = true;
-            this.SetQuickMenu(this.Manager.QuickMenu);
-            this.tasktrayIcon.Icon = this.Resource.GetIcon("ICON_LOGIN");
+            // (ログイン中の場合)タスクトレイアイコンが設定されていなかったら
+            // タスクトレイアイコンにクイックメニューをセットする
+            if (this.tasktrayIcon.ContextMenuStrip == null)
+            {
+                this.tasktrayIcon.ContextMenuStrip = this.Manager.QuickMenu.ContextMenu;
+            }
         }
 
         /// <summary>
-        /// ログアウト状態にする
+        /// タスクトレイアイコンからクイックメニューを外す
         /// </summary>
-        public void SetLogoutMode()
+        public void RemoveQuickMenu()
         {
-            this.loadingTimer.Enabled = false;
-
-            this.isLogin = false;
             this.tasktrayIcon.ContextMenuStrip = null;
-            this.tasktrayIcon.Icon = this.Resource.GetIcon("ICON_LOGOUT");
-        }
-
-        /// <summary>
-        /// クイックメニューをセットする
-        /// </summary>
-        /// <param name="quickMenu">コンテキストメニュー</param>
-        public void SetQuickMenu(QuickMenuComponent quickMenu)
-        {
-            this.tasktrayIcon.ContextMenuStrip = quickMenu.ContextMenu;
         }
 
         /// <summary>
@@ -193,7 +234,7 @@ namespace Client.UI.Components
         {
             this.tasktrayIcon = new NotifyIcon(this.Manager.Container);
             this.tasktrayIcon.Visible = true;
-            this.tasktrayIcon.Text = "LETS"; // ツールチップに表示する文言は要確認（アプリ名、バージョン？）
+            this.tasktrayIcon.Text = this.Resource.GetString("APP_TOOLTIP");
             this.Manager.Container.Add(this.tasktrayIcon);
 
             // ローディングアイコンの登録
@@ -204,17 +245,80 @@ namespace Client.UI.Components
             this.loadingIcons.Add(this.Resource.GetIcon("ICON_LOADING_3"));
             this.currentLoadingIconIndex = 0;
 
+            // ローディングアイコンのタイマーを設定
             this.loadingTimer = new Timer();
             this.loadingTimer.Enabled = false;
             this.loadingTimer.Tick += (s, e) =>
             {
                 this.ShowLoadingIcons();
             };
+
+            // 通常アイコンを設定
+            this.SetStartupMode();
+        }
+
+        /// <summary>
+        /// 通常アイコンを表示（起動中）
+        /// </summary>
+        private void SetStartupMode()
+        {
+            this.tasktrayIcon.Icon = this.Resource.GetIcon("ICON_APP");
+        }
+
+        /// <summary>
+        /// ログイン中アイコンを表示
+        /// </summary>
+        private void SetLoginMode()
+        {
+            this.tasktrayIcon.Icon = this.Resource.GetIcon("ICON_LOGIN");
+        }
+
+        /// <summary>
+        /// ログアウト中アイコンを表示
+        /// </summary>
+        private void SetLogoutMode()
+        {
+            this.tasktrayIcon.Icon = this.Resource.GetIcon("ICON_LOGOUT");
+        }
+
+        /// <summary>
+        /// 選択中アイコンを表示
+        /// </summary>
+        private void SetSelectedMode()
+        {
+            this.tasktrayIcon.Icon = this.Resource.GetIcon("ICON_SELECTED");
+        }
+
+        /// <summary>
+        /// 通知アイコンを表示
+        /// </summary>
+        private void SetNoticeMode()
+        {
+            this.tasktrayIcon.Icon = this.Resource.GetIcon("ICON_NOTIFIED");
+        }
+
+        /// <summary>
+        /// 完了アイコンを表示
+        /// </summary>
+        private void SetCompleteMode()
+        {
+            this.tasktrayIcon.Icon = this.Resource.GetIcon("ICON_COMPLETED");
         }
 
         /// <summary>
         /// ローディングアイコンを表示
         /// </summary>
+        private void SetLoadingMode()
+        {
+            // ローディングアイコンのタイマーをON
+            this.currentLoadingIconIndex = 0;
+            this.loadingTimer.Enabled = true;
+        }
+
+        /// <summary>
+        /// ローディングアイコン表示処理
+        /// </summary>
+        /// <remarks>ローディングアイコンのタイマーがONのとき呼び出される</remarks>
         private void ShowLoadingIcons()
         {
             this.tasktrayIcon.Icon = this.loadingIcons[this.currentLoadingIconIndex];

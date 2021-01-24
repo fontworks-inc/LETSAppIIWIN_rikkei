@@ -7,30 +7,30 @@ namespace Infrastructure.File
     /// <summary>
     /// アプリケーション設定情報を格納するファイルリポジトリ
     /// </summary>
-    public class ApplicationSettingFileRepository : FileRepositoryBase, IApplicationSettingRepository
+    public class ApplicationSettingFileRepository : TextFileRepositoryBase, IApplicationSettingRepository
     {
         /// <summary>
         /// フォント配信サーバURI デフォルト値
         /// </summary>
-        private static readonly string FontDeliveryServerUri = "https://158.101.75.134";
-
+        private static readonly string FontDeliveryServerUri = "https://stage-delivery-lets.fontworks.co.jp";
         /// <summary>
         /// 通知サーバURI デフォルト値
         /// </summary>
-        private static readonly string NotificationServerUri = "https://158.101.75.134";
+        private static readonly string NotificationServerUri = "https://stage-notice-lets.fontworks.co.jp";
 
         /// <summary>
         /// 通信リトライ回数 デフォルト値
         /// </summary>
-        private static readonly int CommunicationRetryCount = 10;
+        //private static readonly int CommunicationRetryCount = 10;
+        private static readonly int CommunicationRetryCount = 2;
 
         /// <summary>
-        /// フォント配信サーバURI デフォルト値
+        /// 定期確認間隔 デフォルト値
         /// </summary>
         private static readonly int FixedTermConfirmationInterval = 1800;
 
         /// <summary>
-        /// フォント配信サーバURI デフォルト値
+        /// フォント容量係数 デフォルト値
         /// </summary>
         private static readonly int FontCalculationFactor = 3;
 

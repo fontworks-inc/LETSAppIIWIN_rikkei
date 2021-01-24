@@ -97,7 +97,7 @@ namespace Client.UI.Resources {
         }
         
         /// <summary>
-        ///   認証コード に類似しているローカライズされた文字列を検索します。
+        ///   2要素認証 に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string APP_04_01_2fa_LBL_AUTHENTICATION_CODE {
             get {
@@ -106,8 +106,8 @@ namespace Client.UI.Resources {
         }
         
         /// <summary>
-        ///   登録されているメールアドレスに認証コードを送信しました。
-        ///メールの本文に記載されている認証コードを入力してください。 に類似しているローカライズされた文字列を検索します。
+        ///   登録されているメールアドレスに2要素認証コードを送信しました。
+        ///メールの本文に記載されている2要素認証コードを入力してください。 に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string APP_04_01_2fa_PROC_DESCRIPTION {
             get {
@@ -116,7 +116,7 @@ namespace Client.UI.Resources {
         }
         
         /// <summary>
-        ///   ２要素認証コードの入力 に類似しているローカライズされた文字列を検索します。
+        ///   2要素認証 に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string APP_04_01_2fa_PROC_TITLE {
             get {
@@ -333,7 +333,7 @@ namespace Client.UI.Resources {
         }
         
         /// <summary>
-        ///   ログイン完了しました に類似しているローカライズされた文字列を検索します。
+        ///   ログインが完了しました に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string APP_06_01_PROC_TITLE {
             get {
@@ -444,11 +444,29 @@ namespace Client.UI.Resources {
         }
         
         /// <summary>
-        ///   致命的なエラーが発生したので、プログラムを終了します に類似しているローカライズされた文字列を検索します。
+        ///   プログラムを終了します に類似しているローカライズされた文字列を検索します。
         /// </summary>
-        internal static string APP_ERR_UnhandledException {
+        internal static string APP_FATAL_UnhandledException_Description {
             get {
-                return ResourceManager.GetString("APP_ERR_UnhandledException", resourceCulture);
+                return ResourceManager.GetString("APP_FATAL_UnhandledException_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   致命的なエラーが発生しました に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string APP_FATAL_UnhandledException_MainMassage {
+            get {
+                return ResourceManager.GetString("APP_FATAL_UnhandledException_MainMassage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   LETSデスクトップアプリ に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string APP_TOOLTIP {
+            get {
+                return ResourceManager.GetString("APP_TOOLTIP", resourceCulture);
             }
         }
         
@@ -482,9 +500,9 @@ namespace Client.UI.Resources {
         /// <summary>
         ///   ディスク容量が不足しています に類似しているローカライズされた文字列を検索します。
         /// </summary>
-        internal static string FUNC_01_03_01_NOTIFIED_LackOfDistSpace {
+        internal static string FUNC_01_03_01_NOTIFIED_LackOfDiscSpace {
             get {
-                return ResourceManager.GetString("FUNC_01_03_01_NOTIFIED_LackOfDistSpace", resourceCulture);
+                return ResourceManager.GetString("FUNC_01_03_01_NOTIFIED_LackOfDiscSpace", resourceCulture);
             }
         }
         
@@ -609,6 +627,159 @@ namespace Client.UI.Resources {
         }
         
         /// <summary>
+        ///   ログイン処理を利用する場合はコンストラクタの引数に IResourceWrapper, IAuthenticationInformationRepository, IDevicesRepository, IUserStatusRepository, IVolatileSettingRepository を設定してください に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string LOG_ERR_AuthenticationService_Login_InvalidOperationException {
+            get {
+                return ResourceManager.GetString("LOG_ERR_AuthenticationService_Login_InvalidOperationException", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   ログアウト処理を利用する場合はコンストラクタの引数に IResourceWrapper, IAuthenticationInformationRepository, IUserStatusRepository, IReceiveNotificationRepository, IVolatileSettingRepository, ICustomerRepository, IFontManagerService を設定してください に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string LOG_ERR_AuthenticationService_Logout_InvalidOperationException {
+            get {
+                return ResourceManager.GetString("LOG_ERR_AuthenticationService_Logout_InvalidOperationException", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   自端末の使用中設定時に例外が発生しました に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string LOG_ERR_DeviceSettingsViewModel_ActivateUserDevice_Exception {
+            get {
+                return ResourceManager.GetString("LOG_ERR_DeviceSettingsViewModel_ActivateUserDevice_Exception", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   3台目NG画面の使用中の端末情報取得時に例外が発生しました に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string LOG_ERR_DeviceSettingsViewModel_InitializeDeviceList_Exception {
+            get {
+                return ResourceManager.GetString("LOG_ERR_DeviceSettingsViewModel_InitializeDeviceList_Exception", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   自端末のログイン完了時に例外が発生しました に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string LOG_ERR_DeviceSettingsViewModel_LoginCompleted_Exception {
+            get {
+                return ResourceManager.GetString("LOG_ERR_DeviceSettingsViewModel_LoginCompleted_Exception", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   該当端末の解除に失敗しました({0}) に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string LOG_ERR_DeviceViewModel_DeactivateDevice_Exception {
+            get {
+                return ResourceManager.GetString("LOG_ERR_DeviceViewModel_DeactivateDevice_Exception", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   フォント識別情報取得時に例外が発生しました に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string LOG_ERR_FontFileRepository_GetFontInfo_Exception {
+            get {
+                return ResourceManager.GetString("LOG_ERR_FontFileRepository_GetFontInfo_Exception", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   フォントファイルの削除に失敗しました。({0}) に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string LOG_ERR_FontManagerService_DeleteFontFile {
+            get {
+                return ResourceManager.GetString("LOG_ERR_FontManagerService_DeleteFontFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   インストール対象フォント情報を取得する際にエラーが発生しました。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string LOG_ERR_FontManagerService_GetInstallFontInformations {
+            get {
+                return ResourceManager.GetString("LOG_ERR_FontManagerService_GetInstallFontInformations", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   フォントのダウンロードに失敗しました。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string LOG_ERR_FontManagerService_OutOfDiskSpace_Caption {
+            get {
+                return ResourceManager.GetString("LOG_ERR_FontManagerService_OutOfDiskSpace_Caption", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   ディスク容量が不足しています。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string LOG_ERR_FontManagerService_OutOfDiskSpace_Text {
+            get {
+                return ResourceManager.GetString("LOG_ERR_FontManagerService_OutOfDiskSpace_Text", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   フォント情報取得時に例外が発生しましたが、本フォントは {0} は対象外として扱い処理を継続します に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string LOG_ERR_FontManagerService_UpdateFontsList {
+            get {
+                return ResourceManager.GetString("LOG_ERR_FontManagerService_UpdateFontsList", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   フォント一覧の更新処理を利用する場合はコンストラクタの引数に IResourceWrapper, IUserFontsSettingRepository,IFontActivationService, IFontInfoRepository を設定してください に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string LOG_ERR_FontManagerService_UpdateFontsList_InvalidOperationException {
+            get {
+                return ResourceManager.GetString("LOG_ERR_FontManagerService_UpdateFontsList_InvalidOperationException", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   ログイン完了画面のフォント一覧画面URL取得処理時に例外が発生しました に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string LOG_ERR_LoginCompletedViewModel_GetFontListPageUrlException {
+            get {
+                return ResourceManager.GetString("LOG_ERR_LoginCompletedViewModel_GetFontListPageUrlException", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   ログイン画面のパスワード再設定ページURL取得処理時に例外が発生しました に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string LOG_ERR_LoginViewModel_GetResetPasswordPageUrlException {
+            get {
+                return ResourceManager.GetString("LOG_ERR_LoginViewModel_GetResetPasswordPageUrlException", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   ログイン画面の会員登録ページURL取得処理時に例外が発生しました に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string LOG_ERR_LoginViewModel_GetUserRegistrationPageUrlException {
+            get {
+                return ResourceManager.GetString("LOG_ERR_LoginViewModel_GetUserRegistrationPageUrlException", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   ログイン時に例外が発生しました に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string LOG_ERR_LoginViewModel_Login_Exception {
+            get {
+                return ResourceManager.GetString("LOG_ERR_LoginViewModel_Login_Exception", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   ログイン状態確認時の全端末情報取得処理で例外が発生しました に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string LOG_ERR_StartupService_GetAllDevicesException {
@@ -627,11 +798,327 @@ namespace Client.UI.Resources {
         }
         
         /// <summary>
-        ///   起動時チェック処理を利用する場合はコンストラクタの引数にIFontManagerService, IContractsAggregateRepositoryを設定してください に類似しているローカライズされた文字列を検索します。
+        ///   起動時チェック処理を利用する場合はコンストラクタの引数にIFontManagerService, IFontManagerService, IContractsAggregateRepository, IUserStatusRepositoryを設定してください に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string LOG_ERR_StartupService_IsCheckedStartup_InvalidOperationException {
             get {
                 return ResourceManager.GetString("LOG_ERR_StartupService_IsCheckedStartup_InvalidOperationException", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   2要素認証時に例外が発生しました に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string LOG_ERR_TwoFactAuthenticationViewModel_TwoFactAuthentication_Exception {
+            get {
+                return ResourceManager.GetString("LOG_ERR_TwoFactAuthenticationViewModel_TwoFactAuthentication_Exception", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   致命的なエラーが発生したので、プログラムを終了します に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string LOG_FATAL_UnhandledException {
+            get {
+                return ResourceManager.GetString("LOG_FATAL_UnhandledException", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   クイックメニューを表示 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string LOG_INFO_ApplicationIconComponent_tasktrayIcon_Click {
+            get {
+                return ResourceManager.GetString("LOG_INFO_ApplicationIconComponent_tasktrayIcon_Click", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   {0}ボタンクリック に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string LOG_INFO_DeviceSettingsViewModel_ButtonClick {
+            get {
+                return ResourceManager.GetString("LOG_INFO_DeviceSettingsViewModel_ButtonClick", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   3台目NG画面を表示 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string LOG_INFO_DeviceSettingsViewModel_Start {
+            get {
+                return ResourceManager.GetString("LOG_INFO_DeviceSettingsViewModel_Start", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   {0}ボタンクリック({1}) に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string LOG_INFO_DeviceViewModel_ButtonClick {
+            get {
+                return ResourceManager.GetString("LOG_INFO_DeviceViewModel_ButtonClick", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   フォントの同期処理を実行 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string LOG_INFO_FixedTermScheduler_NetworkChange_NetworkAvailabilityChanged_ShouldSynchronize {
+            get {
+                return ResourceManager.GetString("LOG_INFO_FixedTermScheduler_NetworkChange_NetworkAvailabilityChanged_ShouldSynchr" +
+                        "onize", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   定期確認処理の終了 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string LOG_INFO_FixedTermScheduler_ScheduledEvent_End {
+            get {
+                return ResourceManager.GetString("LOG_INFO_FixedTermScheduler_ScheduledEvent_End", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   起動時チェック処理を実施し、結果は偽 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string LOG_INFO_FixedTermScheduler_ScheduledEvent_IsCheckedStartup_False {
+            get {
+                return ResourceManager.GetString("LOG_INFO_FixedTermScheduler_ScheduledEvent_IsCheckedStartup_False", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   起動時チェック処理を実施し、結果は真 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string LOG_INFO_FixedTermScheduler_ScheduledEvent_IsCheckedStartup_True {
+            get {
+                return ResourceManager.GetString("LOG_INFO_FixedTermScheduler_ScheduledEvent_IsCheckedStartup_True", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   通知受信処理を開始 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string LOG_INFO_FixedTermScheduler_ScheduledEvent_ReceiveNotificationStart {
+            get {
+                return ResourceManager.GetString("LOG_INFO_FixedTermScheduler_ScheduledEvent_ReceiveNotificationStart", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   オフライン→オンラインに変わったときにフォントの同期処理を実行するよう設定 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string LOG_INFO_FixedTermScheduler_ScheduledEvent_ShouldSynchronize {
+            get {
+                return ResourceManager.GetString("LOG_INFO_FixedTermScheduler_ScheduledEvent_ShouldSynchronize", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   定期確認処理の開始 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string LOG_INFO_FixedTermScheduler_ScheduledEvent_Start {
+            get {
+                return ResourceManager.GetString("LOG_INFO_FixedTermScheduler_ScheduledEvent_Start", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   {0}ボタンクリック に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string LOG_INFO_LoginCompletedViewModel_ButtonClick {
+            get {
+                return ResourceManager.GetString("LOG_INFO_LoginCompletedViewModel_ButtonClick", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   ログイン完了画面を表示 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string LOG_INFO_LoginCompletedViewModel_Start {
+            get {
+                return ResourceManager.GetString("LOG_INFO_LoginCompletedViewModel_Start", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   {0}ボタンクリック に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string LOG_INFO_LoginViewModel_ButtonClick {
+            get {
+                return ResourceManager.GetString("LOG_INFO_LoginViewModel_ButtonClick", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   会員登録ページリンククリック時 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string LOG_INFO_LoginViewModel_RegistrationPageLinkClick {
+            get {
+                return ResourceManager.GetString("LOG_INFO_LoginViewModel_RegistrationPageLinkClick", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   パスワード再設定ページリンククリック に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string LOG_INFO_LoginViewModel_ResetPasswordLinkClick {
+            get {
+                return ResourceManager.GetString("LOG_INFO_LoginViewModel_ResetPasswordLinkClick", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   {0}画面を表示 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string LOG_INFO_LoginViewModel_Start {
+            get {
+                return ResourceManager.GetString("LOG_INFO_LoginViewModel_Start", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   クイックメニュー「アカウント」クリック に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string LOG_INFO_MenuItemAccountPage_OnAccountMenuItemClick {
+            get {
+                return ResourceManager.GetString("LOG_INFO_MenuItemAccountPage_OnAccountMenuItemClick", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   クイックメニュー「お知らせ」クリック に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string LOG_INFO_MenuItemAnnouncePage_OnAnnounceMenuItemClick {
+            get {
+                return ResourceManager.GetString("LOG_INFO_MenuItemAnnouncePage_OnAnnounceMenuItemClick", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   クイックメニュー「フォント」クリック に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string LOG_INFO_MenuItemFontListPage_OnFontMenuItemClick {
+            get {
+                return ResourceManager.GetString("LOG_INFO_MenuItemFontListPage_OnFontMenuItemClick", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   クイックメニュー「ログアウト」クリック に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string LOG_INFO_MenuItemLogout_OnLogoutMenuItemClick {
+            get {
+                return ResourceManager.GetString("LOG_INFO_MenuItemLogout_OnLogoutMenuItemClick", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   クイックメニュー「アップデート」クリック に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string LOG_INFO_MenuItemUpdate_OnUpdateMenuItemClick {
+            get {
+                return ResourceManager.GetString("LOG_INFO_MenuItemUpdate_OnUpdateMenuItemClick", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   クイックメニュー状態表示：ダウンロード中を表示 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string LOG_INFO_QuickMenuComponent_ShowDownloadStatus {
+            get {
+                return ResourceManager.GetString("LOG_INFO_QuickMenuComponent_ShowDownloadStatus", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   クイックメニュー状態表示：ログイン中を表示 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string LOG_INFO_QuickMenuComponent_ShowLoginStatus {
+            get {
+                return ResourceManager.GetString("LOG_INFO_QuickMenuComponent_ShowLoginStatus", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   クイックメニュー状態表示：アップデート中を表示 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string LOG_INFO_QuickMenuComponent_ShowUpdateStatus {
+            get {
+                return ResourceManager.GetString("LOG_INFO_QuickMenuComponent_ShowUpdateStatus", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   既に定期確認処理が実行中のため処理をスキップする に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string LOG_INFO_SchedulerBase_TimerElapsed_ProcessSkip {
+            get {
+                return ResourceManager.GetString("LOG_INFO_SchedulerBase_TimerElapsed_ProcessSkip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   「通知あり」の情報を設定 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string LOG_INFO_StartupService_IsCheckedStartup_IsNoticed {
+            get {
+                return ResourceManager.GetString("LOG_INFO_StartupService_IsCheckedStartup_IsNoticed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   ログアウト中と判定されたため、以後の起動時チェック処理を行わない に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string LOG_INFO_StartupService_IsCheckedStartup_LoggingOut {
+            get {
+                return ResourceManager.GetString("LOG_INFO_StartupService_IsCheckedStartup_LoggingOut", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   起動時チェック処理が正常に終了 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string LOG_INFO_StartupService_IsCheckedStartup_Result_True {
+            get {
+                return ResourceManager.GetString("LOG_INFO_StartupService_IsCheckedStartup_Result_True", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   起動時チェック処理の開始 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string LOG_INFO_StartupService_IsCheckedStartup_Start {
+            get {
+                return ResourceManager.GetString("LOG_INFO_StartupService_IsCheckedStartup_Start", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   {0}ボタンクリック に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string LOG_INFO_TwoFactAuthenticationViewModel_ButtonClick {
+            get {
+                return ResourceManager.GetString("LOG_INFO_TwoFactAuthenticationViewModel_ButtonClick", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   {0}画面を表示 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string LOG_INFO_TwoFactAuthenticationViewModel_Start {
+            get {
+                return ResourceManager.GetString("LOG_INFO_TwoFactAuthenticationViewModel_Start", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   端末のOS種類が不正です。({0}) に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string LOG_WARN_DeviceViewModel_InvalidOSTypeException {
+            get {
+                return ResourceManager.GetString("LOG_WARN_DeviceViewModel_InvalidOSTypeException", resourceCulture);
             }
         }
         
@@ -663,7 +1150,25 @@ namespace Client.UI.Resources {
         }
         
         /// <summary>
-        ///   FontName に類似しているローカライズされた文字列を検索します。
+        ///   書体数：{0}　フォント名：{1} に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string MENU_DOWNLOAD_COMPLETED_TEXT {
+            get {
+                return ResourceManager.GetString("MENU_DOWNLOAD_COMPLETED_TEXT", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   ダウンロードが完了しました。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string MENU_DOWNLOAD_COMPLETED_TITLE {
+            get {
+                return ResourceManager.GetString("MENU_DOWNLOAD_COMPLETED_TITLE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   {0} に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string MENU_DOWNLOAD_FONTNAME {
             get {

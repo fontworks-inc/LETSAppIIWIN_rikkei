@@ -11,7 +11,12 @@ namespace OS.Interfaces
         /// フォントをインストールする
         /// </summary>
         /// <param name="font">対象フォント</param>
-        void Install(Font font);
+        bool Install(Font font);
+
+        /// <summary>
+        /// フォントチェンジメッセージを送信する
+        /// </summary>
+        void BroadcastFont();
 
         /// <summary>
         /// フォントをアンインストールする
@@ -23,7 +28,8 @@ namespace OS.Interfaces
         /// フォントをアクティベートする
         /// </summary>
         /// <param name="font">対象フォント</param>
-        void Activate(Font font);
+        /// <returns>アクティベートに成功したらtrueを返す</returns>
+        bool Activate(Font font);
 
         /// <summary>
         /// フォントをディアクティベートする

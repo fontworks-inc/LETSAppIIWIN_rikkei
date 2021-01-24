@@ -63,11 +63,26 @@ namespace Core.Entities
         /// <summary>
         /// インストール対象フォント
         /// </summary>
-        public IList<Font> InstallTargetFonts { get; set; } = new List<Font>();
+        public IList<InstallFont> InstallTargetFonts { get; set; } = new List<InstallFont>();
 
         /// <summary>
         /// 通知フォントリスト
         /// </summary>
-        public IList<Font> NotificationFonts { get; set; } = new List<Font>();
+        public IList<InstallFont> NotificationFonts { get; set; } = new List<InstallFont>();
+
+        /// <summary>
+        /// User-Agent
+        /// </summary>
+        public string UserAgent { get; set; } = string.Empty;
+
+        /// <summary>
+        /// RefreshToken
+        /// </summary>
+        public string RefreshToken { get; set; } = string.Empty;
+
+        /// <summary>
+        /// クライアントアプリケーションのパス
+        /// </summary>
+        public string ClientApplicationPath { get; set; } = string.Empty;
     }
 }

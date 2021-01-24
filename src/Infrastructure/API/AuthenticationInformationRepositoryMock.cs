@@ -35,9 +35,6 @@ namespace Infrastructure.API
             // ２要素認証要求
             return this.GetTestDataTwoFAIsRequired();
 
-            //// 引数不正
-            // return this.GetTestDataInvalidArgument();
-
             //// 認証エラー
             // return this.GetTestDataAuthenticationFailed();
 
@@ -81,9 +78,6 @@ namespace Infrastructure.API
 
             //// ２要素認証要求
             // return this.GetTestDataTwoFAIsRequired();
-
-            //// 引数不正
-            // return this.GetTestDataInvalidArgument();
 
             //// 認証エラー
             // return this.GetTestDataAuthenticationFailed();
@@ -131,23 +125,6 @@ namespace Infrastructure.API
                 {
                     AccessToken = "access_token_02",
                     RefreshToken = "refresh_token_02",
-                },
-            };
-        }
-
-        /// <summary>
-        /// テストデータ(引数不正)を取得
-        /// </summary>
-        private AuthenticationInformationResponse GetTestDataInvalidArgument()
-        {
-            return new AuthenticationInformationResponse()
-            {
-                Code = (int)ResponseCode.InvalidArgument,
-                Message = "invalid argument",
-                Data = new AuthenticationInformation()
-                {
-                    AccessToken = "access_token_03",
-                    RefreshToken = "refresh_token_03",
                 },
             };
         }

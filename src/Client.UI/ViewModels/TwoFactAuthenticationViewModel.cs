@@ -2,11 +2,13 @@
 using System.Windows;
 using System.Windows.Media;
 using ApplicationService.Interfaces;
+using Client.UI.Components;
 using Client.UI.Interfaces;
 using Client.UI.Views;
 using Core.Entities;
 using Core.Exceptions;
 using Core.Interfaces;
+using NLog;
 using Prism.Commands;
 using Prism.Mvvm;
 
@@ -18,6 +20,11 @@ namespace Client.UI.ViewModels
     /// <remarks>画面ID：APP_04_01_2fa, APP_04_01_2fa_err</remarks>
     public class TwoFactAuthenticationViewModel : BindableBase
     {
+        /// <summary>
+        /// ロガー
+        /// </summary>
+        private static readonly Logger Logger = LogManager.GetLogger("nlog.config");
+
         /// <summary>
         /// 認証サービス
         /// </summary>
@@ -32,6 +39,21 @@ namespace Client.UI.ViewModels
         /// ユーザ別ステータス情報を格納するリポジトリ
         /// </summary>
         private readonly IUserStatusRepository userStatusRepository;
+
+        /// <summary>
+        /// (メイン)ログイン画面
+        /// </summary>
+        private readonly ILoginWindowWrapper loginWindow;
+
+        /// <summary>
+        /// アプリケーションコンポーネント
+        /// </summary>
+        private readonly ComponentManager componentManager;
+
+        /// <summary>
+        /// リソース読込み
+        /// </summary>
+        private readonly IResourceWrapper resouceWrapper;
 
         /// <summary>
         /// 認証コード
@@ -59,32 +81,25 @@ namespace Client.UI.ViewModels
         private Visibility errorMessageVisibility;
 
         /// <summary>
-        /// (メイン)ログイン画面
-        /// </summary>
-        private ILoginWindowWrapper loginWindow;
-
-        /// <summary>
-        /// リソース読込み
-        /// </summary>
-        private IResourceWrapper resouceWrapper;
-
-        /// <summary>
         /// インスタンスを初期化する
         /// </summary>
         /// <param name="loginWindowWrapper">LoginWindowのラッパー</param>
         /// <param name="resouceWrapper">Resourceのラッパー</param>
+        /// <param name="componentManagerWrapper">ComponentManagerWrapperのラッパー</param>
         /// <param name="authenticationInformationRepository">認証情報を格納するリポジトリ</param>
         /// <param name="userStatusRepository">ユーザ別ステータス情報を格納するリポジトリ</param>
         /// <param name="authenticationService">認証サービス</param>
         public TwoFactAuthenticationViewModel(
             ILoginWindowWrapper loginWindowWrapper,
             IResourceWrapper resouceWrapper,
+            IComponentManagerWrapper componentManagerWrapper,
             IAuthenticationInformationRepository authenticationInformationRepository,
             IUserStatusRepository userStatusRepository,
             IAuthenticationService authenticationService)
         {
             this.loginWindow = loginWindowWrapper;
             this.resouceWrapper = resouceWrapper;
+            this.componentManager = componentManagerWrapper.Manager;
 
             this.authenticationInformationRepository = authenticationInformationRepository;
             this.userStatusRepository = userStatusRepository;
@@ -94,6 +109,10 @@ namespace Client.UI.ViewModels
             this.errorMessageVisibility = Visibility.Hidden;
 
             this.SendButtonClick = new DelegateCommand(this.OnSendButtonClick, this.CanSend);
+
+            Logger.Info(string.Format(
+                this.resouceWrapper.GetString("LOG_INFO_TwoFactAuthenticationViewModel_Start"),
+                this.resouceWrapper.GetString("APP_04_01_2fa_PROC_TITLE")));
         }
 
         /// <summary>
@@ -249,50 +268,56 @@ namespace Client.UI.ViewModels
         /// </summary>
         private void OnSendButtonClick()
         {
+            Logger.Info(string.Format(
+                this.resouceWrapper.GetString("LOG_INFO_TwoFactAuthenticationViewModel_ButtonClick"),
+                this.resouceWrapper.GetString("APP_04_01_2fa_BTN_SEND")));
             try
             {
                 // ユーザ別保存：デバイスIDを取得
                 var deviceId = this.userStatusRepository.GetStatus().DeviceId;
 
                 // ２要素認証処理を実行
-                var authenticationInformation = this.authenticationInformationRepository
+                var authenticationInformationResponse = this.authenticationInformationRepository
                     .TwoFactAuthentication(deviceId, this.AuthenticationCode);
 
-                var responseCode = authenticationInformation.GetResponseCode();
-                var responseMessage = authenticationInformation.Message;
+                var responseCode = authenticationInformationResponse.GetResponseCode();
+                var responseMessage = authenticationInformationResponse.Message;
 
                 switch (responseCode)
                 {
                     case ResponseCode.Succeeded:
-                        // ログイン完了処理を実行【TODO:ログイン完了処理】
+                        // ログイン完了処理を実行
+                        this.componentManager.LoginCompleted(authenticationInformationResponse.Data);
+
                         // ログイン完了画面に遷移
                         this.loginWindow.NavigationService.Navigate(new LoginCompleted());
                         break;
+
                     case ResponseCode.AuthenticationFailed:
                         // 認証エラー
                         this.ErrorMessage = this.resouceWrapper.GetString("APP_04_01_2fa_ERR_01");
                         this.ErrorMessageVisibility = Visibility.Visible;
+                        Logger.Error(this.ErrorMessage);
                         break;
+
                     case ResponseCode.TwoFACodeHasExpired:
                         // ２要素認証コード有効期限切れエラー
                         this.ErrorMessage = this.resouceWrapper.GetString("APP_04_01_2fa_ERR_03");
                         this.ErrorMessageVisibility = Visibility.Visible;
+                        Logger.Error(this.ErrorMessage);
                         break;
 
-                    // case ResponseCode.InvalidArgument:
-                    //    // 引数不正 ※機能仕様書に記載がないため対応不明
-                    //    this.ErrorMessage = this.resouceWrapper.GetString("APP_04_01_2fa_ERR_02");
-                    //    this.ErrorMessageVisibility = Visibility.Visible;
-                    //    break;
                     case ResponseCode.MaximumNumberOfDevicesInUse:
                         // 端末設定画面に遷移
-                        this.loginWindow.SetAuthenticationInformation(authenticationInformation.Data);
+                        this.loginWindow.SetAuthenticationInformation(authenticationInformationResponse.Data);
                         this.loginWindow.NavigationService.Navigate(new DeviceSettings());
                         break;
+
                     default:
                         // その他
                         this.ErrorMessage = string.Format(this.resouceWrapper.GetString("APP_04_ERR_EXCEPTION"), responseMessage);
                         this.ErrorMessageVisibility = Visibility.Visible;
+                        Logger.Error(this.ErrorMessage);
                         break;
                 }
             }
@@ -301,11 +326,13 @@ namespace Client.UI.ViewModels
                 // その他のレスポンスコードの場合、エラーメッセージを表示
                 this.ErrorMessage = string.Format(this.resouceWrapper.GetString("APP_04_ERR_EXCEPTION"), ex.Message);
                 this.ErrorMessageVisibility = Visibility.Visible;
+                Logger.Error(ex, this.ErrorMessage);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // 【TODO：ログ出力】
-                // 予期せぬ例外発生時は、ログイン画面を閉じる
+                // 配信サーバアクセスでエラーが発生したときは、画面を閉じ以後の処理を行わない
+                var exception = new Exception(this.resouceWrapper.GetString("LOG_ERR_TwoFactAuthenticationViewModel_TwoFactAuthentication_Exception"), ex);
+                Logger.Error(exception);
                 this.loginWindow.Close();
             }
         }

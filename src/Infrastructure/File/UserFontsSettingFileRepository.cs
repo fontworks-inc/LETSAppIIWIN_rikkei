@@ -7,7 +7,7 @@ namespace Infrastructure.File
     /// <summary>
     /// ユーザ別フォント情報を格納するファイルリポジトリ
     /// </summary>
-    public class UserFontsSettingFileRepository : FileRepositoryBase, IUserFontsSettingRepository
+    public class UserFontsSettingFileRepository : TextFileRepositoryBase, IUserFontsSettingRepository
     {
         /// <summary>
         /// インスタンスを初期化する

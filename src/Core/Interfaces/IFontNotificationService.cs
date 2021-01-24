@@ -12,5 +12,16 @@ namespace Core.Interfaces
         /// </summary>
         /// <param name="font">アクティベートフォント情報</param>
         void Activate(ActivateFont font);
+
+        /// <summary>
+        /// フォントディアクティベート通知処理
+        /// </summary>
+        /// <param name="fontId">ディアクティベート対象のフォントID</param>
+        void Deactivate(string fontId);
+
+        /// <summary>
+        /// ディアクティブフォントの一括アンインストール
+        /// </summary>
+        void AllUninstall();
     }
 }

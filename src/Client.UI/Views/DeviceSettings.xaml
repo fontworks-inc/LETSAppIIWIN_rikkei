@@ -26,18 +26,14 @@
 
         <DataTemplate x:Key="Template">
             <StackPanel Orientation="Horizontal" Width="450" Height="50">
-                <Rectangle HorizontalAlignment="Left" VerticalAlignment="Center"
-                           Width="30" Height="16" Margin="0,0,5,0">
-                    <Rectangle.Fill>
-                        <ImageBrush ImageSource="{Binding DiviceType}"/>
-                    </Rectangle.Fill>
-                </Rectangle>
-                <TextBlock Text="{Binding Name}" VerticalAlignment="Center" FontSize="10pt" Width ="320" Margin="5,0,5,0"/>
+                <Image Source="{Binding DiviceType}" Width="30" Height="30" Margin="-10,0,2,0"/>
+                <TextBlock Text="{Binding Name}" VerticalAlignment="Center" FontSize="11pt" Width ="320" Margin="5,0,5,0"/>
                 <Button Content="{Binding LogoutButtonTitle}" FontSize="10pt" 
                     Width ="80" Height ="28" Margin="3,0,0,0" HorizontalAlignment="Right"
                     Foreground="White" Background="#0078D7" Visibility="{Binding VisibilityLogout}"
                     Command="{Binding LogoutButtonClick}"/>
                 <Label Content="{Binding LoggedoutLabel}" FontSize="10pt" Margin="0,0,0,0"
+                       Width ="90" Height="30"
                        VerticalAlignment="Center" HorizontalAlignment="Left"
                        Visibility="{Binding VisibilityLoggedout}"/>
             </StackPanel>
@@ -53,7 +49,7 @@
                     Command="{Binding NextButtonClick}"/>
             </Grid>
             <Grid DockPanel.Dock="Left" Width="250">
-                <Rectangle HorizontalAlignment="Left" Height="30" Width="124" 
+                <Rectangle HorizontalAlignment="Left" Height="89" Width="82" 
                        Margin="35,50,0,0" VerticalAlignment="Top">
                     <Rectangle.Fill>
                         <ImageBrush ImageSource="{Binding ImageLogo}"/>

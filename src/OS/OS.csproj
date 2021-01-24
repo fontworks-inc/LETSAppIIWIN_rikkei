@@ -20,4 +20,9 @@
   <ItemGroup>
     <ProjectReference Include="..\Core\Core.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System.Drawing.Common">
+      <HintPath>..\Client.UI\References\System.Drawing.Common.dll</HintPath>
+    </Reference>
+  </ItemGroup>
 </Project>

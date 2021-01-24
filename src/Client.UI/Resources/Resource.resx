@@ -119,32 +119,32 @@
   </resheader>
   <data name="APP_04_01_2fa_BTN_SEND" xml:space="preserve">
     <value>送信</value>
-    <comment>２段階認証画面　送信ボタン</comment>
+    <comment>２要素認証画面　送信ボタン</comment>
   </data>
   <data name="APP_04_01_2fa_ERR_01" xml:space="preserve">
     <value>認証コードが違います</value>
-    <comment>２段階認証画面　エラーメッセージ（認証エラー）</comment>
+    <comment>２要素認証画面　エラーメッセージ（認証エラー）</comment>
   </data>
   <data name="APP_04_01_2fa_ERR_02" xml:space="preserve">
     <value>正しく入力されていません</value>
-    <comment>２段階認証画面　エラーメッセージ（認証コード不正）</comment>
+    <comment>２要素認証画面　エラーメッセージ（認証コード不正）</comment>
   </data>
   <data name="APP_04_01_2fa_ERR_03" xml:space="preserve">
     <value>認証コードの期限が切れています</value>
-    <comment>２段階認証画面　エラーメッセージ（認証コード期限切れ）</comment>
+    <comment>２要素認証画面　エラーメッセージ（認証コード期限切れ）</comment>
   </data>
   <data name="APP_04_01_2fa_LBL_AUTHENTICATION_CODE" xml:space="preserve">
-    <value>認証コード</value>
-    <comment>２段階認証画面　認証コード　ラベル</comment>
+    <value>2要素認証</value>
+    <comment>２要素認証画面　認証コード　ラベル</comment>
   </data>
   <data name="APP_04_01_2fa_PROC_DESCRIPTION" xml:space="preserve">
-    <value>登録されているメールアドレスに認証コードを送信しました。
-メールの本文に記載されている認証コードを入力してください。</value>
-    <comment>２段階認証画面　処理説明</comment>
+    <value>登録されているメールアドレスに2要素認証コードを送信しました。
+メールの本文に記載されている2要素認証コードを入力してください。</value>
+    <comment>２要素認証画面　処理説明</comment>
   </data>
   <data name="APP_04_01_2fa_PROC_TITLE" xml:space="preserve">
-    <value>２要素認証コードの入力</value>
-    <comment>２段階認証画面　処理タイトル</comment>
+    <value>2要素認証</value>
+    <comment>２要素認証画面　処理タイトル</comment>
   </data>
   <data name="APP_04_01_BTN_LOGIN" xml:space="preserve">
     <value>ログイン</value>
@@ -240,7 +240,7 @@
     <comment>ログイン完了画面　処理説明</comment>
   </data>
   <data name="APP_06_01_PROC_TITLE" xml:space="preserve">
-    <value>ログイン完了しました</value>
+    <value>ログインが完了しました</value>
     <comment>ログイン完了画面　処理タイトル</comment>
   </data>
   <data name="APP_07_01_BTN_OK" xml:space="preserve">
@@ -290,9 +290,17 @@
     <value>ログアウトします</value>
     <comment>ログアウト確認ダイアログ　処理タイトル</comment>
   </data>
-  <data name="APP_ERR_UnhandledException" xml:space="preserve">
-    <value>致命的なエラーが発生したので、プログラムを終了します</value>
-    <comment>グローバル例外時に表示するメッセージ</comment>
+  <data name="APP_FATAL_UnhandledException_Description" xml:space="preserve">
+    <value>プログラムを終了します</value>
+    <comment>グローバル例外時に表示するメッセージ説明</comment>
+  </data>
+  <data name="APP_FATAL_UnhandledException_MainMassage" xml:space="preserve">
+    <value>致命的なエラーが発生しました</value>
+    <comment>グローバル例外時に表示するメッセージ概要</comment>
+  </data>
+  <data name="APP_TOOLTIP" xml:space="preserve">
+    <value>LETSデスクトップアプリ</value>
+    <comment>タスクトレイアイコン　ツールチップ</comment>
   </data>
   <data name="FUNC_01_02_16_ERR_StartAsAdministrators" xml:space="preserve">
     <value>管理者権限で起動してください</value>
@@ -306,7 +314,7 @@
     <value>フォントのダウンロードに失敗しました</value>
     <comment>[通知センター]フォントのダウンロード失敗</comment>
   </data>
-  <data name="FUNC_01_03_01_NOTIFIED_LackOfDistSpace" xml:space="preserve">
+  <data name="FUNC_01_03_01_NOTIFIED_LackOfDiscSpace" xml:space="preserve">
     <value>ディスク容量が不足しています</value>
     <comment>[通知センター]インストール対象のフォントサイズに対してディスク容量が不足</comment>
   </data>
@@ -347,9 +355,73 @@
   <data name="IMG_LOGO" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>IMG_LOGO.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="LOG_ERR_AuthenticationService_Login_InvalidOperationException" xml:space="preserve">
+    <value>ログイン処理を利用する場合はコンストラクタの引数に IResourceWrapper, IAuthenticationInformationRepository, IDevicesRepository, IUserStatusRepository, IVolatileSettingRepository を設定してください</value>
+    <comment>ログイン処理　正しいコンストラクタを設定していない場合のログメッセージ</comment>
+  </data>
   <data name="LOG_ERR_AuthenticationService_Logout_InvalidOperationException" xml:space="preserve">
-    <value>ログアウト処理を利用する場合はコンストラクタの引数にIAuthenticationInformationRepository, IUserStatusRepository, IReceiveNotificationRepository, IVolatileSettingRepository, IUserFontsSettingRepository, IFontActivationServiceを設定してください</value>
+    <value>ログアウト処理を利用する場合はコンストラクタの引数に IResourceWrapper, IAuthenticationInformationRepository, IUserStatusRepository, IReceiveNotificationRepository, IVolatileSettingRepository, ICustomerRepository, IFontManagerService を設定してください</value>
     <comment>ログアウト処理　正しいコンストラクタを設定していない場合のログメッセージ</comment>
+  </data>
+  <data name="LOG_ERR_DeviceSettingsViewModel_ActivateUserDevice_Exception" xml:space="preserve">
+    <value>自端末の使用中設定時に例外が発生しました</value>
+    <comment>３台目NG画面　次へボタンクリック処理内　自端末使用中設定　例外発生時</comment>
+  </data>
+  <data name="LOG_ERR_DeviceSettingsViewModel_InitializeDeviceList_Exception" xml:space="preserve">
+    <value>3台目NG画面の使用中の端末情報取得時に例外が発生しました</value>
+    <comment>３台目NG画面　初期表示処理内　例外発生時</comment>
+  </data>
+  <data name="LOG_ERR_DeviceSettingsViewModel_LoginCompleted_Exception" xml:space="preserve">
+    <value>自端末のログイン完了時に例外が発生しました</value>
+    <comment>３台目NG画面　次へボタンクリック処理内　ログイン完了時例外</comment>
+  </data>
+  <data name="LOG_ERR_DeviceViewModel_DeactivateDevice_Exception" xml:space="preserve">
+    <value>該当端末の解除に失敗しました({0})</value>
+    <comment>３台目NG画面　使用中端末一覧　端末解除時例外</comment>
+  </data>
+  <data name="LOG_ERR_FontFileRepository_GetFontInfo_Exception" xml:space="preserve">
+    <value>フォント識別情報取得時に例外が発生しました</value>
+    <comment>フォント一覧の更新処理　識別情報取得　例外発生時</comment>
+  </data>
+  <data name="LOG_ERR_FontManagerService_DeleteFontFile" xml:space="preserve">
+    <value>フォントファイルの削除に失敗しました。({0})</value>
+    <comment>フォントの同期処理　 起動時処理　フォントファイル削除に失敗</comment>
+  </data>
+  <data name="LOG_ERR_FontManagerService_GetInstallFontInformations" xml:space="preserve">
+    <value>インストール対象フォント情報を取得する際にエラーが発生しました。</value>
+    <comment>フォントの同期処理　 インストール対象フォント情報取得　APIエラー</comment>
+  </data>
+  <data name="LOG_ERR_FontManagerService_OutOfDiskSpace_Caption" xml:space="preserve">
+    <value>フォントのダウンロードに失敗しました。</value>
+    <comment>フォントの同期処理　 フォントダウンロード　容量不足時　タイトル</comment>
+  </data>
+  <data name="LOG_ERR_FontManagerService_OutOfDiskSpace_Text" xml:space="preserve">
+    <value>ディスク容量が不足しています。</value>
+    <comment>フォントの同期処理　 フォントダウンロード　容量不足時　本文</comment>
+  </data>
+  <data name="LOG_ERR_FontManagerService_UpdateFontsList" xml:space="preserve">
+    <value>フォント情報取得時に例外が発生しましたが、本フォントは {0} は対象外として扱い処理を継続します</value>
+    <comment>フォント一覧の更新処理　識別情報取得　例外発生時の処理継続説明</comment>
+  </data>
+  <data name="LOG_ERR_FontManagerService_UpdateFontsList_InvalidOperationException" xml:space="preserve">
+    <value>フォント一覧の更新処理を利用する場合はコンストラクタの引数に IResourceWrapper, IUserFontsSettingRepository,IFontActivationService, IFontInfoRepository を設定してください</value>
+    <comment>フォント一覧の更新処理　正しいコンストラクタを設定していない場合のログメッセージ</comment>
+  </data>
+  <data name="LOG_ERR_LoginCompletedViewModel_GetFontListPageUrlException" xml:space="preserve">
+    <value>ログイン完了画面のフォント一覧画面URL取得処理時に例外が発生しました</value>
+    <comment>ログイン完了画面　フォント一覧画面URL取得処理で例外発生時のログメッセージ</comment>
+  </data>
+  <data name="LOG_ERR_LoginViewModel_GetResetPasswordPageUrlException" xml:space="preserve">
+    <value>ログイン画面のパスワード再設定ページURL取得処理時に例外が発生しました</value>
+    <comment>ログイン画面　パスワード再設定ページURL取得処理で例外発生時のログメッセージ</comment>
+  </data>
+  <data name="LOG_ERR_LoginViewModel_GetUserRegistrationPageUrlException" xml:space="preserve">
+    <value>ログイン画面の会員登録ページURL取得処理時に例外が発生しました</value>
+    <comment>ログイン画面　会員登録ページURL取得処理で例外発生時のログメッセージ</comment>
+  </data>
+  <data name="LOG_ERR_LoginViewModel_Login_Exception" xml:space="preserve">
+    <value>ログイン時に例外が発生しました</value>
+    <comment>ログイン画面　ログインボタン押下時処理内　例外発生時</comment>
   </data>
   <data name="LOG_ERR_StartupService_GetAllDevicesException" xml:space="preserve">
     <value>ログイン状態確認時の全端末情報取得処理で例外が発生しました</value>
@@ -360,8 +432,148 @@
     <comment>起動時チェック処理　契約情報取得処理で例外発生時のログメッセージ</comment>
   </data>
   <data name="LOG_ERR_StartupService_IsCheckedStartup_InvalidOperationException" xml:space="preserve">
-    <value>起動時チェック処理を利用する場合はコンストラクタの引数にIFontManagerService, IContractsAggregateRepositoryを設定してください</value>
-    <comment>起動時チェック処理　利用するインスタンスの設定が不足時にで例外発生時ログメッセージ</comment>
+    <value>起動時チェック処理を利用する場合はコンストラクタの引数にIFontManagerService, IFontManagerService, IContractsAggregateRepository, IUserStatusRepositoryを設定してください</value>
+    <comment>起動時チェック処理　利用するインスタンスの設定が不足時に例外発生時ログメッセージ</comment>
+  </data>
+  <data name="LOG_ERR_TwoFactAuthenticationViewModel_TwoFactAuthentication_Exception" xml:space="preserve">
+    <value>2要素認証時に例外が発生しました</value>
+    <comment>２要素認証画面　送信ボタンクリック処理内　例外発生時</comment>
+  </data>
+  <data name="LOG_FATAL_UnhandledException" xml:space="preserve">
+    <value>致命的なエラーが発生したので、プログラムを終了します</value>
+    <comment>グローバル例外時に表示するログメッセージ</comment>
+  </data>
+  <data name="LOG_INFO_ApplicationIconComponent_tasktrayIcon_Click" xml:space="preserve">
+    <value>クイックメニューを表示</value>
+    <comment>タスクトレイアイコン　クリック時　クイックメニュー表示</comment>
+  </data>
+  <data name="LOG_INFO_DeviceSettingsViewModel_ButtonClick" xml:space="preserve">
+    <value>{0}ボタンクリック</value>
+    <comment>３台目NG画面　ボタンクリック</comment>
+  </data>
+  <data name="LOG_INFO_DeviceSettingsViewModel_Start" xml:space="preserve">
+    <value>3台目NG画面を表示</value>
+    <comment>３台目NG画面　表示時</comment>
+  </data>
+  <data name="LOG_INFO_DeviceViewModel_ButtonClick" xml:space="preserve">
+    <value>{0}ボタンクリック({1})</value>
+    <comment>３台目NG画面　使用中端末一覧　ボタンクリック</comment>
+  </data>
+  <data name="LOG_INFO_FixedTermScheduler_NetworkChange_NetworkAvailabilityChanged_ShouldSynchronize" xml:space="preserve">
+    <value>フォントの同期処理を実行</value>
+    <comment>オフライン→オンラインに変わり、フォントの同期処理を実行する際に出力されるログ</comment>
+  </data>
+  <data name="LOG_INFO_FixedTermScheduler_ScheduledEvent_End" xml:space="preserve">
+    <value>定期確認処理の終了</value>
+    <comment>定期確認処理の終了時に出力されるログ</comment>
+  </data>
+  <data name="LOG_INFO_FixedTermScheduler_ScheduledEvent_IsCheckedStartup_False" xml:space="preserve">
+    <value>起動時チェック処理を実施し、結果は偽</value>
+    <comment>定期確認処理内で起動時チェック処理を実施した際に出力されるログ</comment>
+  </data>
+  <data name="LOG_INFO_FixedTermScheduler_ScheduledEvent_IsCheckedStartup_True" xml:space="preserve">
+    <value>起動時チェック処理を実施し、結果は真</value>
+    <comment>定期確認処理内で起動時チェック処理を実施した際に出力されるログ</comment>
+  </data>
+  <data name="LOG_INFO_FixedTermScheduler_ScheduledEvent_ReceiveNotificationStart" xml:space="preserve">
+    <value>通知受信処理を開始</value>
+    <comment>定期確認処理内で通知受信処理を開始した際に出力されるログ。</comment>
+  </data>
+  <data name="LOG_INFO_FixedTermScheduler_ScheduledEvent_ShouldSynchronize" xml:space="preserve">
+    <value>オフライン→オンラインに変わったときにフォントの同期処理を実行するよう設定</value>
+    <comment>定期確認処理内でフォントの同期処理を実行するように設定した際に出力されるログ。</comment>
+  </data>
+  <data name="LOG_INFO_FixedTermScheduler_ScheduledEvent_Start" xml:space="preserve">
+    <value>定期確認処理の開始</value>
+    <comment>定期確認処理の開始時に出力されるログ</comment>
+  </data>
+  <data name="LOG_INFO_LoginCompletedViewModel_ButtonClick" xml:space="preserve">
+    <value>{0}ボタンクリック</value>
+    <comment>ログイン完了画面　フォント一覧ボタンクリック時</comment>
+  </data>
+  <data name="LOG_INFO_LoginCompletedViewModel_Start" xml:space="preserve">
+    <value>ログイン完了画面を表示</value>
+    <comment>ログイン完了画面　表示時</comment>
+  </data>
+  <data name="LOG_INFO_LoginViewModel_ButtonClick" xml:space="preserve">
+    <value>{0}ボタンクリック</value>
+    <comment>ログイン画面　ボタンクリック時</comment>
+  </data>
+  <data name="LOG_INFO_LoginViewModel_RegistrationPageLinkClick" xml:space="preserve">
+    <value>会員登録ページリンククリック時</value>
+    <comment>ログイン画面　会員登録ページリンククリック時</comment>
+  </data>
+  <data name="LOG_INFO_LoginViewModel_ResetPasswordLinkClick" xml:space="preserve">
+    <value>パスワード再設定ページリンククリック</value>
+    <comment>ログイン画面　パスワード再設定ページリンククリック時</comment>
+  </data>
+  <data name="LOG_INFO_LoginViewModel_Start" xml:space="preserve">
+    <value>{0}画面を表示</value>
+    <comment>ログイン画面　表示時</comment>
+  </data>
+  <data name="LOG_INFO_MenuItemAccountPage_OnAccountMenuItemClick" xml:space="preserve">
+    <value>クイックメニュー「アカウント」クリック</value>
+    <comment>クイックメニュー「アカウント」クリック</comment>
+  </data>
+  <data name="LOG_INFO_MenuItemAnnouncePage_OnAnnounceMenuItemClick" xml:space="preserve">
+    <value>クイックメニュー「お知らせ」クリック</value>
+    <comment>クイックメニュー「お知らせ」クリック</comment>
+  </data>
+  <data name="LOG_INFO_MenuItemFontListPage_OnFontMenuItemClick" xml:space="preserve">
+    <value>クイックメニュー「フォント」クリック</value>
+    <comment>クイックメニュー「フォント」クリック</comment>
+  </data>
+  <data name="LOG_INFO_MenuItemLogout_OnLogoutMenuItemClick" xml:space="preserve">
+    <value>クイックメニュー「ログアウト」クリック</value>
+    <comment>クイックメニュー「ログアウト」クリック</comment>
+  </data>
+  <data name="LOG_INFO_MenuItemUpdate_OnUpdateMenuItemClick" xml:space="preserve">
+    <value>クイックメニュー「アップデート」クリック</value>
+    <comment>クイックメニュー「アップデート」クリック</comment>
+  </data>
+  <data name="LOG_INFO_QuickMenuComponent_ShowDownloadStatus" xml:space="preserve">
+    <value>クイックメニュー状態表示：ダウンロード中を表示</value>
+    <comment>クイックメニュー状態表示　ダウンロード中を表示</comment>
+  </data>
+  <data name="LOG_INFO_QuickMenuComponent_ShowLoginStatus" xml:space="preserve">
+    <value>クイックメニュー状態表示：ログイン中を表示</value>
+    <comment>クイックメニュー状態表示　ログイン中を表示</comment>
+  </data>
+  <data name="LOG_INFO_QuickMenuComponent_ShowUpdateStatus" xml:space="preserve">
+    <value>クイックメニュー状態表示：アップデート中を表示</value>
+    <comment>クイックメニュー状態表示　アップデート中を表示</comment>
+  </data>
+  <data name="LOG_INFO_SchedulerBase_TimerElapsed_ProcessSkip" xml:space="preserve">
+    <value>既に定期確認処理が実行中のため処理をスキップする</value>
+    <comment>定期間隔処理をスキップする際出力されるログ</comment>
+  </data>
+  <data name="LOG_INFO_StartupService_IsCheckedStartup_IsNoticed" xml:space="preserve">
+    <value>「通知あり」の情報を設定</value>
+    <comment>起動時チェック処理内で、契約更新の必要と判定された場合に出力されるログ</comment>
+  </data>
+  <data name="LOG_INFO_StartupService_IsCheckedStartup_LoggingOut" xml:space="preserve">
+    <value>ログアウト中と判定されたため、以後の起動時チェック処理を行わない</value>
+    <comment>起動時チェック処理内のログイン状態確認処理でログアウト中と判定された際に出力されるログ</comment>
+  </data>
+  <data name="LOG_INFO_StartupService_IsCheckedStartup_Result_True" xml:space="preserve">
+    <value>起動時チェック処理が正常に終了</value>
+    <comment>起動時チェック処理が正常に終了時(「処理済み」になる場合)に出力されるログ</comment>
+  </data>
+  <data name="LOG_INFO_StartupService_IsCheckedStartup_Start" xml:space="preserve">
+    <value>起動時チェック処理の開始</value>
+    <comment>起動時チェック処理の開始時に出力されるログ</comment>
+  </data>
+  <data name="LOG_INFO_TwoFactAuthenticationViewModel_ButtonClick" xml:space="preserve">
+    <value>{0}ボタンクリック</value>
+    <comment>２要素認証画面　ボタンクリック</comment>
+  </data>
+  <data name="LOG_INFO_TwoFactAuthenticationViewModel_Start" xml:space="preserve">
+    <value>{0}画面を表示</value>
+    <comment>２要素認証画面　表示時</comment>
+  </data>
+  <data name="LOG_WARN_DeviceViewModel_InvalidOSTypeException" xml:space="preserve">
+    <value>端末のOS種類が不正です。({0})</value>
+    <comment>３台目NG画面　使用中端末一覧　OS種類不正時</comment>
   </data>
   <data name="MENU_ACCOUNT" xml:space="preserve">
     <value>アカウント</value>
@@ -375,8 +587,16 @@
     <value>( {0} 件)</value>
     <comment>クイックメニュー[お知らせ]　未読件数表示部</comment>
   </data>
+  <data name="MENU_DOWNLOAD_COMPLETED_TEXT" xml:space="preserve">
+    <value>書体数：{0}　フォント名：{1}</value>
+    <comment>クイックメニュー[ダウンロード中(状態表示)]　完了 本文</comment>
+  </data>
+  <data name="MENU_DOWNLOAD_COMPLETED_TITLE" xml:space="preserve">
+    <value>ダウンロードが完了しました。</value>
+    <comment>クイックメニュー[ダウンロード中(状態表示)]　完了 タイトル</comment>
+  </data>
   <data name="MENU_DOWNLOAD_FONTNAME" xml:space="preserve">
-    <value>FontName</value>
+    <value>{0}</value>
     <comment>クイックメニュー[ダウンロード中(状態表示)]　フォント名表示部</comment>
   </data>
   <data name="MENU_DOWNLOAD_LOADING" xml:space="preserve">

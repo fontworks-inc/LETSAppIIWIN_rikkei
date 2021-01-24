@@ -17,9 +17,9 @@ namespace Client.UI.Components.MenuItem
         /// <summary>
         /// コンストラクタ
         /// </summary>
-        /// <param name="manager">ComponentManager</param>
-        public MenuItemUpdateStatus(ComponentManager manager)
-             : base(manager)
+        /// <param name="quickMenu">QuickMenuComponent</param>
+        public MenuItemUpdateStatus(QuickMenuComponent quickMenu)
+             : base(quickMenu)
         {
         }
 
@@ -47,15 +47,6 @@ namespace Client.UI.Components.MenuItem
         }
 
         /// <summary>
-        /// クイックメニューにアイテムを追加する
-        /// </summary>
-        /// <param name="quickMenu">クイックメニュー</param>
-        public override void SetMenu(QuickMenuComponent quickMenu)
-        {
-            quickMenu.ContextMenu.Items.Add(this.updateStatus);
-        }
-
-        /// <summary>
         /// アップデートの進捗状況を設定
         /// </summary>
         /// <param name="progressRate">進捗率</param>
@@ -79,6 +70,16 @@ namespace Client.UI.Components.MenuItem
         protected override void InitializeComponent()
         {
             this.updateStatus = this.CreateLabel(this.Resource.GetString("MENU_UPDATE_LOADING"), this.itemHeight);
+
+            this.SetMenu();
+        }
+
+        /// <summary>
+        /// クイックメニューにアイテムを追加する
+        /// </summary>
+        protected override void SetMenu()
+        {
+            this.QuickMenu.ContextMenu.Items.Add(this.updateStatus);
         }
     }
 }

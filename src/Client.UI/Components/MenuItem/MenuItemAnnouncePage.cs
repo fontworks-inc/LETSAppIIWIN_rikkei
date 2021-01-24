@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Windows.Forms;
 using Core.Interfaces;
+using NLog;
 
 namespace Client.UI.Components.MenuItem
 {
@@ -10,6 +11,11 @@ namespace Client.UI.Components.MenuItem
     /// </summary>
     public class MenuItemAnnouncePage : MenuItemBase
     {
+        /// <summary>
+        /// ロガー
+        /// </summary>
+        private static readonly Logger Logger = LogManager.GetLogger("nlog.config");
+
         /// <summary>
         /// メモリで保持する情報を格納するリポジトリ
         /// </summary>
@@ -34,16 +40,16 @@ namespace Client.UI.Components.MenuItem
         /// <summary>
         /// コンストラクタ
         /// </summary>
-        /// <param name="manager">ComponentManager</param>
+        /// <param name="quickMenu">QuickMenuComponent</param>
         /// <param name="volatileSettingRepository">メモリで保持する情報を格納するリポジトリ</param>
         /// <param name="userStatusRepository">ユーザ別ステータス情報を格納するリポジトリ</param>
         /// <param name="urlRepository">URLアドレスを格納するリポジトリ</param>
         public MenuItemAnnouncePage(
-            ComponentManager manager,
+            QuickMenuComponent quickMenu,
             IVolatileSettingRepository volatileSettingRepository,
             IUserStatusRepository userStatusRepository,
             IUrlRepository urlRepository)
-             : base(manager)
+             : base(quickMenu)
         {
             this.announce.Click += (s, e) =>
             {
@@ -88,22 +94,23 @@ namespace Client.UI.Components.MenuItem
         }
 
         /// <summary>
-        /// クイックメニューにアイテムを追加する
-        /// </summary>
-        /// <param name="quickMenu">クイックメニュー</param>
-        public override void SetMenu(QuickMenuComponent quickMenu)
-        {
-            quickMenu.ContextMenu.Items.Add(this.separator);
-            quickMenu.ContextMenu.Items.Add(this.announce);
-        }
-
-        /// <summary>
         /// クイックメニュー初期化処理
         /// </summary>
         protected override void InitializeComponent()
         {
             this.separator = this.CreateSeparator();
             this.announce = this.Create("MENU_ANNOUNCE", this.Resource.GetString("MENU_ANNOUNCE"));
+
+            this.SetMenu();
+        }
+
+        /// <summary>
+        /// クイックメニューにアイテムを追加する
+        /// </summary>
+        protected override void SetMenu()
+        {
+            this.QuickMenu.ContextMenu.Items.Add(this.separator);
+            this.QuickMenu.ContextMenu.Items.Add(this.announce);
         }
 
         /// <summary>
@@ -111,6 +118,8 @@ namespace Client.UI.Components.MenuItem
         /// </summary>
         private void OnAnnounceMenuItemClick()
         {
+            Logger.Info(this.QuickMenu.Manager.GetResource().GetString("LOG_INFO_MenuItemAnnouncePage_OnAnnounceMenuItemClick"));
+
             // メモリ保存の項目を取得
             var volatileSetting = this.volatileSettingRepository.GetVolatileSetting();
 
@@ -118,19 +127,17 @@ namespace Client.UI.Components.MenuItem
             var deviceId = this.userStatusRepository.GetStatus().DeviceId;
 
             // URLの取得
-            var url = this.urlRepository.GetAnnouncePageUrl(deviceId, volatileSetting.AccessToken).ToString();
+            Core.Entities.Url url = this.urlRepository.GetAnnouncePageUrl(deviceId, volatileSetting.AccessToken);
 
             // 通知なし volatileSettingにある設定値の変更
             volatileSetting.IsNoticed = false;
 
-            // アイコンの更新 「2.1.2 アイコン表示ルール」のメソッド呼び出し　TODO　メソッド実装後に記載
-            // this.Manager.ApplicationIcon.SetIcon();
+            // アイコン表示ルールに従いアイコンを設定
+            this.QuickMenu.Manager.SetIcon();
 
             // ブラウザ起動：お知らせ画面を表示する
-            // NET Frameworkでは、Process.Start(url);で既定のブラウザが開いたが.NET CoreではNGになったよう
-            // Windowsの場合　& をエスケープ（シェルがコマンドの切れ目と認識するのを防ぐ）
-            url = url.Replace("&", "^&");
-            Process.Start(new ProcessStartInfo("cmd", $"/c start {url}") { CreateNoWindow = true });
+            var browser = new Client.UI.Entities.WebBrowser();
+            browser.Navigate(url);
         }
     }
 }

@@ -13,7 +13,7 @@
                     Foreground="White" Background="#0078D7"/>
             </Grid>
             <Grid DockPanel.Dock="Left" Width="250">
-                <Rectangle HorizontalAlignment="Left" Height="30" Width="124" 
+                <Rectangle HorizontalAlignment="Left" Height="89" Width="82" 
                        Margin="35,50,0,0" VerticalAlignment="Top">
                     <Rectangle.Fill>
                         <ImageBrush ImageSource="{Binding ImageLogo}"/>

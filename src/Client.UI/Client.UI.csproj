@@ -7,7 +7,7 @@
     <Platforms>AnyCPU;x86</Platforms>
     <EnableDefaultItems Condition=" '$(EnableDefaultItems)' == '' ">false</EnableDefaultItems>
     <EnableDefaultCompileItems Condition=" '$(EnableDefaultCompileItems)' == '' ">false</EnableDefaultCompileItems>
-    <ApplicationIcon>ICON_APP.ico</ApplicationIcon>
+    <ApplicationIcon>LETS.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
     <DebugType>none</DebugType>
@@ -35,6 +35,12 @@
     <Compile Include="Components\MenuItem\MenuItemUpdateStatus.cs" />
     <Compile Include="Components\QuickMenuComponent.cs" />
     <Compile Include="Components\WindowMessageType.cs" />
+    <Compile Include="Entities\WebBrowser.cs" />
+    <Compile Include="ExceptionNotifier.cs" />
+    <Compile Include="Exceptions\GetFontListPageUrlException.cs" />
+    <Compile Include="Exceptions\GetResetPasswordPageUrlException.cs" />
+    <Compile Include="Exceptions\GetUserRegistrationPageUrlException.cs" />
+    <Compile Include="Interfaces\IComponentManagerWrapper.cs" />
     <Compile Include="Interfaces\ILoginWindowWrapper.cs" />
     <Compile Include="Resources\Resource.Designer.cs">
       <DesignTime>True</DesignTime>
@@ -62,14 +68,18 @@
     <Compile Include="Views\LogoutConfirmation.xaml.cs" />
     <Compile Include="Views\MainWindow.xaml.cs" />
     <Compile Include="Views\TwoFactAuthentication.xaml.cs" />
+    <Compile Include="Wrappers\ComponentManagerWrapper.cs" />
     <Compile Include="Wrappers\LoginWindowWrapper.cs" />
     <Compile Include="Wrappers\ResourceWrapper.cs" />
+    <Compile Include="Wrappers\ToastNotificationWrapper.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="appsettings.json">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Content>
-    <Content Include="ICON_APP.ico" />
+    <Content Include="LETS.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <None Include="nlog.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
