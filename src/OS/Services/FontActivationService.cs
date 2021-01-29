@@ -72,23 +72,23 @@ namespace OS.Services
         {
             try
             {
-                Logger.Info(string.Format("Install:Path(Source)=" + font.Path, string.Empty));
+                Logger.Debug("Install:Path(Source)=" + font.Path);
                 var destFileName = this.MoveFile(font.Path);
                 font.Path = destFileName;
-                Logger.Info(string.Format("Install:Path(Dest)=" + font.Path, string.Empty));
+                Logger.Debug("Install:Path(Dest)=" + font.Path);
 
                 // アクティベート実施
                 bool activate = this.Activate(font);
-                Logger.Info(string.Format("Activated:" + font.Path, string.Empty));
+                Logger.Debug("Activated:" + font.Path);
 
                 return activate;
             }
             catch (Exception e)
             {
-                Logger.Info(string.Format("Install:Exception:" + e.Message, string.Empty));
+                Logger.Debug("Install:Exception:" + e.Message + "\n" + e.StackTrace);
             }
 
-            Logger.Info(string.Format("Install:false:" + font.Path, string.Empty));
+            Logger.Debug("Install:false:" + font.Path);
             return false;
         }
 
@@ -112,42 +112,50 @@ namespace OS.Services
         /// <returns>アクティベートに成功したらtrueを返す</returns>
         public bool Activate(Font font)
         {
-            Logger.Info(string.Format("Activate:" + font.Path, string.Empty));
+            Logger.Debug("Activate:" + font.Path);
 
             var fontPath = font.Path;
 
-            // フォント名の取得と登録
-            using (var pfc = new System.Drawing.Text.PrivateFontCollection())
+            try
             {
-                pfc.AddFontFile(fontPath);
-                if (pfc.Families.Length != 0)
+                // フォント名の取得と登録
+                using (var pfc = new System.Drawing.Text.PrivateFontCollection())
                 {
-                    // フォント名
-                    var fontName = pfc.Families[0].Name;
-                    Logger.Info(string.Format("Activate:fontName=" + fontName, string.Empty));
+                    pfc.AddFontFile(fontPath);
+                    if (pfc.Families.Length != 0)
+                    {
+                        // フォント名
+                        var fontName = pfc.Families[0].Name;
+                        Logger.Debug("Activate:fontName=" + fontName);
 
-                    // レジストリに登録
-                    this.AddRegistry(fontName, fontPath);
+                        // レジストリに登録
+                        this.AddRegistry(fontName, fontPath);
 
-                    // 登録したデータをユーザ別フォント情報にも保存
-                    font.IsActivated = true;
-                    font.RegistryKey = fontName;
-                    this.AddSettings(font, fontName);
+                        // 登録したデータをユーザ別フォント情報にも保存
+                        font.IsActivated = true;
+                        font.RegistryKey = fontName;
+                        this.AddSettings(font, fontName);
+                    }
+                }
+
+                // 削除してから追加：既に追加されてた場合、2重に登録された形になるため。
+                RemoveFontResource(fontPath);
+                Logger.Debug(string.Format("Activate:RemoveFontResource:" + fontPath, string.Empty));
+
+                // 追加：失敗時は0が戻り、成功時には追加されたフォント数が戻る（フォントは太字や斜体などがあるため1とは限らない）
+                var result = AddFontResource(fontPath);
+                Logger.Debug("Activate:AddFontResource:" + fontPath + " result=" + result.ToString());
+
+                // 起動中の他のアプリケーションに通知
+                if (result > 0)
+                {
+                    fontChange = true;
                 }
             }
-
-            // 削除してから追加：既に追加されてた場合、2重に登録された形になるため。
-            RemoveFontResource(fontPath);
-            Logger.Info(string.Format("Activate:RemoveFontResource:" + fontPath, string.Empty));
-
-            // 追加：失敗時は0が戻り、成功時には追加されたフォント数が戻る（フォントは太字や斜体などがあるため1とは限らない）
-            var result = AddFontResource(fontPath);
-            Logger.Info(string.Format("Activate:AddFontResource:" + fontPath + " result=" + result.ToString(), string.Empty));
-
-            // 起動中の他のアプリケーションに通知
-            if (result > 0)
+            catch (Exception ex)
             {
-                fontChange = true;
+                Logger.Debug("Activate:\n" + ex.StackTrace);
+                return false;
             }
 
             return true;
@@ -179,7 +187,7 @@ namespace OS.Services
 
             // 削除
             var result = RemoveFontResource(font.Path);
-            Logger.Info(string.Format("Deactivate:RemoveFontResource:" + font.Path, string.Empty));
+            Logger.Debug("Deactivate:RemoveFontResource:" + font.Path);
 
             // 起動中の他のアプリケーションに通知
             if (result > 0)
@@ -236,10 +244,15 @@ namespace OS.Services
             var destFileName = Path.Combine(this.fontDir, Path.GetFileName(srcPath));
 
             // 移動＋上書き
-            //if (!srcPath.Equals(destFileName))
-            //{
+            try
+            {
                 File.Move(srcPath, destFileName, true);
-            //}
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                // フォントフォルダのファイルに上書きできないので無視する
+                Logger.Debug("MoveFile:" + ex.StackTrace);
+            }
 
             return destFileName;
         }
@@ -251,11 +264,11 @@ namespace OS.Services
         /// <param name="value">値：フォントファイルパス</param>
         private void AddRegistry(string key, string value)
         {
-            Logger.Info(string.Format("AddRegistry(Before):key=" + this.registryFontsPath + ":" + key + " value=" + value, ""));
+            Logger.Debug("AddRegistry(Before):key=" + this.registryFontsPath + ":" + key + " value=" + value);
             var regkey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(this.registryFontsPath, true);
-            Logger.Info(string.Format("AddRegistry(Before):regkey=" + regkey.ToString(), ""));
+            Logger.Debug("AddRegistry(Before):regkey=" + regkey.ToString());
             regkey.SetValue(key, value);
-            Logger.Info(string.Format("AddRegistry(After):key=" + key + " value=" + value, ""));
+            Logger.Debug("AddRegistry(After):key=" + key + " value=" + value);
             regkey.Close();
         }
 

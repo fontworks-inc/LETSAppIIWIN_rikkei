@@ -63,7 +63,6 @@ namespace Infrastructure.API
                 this.Invoke(this.CallGetContractsAPI);
 
                 // 戻り値のセット（個別処理）
-                //var ret = (ContractResponse)this.ApiResponse;
                 var ret = new ContractResponse(this.ApiResponse);
                 if (ret.Code == (int)ResponseCode.Succeeded)
                 {
@@ -72,10 +71,21 @@ namespace Infrastructure.API
                     {
                         var contract = new Contract();
                         contract.ContractId = item.ContractId;
-                        contract.ContractEndDate = DateTime.Parse(item.ContractEndDate);
+                        try
+                        {
+                            contract.ContractEndDate = DateTime.Parse(item.ContractEndDate);
+                        }
+                        catch (Exception ex)
+                        {
+                            contract.ContractEndDate = new DateTime(0);
+                        }
                         response.Contracts.Add(contract);
                     };
                     ret.Data.Contracts.ForEach(action);
+                }
+                else
+                {
+                    throw new ApiException(ret.Code, ret.Message);
                 }
             }
             catch (ApiException)

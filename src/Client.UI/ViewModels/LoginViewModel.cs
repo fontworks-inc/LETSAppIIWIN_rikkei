@@ -466,6 +466,7 @@ namespace Client.UI.ViewModels
                         break;
 
                     case ResponseCode.AuthenticationFailed:
+                    case ResponseCode.InvalidArgument:
                         // 認証エラー
                         this.ErrorMessage = this.resouceWrapper.GetString("APP_04_01_ERR_01");
                         this.ErrorMessageVisibility = Visibility.Visible;
@@ -480,7 +481,7 @@ namespace Client.UI.ViewModels
 
                     default:
                         // その他
-                        this.ErrorMessage = string.Format(this.resouceWrapper.GetString("APP_04_ERR_EXCEPTION"), responseMessage);
+                        this.ErrorMessage = string.Format(this.resouceWrapper.GetString("APP_04_ERR_EXCEPTION"), this.GetErrorMessageByResponseCode(responseCode));
                         this.ErrorMessageVisibility = Visibility.Visible;
                         Logger.Error(this.ErrorMessage);
                         break;
@@ -511,7 +512,7 @@ namespace Client.UI.ViewModels
             var result = true;
 
             // メールアドレスの入力文字数チェック
-            if (this.MailAddress.Length >= LoginViewModel.MaxLengthOfMailAddress)
+            if (this.MailAddress.Length > LoginViewModel.MaxLengthOfMailAddress)
             {
                 this.MailAddressErrorMessage = this.resouceWrapper.GetString("APP_04_01_ERR_02");
                 this.MailAddressErrorMessageVisibility = Visibility.Visible;
@@ -519,7 +520,7 @@ namespace Client.UI.ViewModels
             }
 
             // パスワードの入力文字数チェック
-            if (this.Password.Length >= LoginViewModel.MaxLengthOfPassword)
+            if (this.Password.Length > LoginViewModel.MaxLengthOfPassword)
             {
                 this.PasswordErrorMessage = this.resouceWrapper.GetString("APP_04_01_ERR_03");
                 this.PasswordErrorMessageVisibility = Visibility.Visible;
@@ -599,6 +600,32 @@ namespace Client.UI.ViewModels
             {
                 throw new GetUserRegistrationPageUrlException(this.resouceWrapper.GetString("LOG_ERR_LoginViewModel_GetUserRegistrationPageUrlException"), e);
             }
+        }
+
+        /// <summary>
+        /// レスポンスコードに応じたメッセージ
+        /// <paramref name="responseCode"/>レスポンスコード<>
+        /// </summary>
+        private string GetErrorMessageByResponseCode(ResponseCode responseCode)
+        {
+            string message = string.Empty;
+            switch (responseCode)
+            {
+                case ResponseCode.InvalidArgument:
+                    message = this.resouceWrapper.GetString("ResponseCode_InvalidArgument");
+                    break;
+                case ResponseCode.AcountLocked:
+                    message = this.resouceWrapper.GetString("ResponseCode_AcountLocked");
+                    break;
+                case ResponseCode.ContractExpired:
+                    message = this.resouceWrapper.GetString("ResponseCode_ContractExpired");
+                    break;
+                default:
+                    message = this.resouceWrapper.GetString("ResponseCode_InternalServerError");
+                    break;
+            }
+
+            return message;
         }
     }
 }

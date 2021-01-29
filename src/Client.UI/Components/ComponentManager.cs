@@ -34,17 +34,41 @@ namespace Client.UI.Components
         private static readonly Logger Logger = LogManager.GetLogger("nlog.config");
 
         /// <summary>
+        /// 自ウィンドウハンドラ
+        /// </summary>
+        private static IntPtr myhWnd = IntPtr.Zero;
+
+        /// <summary>
         /// 認証サービス
         /// </summary>
         private readonly IAuthenticationService authenticationService;
 
         /// <summary>
+        /// プログラムのアップデートを行うサービス
+        /// </summary>
+        private readonly IApplicationUpdateService applicationUpdateService;
+
+        /// <summary>
+        /// プログラムのダウンロードを行うサービスクラス
+        /// </summary>
+        private readonly IApplicationDownloadService applicationDownloadService;
+
+        /// <summary>
+        /// メモリで保持する情報を格納するリポジトリ
+        /// </summary>
+        private readonly IVolatileSettingRepository volatileSettingRepository;
+
+        /// <summary>
+        /// アプリケーション共通保存情報を格納するリポジトリ
+        /// </summary>
+        private readonly IApplicationRuntimeRepository applicationRuntimeRepository;
+
         /// お客様情報API
         /// </summary>
         private readonly ICustomerRepository customerRepository;
 
         /// <summary>
-        /// ユーザー別保存情報
+        /// ユーザ別ステータス情報を格納するリポジトリ
         /// </summary>
         private readonly IUserStatusRepository userStatusRepository;
 
@@ -91,8 +115,19 @@ namespace Client.UI.Components
             this.resouceWrapper = containerProvider.Resolve<IResourceWrapper>();
             this.loginWindowWrapper = containerProvider.Resolve<ILoginWindowWrapper>();
 
+            // 設定ファイルを読み込む
+            this.volatileSettingRepository = containerProvider.Resolve<IVolatileSettingRepository>();
+            this.userStatusRepository = containerProvider.Resolve<IUserStatusRepository>();
+            this.applicationRuntimeRepository = containerProvider.Resolve<IApplicationRuntimeRepository>();
+
             // 認証サービス
             this.authenticationService = containerProvider.Resolve<IAuthenticationService>();
+
+            // プログラムのアップデートを行うサービス
+            this.applicationUpdateService = containerProvider.Resolve<IApplicationUpdateService>();
+
+            // プログラムのダウンロードを行うサービス
+            this.applicationDownloadService = containerProvider.Resolve<IApplicationDownloadService>();
 
             // フォント管理に関する処理を行うサービス
             this.fontManagerService = containerProvider.Resolve<IFontManagerService>();
@@ -100,7 +135,7 @@ namespace Client.UI.Components
             // お客様情報API
             this.customerRepository = containerProvider.Resolve<ICustomerRepository>();
 
-            // お客様情報API
+            // ユーザ情報API
             this.userStatusRepository = containerProvider.Resolve<IUserStatusRepository>();
 
             // コンポーネントを初期化(タスクトレイアイコン、クイックメニュー)
@@ -207,13 +242,33 @@ namespace Client.UI.Components
         /// <param name="deactivateFonts">フォントをディアクティベートするかどうか</param>
         public void Exit(bool deactivateFonts)
         {
-            if (deactivateFonts)
+            try
             {
-                // ログアウト処理を実行する
-                this.Logout();
+                if (deactivateFonts)
+                {
+                    // ログアウト処理を実行する
+                    this.Logout();
 
-                // 「LETSフォント」のフォントファイルパスを出力する
-                this.fontManagerService.OutputLetsFontsList();
+                    // 「LETSフォント」のフォントファイルパスを出力する
+                    this.fontManagerService.OutputLetsFontsList();
+                }
+                else
+                {
+                    // アップデート完了時に共通保存情報をリセットする
+                    this.applicationRuntimeRepository.SaveApplicationRuntime(new ApplicationRuntime());
+
+                    // 更新後のプログラムを起動する
+                    // ホームドライブの取得
+                    string homedrive = Environment.GetEnvironmentVariable("HOMEDRIVE");
+
+                    // LETSアプリの起動(ショートカットを実行する)
+                    string shortcut = $@"{homedrive}\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\LETS デスクトップアプリ.lnk";
+                    Process.Start(new ProcessStartInfo("cmd", $"/c \"{shortcut}\"") { CreateNoWindow = true });
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Debug("Exit:" + ex.StackTrace);
             }
 
             // アプリケーションを終了
@@ -221,7 +276,7 @@ namespace Client.UI.Components
         }
 
         /// <summary>
-        /// 強制アップデート【Phase2】
+        /// 強制アップデート
         /// </summary>
         public void ForcedUpdate()
         {
@@ -240,10 +295,22 @@ namespace Client.UI.Components
         }
 
         /// <summary>
-        /// アップデート開始【Phase2】
+        /// アップデート開始
         /// </summary>
         public void StartUpdate()
         {
+            // アップデート処理実施
+            try
+            {
+                this.applicationUpdateService.Update();
+            }
+            catch (Exception e)
+            {
+                Logger.Error(e, this.resouceWrapper.GetString("FUNC_01_02_17_ERR_UpdateFailed"));
+                ToastNotificationWrapper.Show(this.resouceWrapper.GetString("FUNC_01_02_17_ERR_UpdateFailed"), e.Message);
+                return;
+            }
+
             // クイックメニューの状態表示部にアップデート中を表示
             this.QuickMenu.ShowUpdateStatus();
 
@@ -252,12 +319,36 @@ namespace Client.UI.Components
         }
 
         /// <summary>
-        /// アップデート完了【Phase2】
+        /// アップデート完了
         /// </summary>
         public void UpdateCompleted()
         {
             // アイコン表示ルールに従いアイコンを設定
             this.ApplicationIcon.SetIcon();
+        }
+
+        /// <summary>
+        /// 更新プログラムダウンロード開始
+        /// </summary>
+        public void StartUpdateProgramDownload()
+        {
+            // ダウンロード処理実施
+            this.applicationDownloadService.StartDownloading(this.UpdateProgramDownloadCompleted, this.ForcedUpdate);
+
+            // アイコン表示ルールに従いアイコンを設定
+            this.ApplicationIcon.SetIcon();
+        }
+
+        /// <summary>
+        /// 更新プログラムダウンロード完了
+        /// </summary>
+        public void UpdateProgramDownloadCompleted()
+        {
+            // アイコン表示ルールに従いアイコンを設定
+            this.ApplicationIcon.SetIcon();
+
+            // クイックメニューに「アップデート」を表示
+            this.QuickMenu.MenuUpdate.Show();
         }
 
         /// <summary>
@@ -303,15 +394,57 @@ namespace Client.UI.Components
 
             string title = this.resouceWrapper.GetString("MENU_DOWNLOAD_COMPLETED_TITLE");
             ToastNotificationWrapper.Show(title, text);
+
+            // アイコン表示ルールに従いアイコンを設定
+            this.ApplicationIcon.SetIcon();
+        }
+
+        /// <summary>
+        /// フォントダウンロード失敗
+        /// </summary>
+        /// <param name="font">フォント</param>
+        public void FontDownloadFailed(InstallFont font)
+        {
+            string title = this.resouceWrapper.GetString("FUNC_01_03_01_NOTIFIED_FailedToDownloadFonts");
+            string text = string.Format(this.resouceWrapper.GetString("FUNC_01_03_01_NOTIFIED_FailedToDownloadFonts_Text"), font.DisplayFontName);
+            ToastNotificationWrapper.Show(title, text);
+        }
+
+        /// <summary>
+        /// 更新あり
+        /// </summary>
+        public void IsUpdated()
+        {
+            // メモリに「更新有り」と設定
+            VolatileSetting volatileSetting = this.volatileSettingRepository.GetVolatileSetting();
+            volatileSetting.IsUpdated = true;
+
+            // アイコン表示ルールに従いアイコンを設定
+            this.ApplicationIcon.SetIcon();
+        }
+
+        /// <summary>
+        /// お知らせ
+        /// </summary>
+        /// <param name="numberOfUnreadMessages">未読お知らせの件数(デフォルトは0)</param>
+        public void ShowNotification(int numberOfUnreadMessages = 0)
+        {
+            // メモリに「通知有り」と設定
+            VolatileSetting volatileSetting = this.volatileSettingRepository.GetVolatileSetting();
+            volatileSetting.IsNoticed = true;
+
+            // クイックメニューにお知らせを表示
+            this.QuickMenu.MenuAnnouncePage.SetNumberOfUnreadMessages(numberOfUnreadMessages);
         }
 
         /// <summary>
         /// ログアウト処理
         /// </summary>
-        public void Logout()
+        /// <param name="isCallApi">ログアウトAPIを呼び出すかどうか</param>
+        public void Logout(bool isCallApi = true)
         {
             // ログアウト処理実行
-            if (this.authenticationService.Logout())
+            if (this.authenticationService.Logout(isCallApi))
             {
                 // クイックメニューを解除する
                 this.ApplicationIcon.RemoveQuickMenu();
@@ -334,7 +467,7 @@ namespace Client.UI.Components
             forcedLogoutDialog.ShowDialog();
 
             // ログアウト処理を実施
-            this.Logout();
+            this.Logout(false);
 
             // タスクトレイアイコンを操作可能とする
             this.ApplicationIcon.Enabled = true;
@@ -350,7 +483,6 @@ namespace Client.UI.Components
             this.ApplicationIcon.SetIcon(selected);
         }
 
-        private static IntPtr MyhWnd = IntPtr.Zero;
         /// <summary>
         /// ウィンドウメッセージを処理する
         /// </summary>
@@ -361,9 +493,9 @@ namespace Client.UI.Components
 
             // ユーザー定義メッセージを処理する
             WindowMessageType messageType = (WindowMessageType)m.Msg;
-            if (MyhWnd == IntPtr.Zero)
+            if (myhWnd == IntPtr.Zero)
             {
-                MyhWnd = m.HWnd;
+                myhWnd = m.HWnd;
             }
 
             switch (messageType)
@@ -396,6 +528,7 @@ namespace Client.UI.Components
                 case WindowMessageType.ProgressOfUpdate:
                     // プログラムアップデート進捗メッセージ【Phase2】
                     int progressRate = (int)m.LParam;
+                    this.QuickMenu.ShowUpdateStatus();
                     this.QuickMenu.MenuUpdateStatus.SetProgressStatus(progressRate);
                     break;
 
@@ -429,23 +562,39 @@ namespace Client.UI.Components
             IntPtr lparam);
 
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        /// <summary>
+        /// ウィンドウのタイトルを取得する
+        /// </summary>
         private static extern int GetWindowText(IntPtr hWnd,
             StringBuilder lpString, int nMaxCount);
 
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        /// <summary>
+        /// ウィンドウのクラス名を取得する
+        /// </summary>
         private static extern int GetClassName(IntPtr hWnd,
             StringBuilder lpClassName, int nMaxCount);
 
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        /// <summary>
+        /// ウィンドウのタイトル長さを取得する
+        /// </summary>
         private static extern int GetWindowTextLength(IntPtr hWnd);
 
         [DllImport("user32.dll", SetLastError = true)]
+        /// <summary>
+        /// ウィンドウのプロセスIDを取得する
+        /// </summary>
         public static extern int GetWindowThreadProcessId(IntPtr hWnd, out int lpdwProcessId);
 
         [DllImport("user32.dll")]
         private static extern int SendMessage(IntPtr hWnd, uint msg, int wParam, int lParam);
 
+        /// <summary>
+        /// LETSが存在したか
+        /// </summary>
         private static bool isExitLETS = false;
+
         private ComponentManager compManager;
         private void ExitLETS(ComponentManager compManager)
         {
@@ -466,7 +615,7 @@ namespace Client.UI.Components
             }
             catch (Exception ex)
             {
-                Logger.Debug("ExitLETS:" + ex.Message);
+                Logger.Debug("ExitLETS:" + ex.Message + "\n" + ex.StackTrace);
             }
         }
 
@@ -499,9 +648,9 @@ namespace Client.UI.Components
                         Logger.Debug("EnumWindowCallBack:" + tsb.ToString());
                         Logger.Debug("EnumWindowCallBack:ProcName=" + procname);
                         isExitLETS = true;
-                        if (MyhWnd != IntPtr.Zero)
+                        if (myhWnd != IntPtr.Zero)
                         {
-                            SendMessage(MyhWnd, 0x8001, 0, 3);
+                            SendMessage(myhWnd, 0x8001, 0, 3);
                         }
 
                         return false;
@@ -510,7 +659,7 @@ namespace Client.UI.Components
             }
             catch (Exception ex)
             {
-                Logger.Debug(ex.Message);
+                Logger.Debug(ex.Message + "\n" + ex.StackTrace);
             }
 
             return true;

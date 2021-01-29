@@ -55,8 +55,16 @@ namespace Infrastructure.File
         /// <remarks>API呼び出し時のみ実装</remarks>
         public Customer GetCustomer(string deviceId)
         {
-            Customer customer = this.customerAPIRepository.GetCustomer(deviceId);
-            this.SaveCustomer(customer);
+            Customer customer = null;
+            try
+            {
+                customer = this.customerAPIRepository.GetCustomer(deviceId);
+                this.SaveCustomer(customer);
+            }
+            catch (Exception)
+            {
+                customer = this.GetCustomer();
+            }
 
             return customer;
         }

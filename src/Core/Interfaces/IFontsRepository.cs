@@ -12,6 +12,7 @@ namespace Core.Interfaces
         /// <summary>
         /// インストールフォント情報を取得する
         /// </summary>
+        /// <param name="deviceId">デバイスID</param>
         /// <param name="type">取得するフォントの適用種別</param>
         /// <returns>フォント情報リスト</returns>
         IList<InstallFont> GetInstallFontInformations(string deviceId, VaildFontType type);
@@ -21,6 +22,7 @@ namespace Core.Interfaces
         /// </summary>
         /// <param name="deviceId">デバイスID</param>
         /// <param name="fontId">フォントID</param>
+        /// <returns>フォントファイルストリーム</returns>
         public FileStream DownloadFonts(string deviceId, string fontId);
     }
 }

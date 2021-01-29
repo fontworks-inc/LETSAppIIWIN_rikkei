@@ -45,13 +45,8 @@ namespace Infrastructure.API
                 "AuthenticationInformationAPIRepository:Login Enter", string.Empty));
 
             // APIの引数の値をセット(個別処理)
-            Logger.Info(string.Format(
-                "AuthenticationInformationAPIRepository:Login APIの引数の値をセット(個別処理)", string.Empty));
+            Logger.Debug("AuthenticationInformationAPIRepository:Login APIの引数の値をセット(個別処理)");
 
-            //this.ApiParam.Clear();
-            //this.ApiParam.Add(APIParam.DeviceId, deviceId);
-            //this.ApiParam.Add(APIParam.MailAddress, mailAddress);
-            //this.ApiParam.Add(APIParam.Password, password);
             this.ApiParam[APIParam.DeviceId] = deviceId;
             this.ApiParam[APIParam.MailAddress] = mailAddress;
             this.ApiParam[APIParam.Password] = password;
@@ -76,15 +71,11 @@ namespace Infrastructure.API
             catch (ApiException)
             {
                 // 通信に失敗or通信しなかった
-                Logger.Info(string.Format(
-                    "AuthenticationInformationAPIRepository:Login 通信に失敗or通信しなかった",
-                    ""));
+                Logger.Debug("AuthenticationInformationAPIRepository:Login 通信に失敗or通信しなかった");
                 throw;
             }
 
-            Logger.Info(string.Format(
-                "AuthenticationInformationAPIRepository:Login return",
-                ""));
+            Logger.Debug("AuthenticationInformationAPIRepository:Login return");
             return response;
         }
 
@@ -97,9 +88,6 @@ namespace Infrastructure.API
         public void Logout(string deviceId, string accessToken)
         {
             // APIの引数の値をセット(個別処理)
-            //this.ApiParam.Clear();
-            //this.ApiParam.Add(APIParam.DeviceId, deviceId);
-            //this.ApiParam.Add(APIParam.AccessToken, accessToken);
             this.ApiParam[APIParam.DeviceId] = deviceId;
             this.ApiParam[APIParam.AccessToken] = accessToken;
 
@@ -107,6 +95,12 @@ namespace Infrastructure.API
             try
             {
                 this.Invoke(this.CallLogoutApi);
+
+                var ret = (Model200)this.ApiResponse;
+                if (ret.Code != (int)ResponseCode.Succeeded)
+                {
+                    throw new ApiException(ret.Code, ret.Message);
+                }
 
                 // 戻り値なし
             }
@@ -129,9 +123,6 @@ namespace Infrastructure.API
             AuthenticationInformationResponse response = new AuthenticationInformationResponse();
 
             // APIの引数の値をセット(個別処理)
-            //this.ApiParam.Clear();
-            //this.ApiParam.Add(APIParam.DeviceId, deviceId);
-            //this.ApiParam.Add(APIParam.TwoFactCode, twoFactCode);
             this.ApiParam[APIParam.DeviceId] = deviceId;
             this.ApiParam[APIParam.TwoFactCode] = twoFactCode;
 
@@ -163,9 +154,7 @@ namespace Infrastructure.API
         /// </summary>
         private void CallLoginApi()
         {
-            Logger.Info(string.Format(
-                "AuthenticationInformationAPIRepository:CallLoginApi Enter",
-                ""));
+            Logger.Debug("AuthenticationInformationAPIRepository:CallLoginApi Enter");
             Configuration config = new Configuration();
             config.BasePath = this.BasePath;
             config.UserAgent = (string)this.ApiParam[APIParam.UserAgent];
@@ -173,16 +162,10 @@ namespace Infrastructure.API
             var body = new InlineObject(
                 (string)this.ApiParam[APIParam.MailAddress],
                 (string)this.ApiParam[APIParam.Password]);
-            Logger.Info(string.Format(
-                "AuthenticationInformationAPIRepository:CallLoginApi apiInstance.Login:Before",
-                ""));
-            Logger.Info(string.Format(
-                "AuthenticationInformationAPIRepository:CallLoginApi ApiParam[APIParam.DeviceId]=" + this.ApiParam[APIParam.DeviceId],
-                ""));
+            Logger.Debug("AuthenticationInformationAPIRepository:CallLoginApi apiInstance.Login:Before");
+            Logger.Debug("AuthenticationInformationAPIRepository:CallLoginApi ApiParam[APIParam.DeviceId]=" + this.ApiParam[APIParam.DeviceId]);
             this.ApiResponse = apiInstance.Login((string)this.ApiParam[APIParam.DeviceId], config.UserAgent, body);
-            Logger.Info(string.Format(
-                "AuthenticationInformationAPIRepository:CallLoginApi apiInstance.Login:After",
-                ""));
+            Logger.Debug("AuthenticationInformationAPIRepository:CallLoginApi apiInstance.Login:After");
         }
 
         /// <summary>

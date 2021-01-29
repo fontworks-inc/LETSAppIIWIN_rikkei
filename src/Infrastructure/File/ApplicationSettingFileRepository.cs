@@ -12,11 +12,12 @@ namespace Infrastructure.File
         /// <summary>
         /// フォント配信サーバURI デフォルト値
         /// </summary>
-        private static readonly string FontDeliveryServerUri = "https://stage-delivery-lets.fontworks.co.jp";
+        private static readonly string FontDeliveryServerUri = "https://delivery-lets.fontworks.co.jp";
+
         /// <summary>
         /// 通知サーバURI デフォルト値
         /// </summary>
-        private static readonly string NotificationServerUri = "https://stage-notice-lets.fontworks.co.jp";
+        private static readonly string NotificationServerUri = "https://notice-lets.fontworks.co.jp";
 
         /// <summary>
         /// 通信リトライ回数 デフォルト値

@@ -54,9 +54,45 @@ namespace ApplicationService.Schedulers
         private IContractsAggregateRepository contractsAggregateRepository;
 
         /// <summary>
-        /// 自デバイスの情報が端末情報に含まれていない場合に呼び出されるイベント
+        /// クライアントアプリを終了するために呼び出されるイベント
+        /// </summary>
+        private ShutdownClientApplicationRequiredEvent shutdownClientApplicationRequiredEvent;
+
+        /// <summary>
+        /// 強制アップデートを実施するイベント
+        /// </summary>
+        private ForceUpdateEvent forceUpdateEvent;
+
+        /// <summary>
+        /// ダウンロード完了時に実施するイベント
+        /// </summary>
+        private DownloadCompletedEvent downloadCompletedEvent;
+
+        /// <summary>
+        /// 更新プログラムがダウンロード済みのときに呼び出されるイベント
+        /// </summary>
+        private ExistsUpdateProgramEvent existsUpdateProgramEvent;
+
+        /// <summary>
+        /// 更新プログラムのダウンロードを実施するイベント
+        /// </summary>
+        private StartDownloadEvent startDownloadEvent;
+
+        /// <summary>
+        /// 自デバイスの情報が含まれていない場合に呼び出されるイベント
         /// </summary>
         private NotContainsDeviceEvent notContainsDeviceEvent;
+
+        /// <summary>
+        /// 未読お知らせが有るときに呼び出されるイベント
+        /// </summary>
+        /// <param name="numberOfUnreadMessages">未読件数</param>
+        private ExistsUnreadNotificationEvent existsUnreadNotificationEvent;
+
+        /// <summary>
+        /// 他端末からフォントがコピーされていたときに呼び出されるイベント
+        /// </summary>
+        private DetectionFontCopyEvent detectionFontCopyEvent;
 
         /// <summary>
         /// フォントの同期処理を行うべきかどうか
@@ -78,7 +114,14 @@ namespace ApplicationService.Schedulers
         /// <param name="receiveNotificationRepository">通知受信機能を格納するリポジトリ</param>
         /// <param name="fontManagerService">フォント管理に関する処理を行うサービス</param>
         /// <param name="contractsAggregateRepository">契約情報を格納するリポジトリ</param>
+        /// <param name="shutdownClientApplicationRequiredEvent">クライアントアプリを終了するイベント</param>
+        /// <param name="forceUpdateEvent">強制アップデートを実施するイベント</param>
+        /// <param name="downloadCompletedEvent">ダウンロード完了時に実施するイベント</param>
+        /// <param name="existsUpdateProgramEvent">更新プログラムがダウンロード済みのときに呼び出されるイベント</param>
+        /// <param name="startDownloadEvent">更新プログラムのダウンロードを実施するイベント</param>
         /// <param name="notContainsDeviceEvent">自デバイスの情報が端末情報に含まれていない場合に呼び出されるイベント</param>
+        /// <param name="existsUnreadNotificationEvent">未読お知らせが有るときに呼び出されるイベント</param>
+        /// <param name="detectionFontCopyEvent">他端末からフォントがコピーされていたときに呼び出されるイベント</param>
         public FixedTermScheduler(
             double interval,
             ExceptionNotify exceptionNotify,
@@ -89,18 +132,34 @@ namespace ApplicationService.Schedulers
             IReceiveNotificationRepository receiveNotificationRepository,
             IFontManagerService fontManagerService,
             IContractsAggregateRepository contractsAggregateRepository,
-            NotContainsDeviceEvent notContainsDeviceEvent)
+            ShutdownClientApplicationRequiredEvent shutdownClientApplicationRequiredEvent,
+            ForceUpdateEvent forceUpdateEvent,
+            DownloadCompletedEvent downloadCompletedEvent,
+            ExistsUpdateProgramEvent existsUpdateProgramEvent,
+            StartDownloadEvent startDownloadEvent,
+            NotContainsDeviceEvent notContainsDeviceEvent,
+            ExistsUnreadNotificationEvent existsUnreadNotificationEvent,
+            DetectionFontCopyEvent detectionFontCopyEvent)
             : base(60 * MillisecondMultiplier, exceptionNotify, resourceWrapper)
         {
-            //this.originalInterval = interval;
-            this.originalInterval = 300;    // 5分にしておく
+            this.originalInterval = interval;
+            //this.originalInterval = 300;    // 5分にしておく
             this.volatileSettingRepository = volatileSettingRepository;
             this.userStatusRepository = userStatusRepository;
             this.startupService = startupService;
             this.receiveNotificationRepository = receiveNotificationRepository;
             this.fontManagerService = fontManagerService;
             this.contractsAggregateRepository = contractsAggregateRepository;
+
+            this.shutdownClientApplicationRequiredEvent = shutdownClientApplicationRequiredEvent;
+            this.forceUpdateEvent = forceUpdateEvent;
+            this.downloadCompletedEvent = downloadCompletedEvent;
+            this.existsUpdateProgramEvent = existsUpdateProgramEvent;
+            this.startDownloadEvent = startDownloadEvent;
             this.notContainsDeviceEvent = notContainsDeviceEvent;
+            this.existsUnreadNotificationEvent = existsUnreadNotificationEvent;
+            this.detectionFontCopyEvent = detectionFontCopyEvent;
+
             this.shouldSynchronize = false;
 
             // ネットワーク接続状況変更イベント
@@ -125,9 +184,20 @@ namespace ApplicationService.Schedulers
 
             if (volatileSetting.IsCheckedStartup)
             {
+                UserStatus userStatusWk = this.userStatusRepository.GetStatus();
+                if (userStatusWk.IsLoggingIn)
+                {
+                    if (!this.receiveNotificationRepository.IsConnected())
+                    {
+                        Logger.Info(this.ResourceWrapper.GetString("LOG_INFO_FixedTermScheduler_ScheduledEvent_ReceiveNotificationStart"));
+                        this.receiveNotificationRepository.Start(volatileSetting.AccessToken, this.userStatusRepository.GetStatus().DeviceId);
+                    }
+                }
+
                 // 前回実行時間から、interval秒過ぎていなければ抜ける
                 if (DateTime.Now < this.lastScheduledEvent.AddMilliseconds(this.originalInterval * MillisecondMultiplier))
                 {
+                    Logger.Info(this.ResourceWrapper.GetString("LOG_INFO_FixedTermScheduler_ScheduledEvent_End"));
                     return;
                 }
             }
@@ -137,7 +207,15 @@ namespace ApplicationService.Schedulers
                 .AddHours(ElapsedHours).CompareTo(DateTime.Now) >= 0)
             {
                 // 起動時チェック処理を実行する
-                if (this.startupService.IsCheckedStartup(this.notContainsDeviceEvent))
+                if (this.startupService.IsCheckedStartup(
+                    this.shutdownClientApplicationRequiredEvent,
+                    this.forceUpdateEvent,
+                    this.downloadCompletedEvent,
+                    this.existsUpdateProgramEvent,
+                    this.startDownloadEvent,
+                    this.notContainsDeviceEvent,
+                    this.existsUnreadNotificationEvent,
+                    this.detectionFontCopyEvent))
                 {
                     Logger.Info(this.ResourceWrapper.GetString("LOG_INFO_FixedTermScheduler_ScheduledEvent_IsCheckedStartup_True"));
 

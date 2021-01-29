@@ -89,7 +89,7 @@ namespace Core.Entities
         public override bool Equals(object obj)
         {
             return obj is InstallFont font &&
-                  this.FileName.Equals(font.FileName) &&
+                  this.DisplayFontName.Equals(font.DisplayFontName) &&
                    this.Version.Equals(font.Version);
         }
 
@@ -99,7 +99,7 @@ namespace Core.Entities
         /// <returns>このオブジェクトのハッシュコード</returns>
         public override int GetHashCode()
         {
-            return HashCode.Combine(this.FileName, this.Version);
+            return HashCode.Combine(this.DisplayFontName, this.Version);
         }
     }
 }

@@ -162,6 +162,16 @@ namespace Client.UI.Components
                 return;
             }
 
+            // ユーザー別に保持する情報を取得
+            UserStatus userStatus = this.userStatusRepository.GetStatus();
+
+            // ログアウト中アイコン表示（ログイン状態：ログアウト中）
+            if (!userStatus.IsLoggingIn)
+            {
+                this.SetLogoutMode();
+                return;
+            }
+
             // 完了アイコン表示（ダウンロード完了時、または、アップデート完了時）
             // 【Phase2】アップデート完了時を追加
             if (volatileSetting.CompletedDownload)
@@ -171,34 +181,23 @@ namespace Client.UI.Components
             }
 
             // ローディングアイコン表示（ダウンロード中、または、アップデート中）
-            // 【Phase2】アップデート中を追加
-            if (volatileSetting.IsDownloading)
+            if (volatileSetting.IsDownloading || volatileSetting.IsUpdating)
             {
                 this.SetLoadingMode();
                 return;
             }
 
             // 通知アイコン表示（通知あり）
-            if (volatileSetting.IsNoticed)
+            if (volatileSetting.IsNoticed || volatileSetting.IsUpdated)
             {
                 this.SetNoticeMode();
                 return;
             }
 
-            // ユーザー別に保持する情報を取得
-            UserStatus userStatus = this.userStatusRepository.GetStatus();
-
             // ログイン中アイコン表示（ログイン状態：ログイン中）
             if (userStatus.IsLoggingIn)
             {
                 this.SetLoginMode();
-                return;
-            }
-
-            // ログアウト中アイコン表示（ログイン状態：ログアウト中）
-            if (!userStatus.IsLoggingIn)
-            {
-                this.SetLogoutMode();
                 return;
             }
 

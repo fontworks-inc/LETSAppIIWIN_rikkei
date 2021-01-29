@@ -34,9 +34,6 @@ namespace Infrastructure.API
             List<Device> response = new List<Device>();
 
             // APIの引数の値をセット(個別処理)
-            //this.ApiParam.Clear();
-            //this.ApiParam.Add(APIParam.DeviceId, deviceId);
-            //this.ApiParam.Add(APIParam.AccessToken, accessToken);
             this.ApiParam[APIParam.DeviceId] = deviceId;
             this.ApiParam[APIParam.AccessToken] = accessToken;
 
@@ -82,10 +79,6 @@ namespace Infrastructure.API
         public void DeactivateDevice(string deviceId, string accessToken, string targetDeviceId)
         {
             // APIの引数の値をセット(個別処理)
-            //this.ApiParam.Clear();
-            //this.ApiParam.Add(APIParam.DeviceId, deviceId);
-            //this.ApiParam.Add(APIParam.AccessToken, accessToken);
-            //this.ApiParam.Add(APIParam.TargetDeviceId, targetDeviceId);
             this.ApiParam[APIParam.AccessToken] = accessToken;
             this.ApiParam[APIParam.TargetDeviceId] = targetDeviceId;
 
@@ -115,9 +108,6 @@ namespace Infrastructure.API
             AuthenticationInformation response = new AuthenticationInformation();
 
             // APIの引数の値をセット(個別処理)
-            //this.ApiParam.Clear();
-            //this.ApiParam.Add(APIParam.DeviceId, deviceId);
-            //this.ApiParam.Add(APIPar
             this.ApiParam[APIParam.DeviceId] = deviceId;
             this.ApiParam[APIParam.AccessToken] = accessToken;
 
@@ -155,11 +145,6 @@ namespace Infrastructure.API
             string response = null;
 
             // APIの引数の値をセット(個別処理)
-            //this.ApiParam.Clear();
-            //this.ApiParam.Add(APIParam.MailAddress, user.MailAddress);
-            //this.ApiParam.Add(APIParam.Password, user.Password);
-            //this.ApiParam.Add(APIParam.HostName, user.HostName);
-            //this.ApiParam.Add(APIParam.OSUserName, user.OSUserName);
             this.ApiParam[APIParam.MailAddress] = user.MailAddress;
             this.ApiParam[APIParam.Password] = user.Password;
             this.ApiParam[APIParam.HostName] = user.HostName;
@@ -244,6 +229,7 @@ namespace Infrastructure.API
             {
                 config.AccessToken = (string)this.ApiParam[APIParam.AccessToken];
             }
+
             LoginApi apiInstance = new LoginApi(config);
             var body = new InlineObject4(
                 (string)this.ApiParam[APIParam.MailAddress],

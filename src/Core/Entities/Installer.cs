@@ -20,11 +20,13 @@ namespace Core.Entities
         /// <param name="downloadStatus">ダウンロード状態</param>
         /// <param name="version">バージョン</param>
         /// <param name="applicationUpdateType">強制/任意</param>
-        public Installer(DownloadStatus downloadStatus, string version, bool applicationUpdateType)
+        /// <param name="url">URL</param>
+        public Installer(DownloadStatus downloadStatus, string version, bool applicationUpdateType, string url)
         {
             this.DownloadStatus = downloadStatus;
             this.Version = version;
             this.ApplicationUpdateType = applicationUpdateType;
+            this.Url = url;
         }
 
         /// <summary>
@@ -42,6 +44,11 @@ namespace Core.Entities
         /// </summary>
         /// <remarks>強制の時にtrue, 任意の時にfalseを返す</remarks>
         public bool ApplicationUpdateType { get; set; }
+
+        /// <summary>
+        /// URL
+        /// </summary>
+        public string Url { get; set; } = string.Empty;
 
         /// <summary>
         /// このオブジェクトが指定されたオブジェクトと等しいかどうかを判定する

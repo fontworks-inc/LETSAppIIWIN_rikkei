@@ -49,6 +49,12 @@ namespace Core.Entities
         public bool IsNoticed { get; set; } = false;
 
         /// <summary>
+        /// 更新状態
+        /// </summary>
+        /// <remarks>更新ありの時にtrue, なしの時にfalseを返す</remarks>
+        public bool IsUpdated { get; set; } = false;
+
+        /// <summary>
         /// ダウンロード中かどうか
         /// </summary>
         /// <remarks>ダウンロード中時にtrueを返す</remarks>
@@ -59,6 +65,12 @@ namespace Core.Entities
         /// </summary>
         /// <remarks>ダウンロード完了時にtrueを返す</remarks>
         public bool CompletedDownload { get; set; } = false;
+
+        /// <summary>
+        /// アップデート中かどうか
+        /// </summary>
+        /// <remarks>アップデート中であればtrueを返す</remarks>
+        public bool IsUpdating { get; set; } = false;
 
         /// <summary>
         /// インストール対象フォント

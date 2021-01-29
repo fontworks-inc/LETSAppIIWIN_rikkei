@@ -34,7 +34,9 @@ namespace Core.Entities
         /// <param name="displayName">表示用フォント名</param>
         /// <param name="version">バージョン</param>
         /// <param name="registryKey">レジストリキー</param>
+        /// <param name="isFreemium">フリーミアムフォントフラグ</param>
         /// <param name="contractIds">契約IDリスト</param>
+        /// <param name="isFreemium">フリーミアム</param>
         /// <param name="isRemove">削除対象</param>
         public Font(string id, string path, bool isLETS, bool? isActivated, string displayName, string version, string registryKey, bool isFreemium, IList<string> contractIds, bool? isRemove = false)
         {
@@ -47,6 +49,7 @@ namespace Core.Entities
             this.RegistryKey = registryKey;
             this.IsFreemium = isFreemium;
             this.ContractIds = contractIds;
+            this.IsFreemium = isFreemium;
             this.IsRemove = isRemove;
         }
 
@@ -97,6 +100,9 @@ namespace Core.Entities
         /// <remarks>アクティベート時に登録したレジストリのキー</remarks>
         public string RegistryKey { get; set; } = string.Empty;
 
+        /// <summary>
+        /// フリーミアムフォントフラグ
+        /// </summary>
         public bool IsFreemium { get; set; } = false;
 
         /// <summary>

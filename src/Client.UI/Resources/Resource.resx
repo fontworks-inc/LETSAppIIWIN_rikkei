@@ -130,7 +130,8 @@
     <comment>２要素認証画面　エラーメッセージ（認証コード不正）</comment>
   </data>
   <data name="APP_04_01_2fa_ERR_03" xml:space="preserve">
-    <value>認証コードの期限が切れています</value>
+    <value>認証コードの期限が切れています
+もう一度最初からログイン操作を行ってください。</value>
     <comment>２要素認証画面　エラーメッセージ（認証コード期限切れ）</comment>
   </data>
   <data name="APP_04_01_2fa_LBL_AUTHENTICATION_CODE" xml:space="preserve">
@@ -163,7 +164,7 @@
     <comment>ログイン画面　エラーメッセージ個別(パスワード)</comment>
   </data>
   <data name="APP_04_01_LBL_MAILADRESS" xml:space="preserve">
-    <value>メールアドレスID</value>
+    <value>メールアドレス</value>
     <comment>ログイン画面　メールアドレスID　ラベル</comment>
   </data>
   <data name="APP_04_01_LBL_PASSWORD" xml:space="preserve">
@@ -191,7 +192,7 @@
     <comment>ログイン画面　こちらリンク</comment>
   </data>
   <data name="APP_04_WIN_TITLE" xml:space="preserve">
-    <value>LETS アカウント</value>
+    <value>LETS</value>
     <comment>ログイン処理　画面タイトル</comment>
   </data>
   <data name="APP_05_01_BTN_NEXT" xml:space="preserve">
@@ -224,7 +225,8 @@
     <comment>端末設定画面　処理説明</comment>
   </data>
   <data name="APP_05_01_PROC_DESCRIPTION2" xml:space="preserve">
-    <value>LETSウェブサイトのデバイス管理ページからも同様に確認・変更ができます。</value>
+    <value>次回、別のデバイスをご使用の場合には、LETSウェブサイトのデバイス管理ページからも
+同様に確認・変更ができます。</value>
     <comment>端末設定画面　下部説明</comment>
   </data>
   <data name="APP_05_01_PROC_TITLE" xml:space="preserve">
@@ -252,8 +254,8 @@
     <comment>強制アップデートダイアログ　処理説明</comment>
   </data>
   <data name="APP_07_01_PROC_TITLE" xml:space="preserve">
-    <value>LETSデスクトップアプリの強制アップデートを開始します</value>
-    <comment>強制アップデートダイアログ　処理タイトル</comment>
+    <value>LETSデスクトップアプリのアップデートを開始します</value>
+    <comment>アップデートダイアログ　処理タイトル</comment>
   </data>
   <data name="APP_08_01_BTN_LOGOUT" xml:space="preserve">
     <value>ログアウト</value>
@@ -261,16 +263,18 @@
   </data>
   <data name="APP_08_01_PROC_DESCRIPTION" xml:space="preserve">
     <value>現在行っている作業を保存し、以下の「ログアウト」ボタンを押下してください。
-引き続きLETSのフォントを使用する場合は、クイックメニューからログインしてください。</value>
+引き続きLETSのフォントを使用する場合は、LETSデスクトップアプリの
+クイックメニューからログインしてください。</value>
     <comment>強制ログアウトダイアログ　処理説明</comment>
   </data>
   <data name="APP_08_01_PROC_TITLE" xml:space="preserve">
-    <value>このデバイスがログアウトされたため、LETSデスクトップアプリを
-ログアウトします</value>
+    <value>デバイス管理ページからログアウトされたか、
+別のデバイスをログインしたために、このデバイスがログアウトされました。
+LETSデスクトップアプリをログアウトしてください。</value>
     <comment>強制ログアウトダイアログ　処理タイトル</comment>
   </data>
   <data name="APP_08_01_WIN_TITLE" xml:space="preserve">
-    <value>LETS アカウント</value>
+    <value>LETS</value>
     <comment>強制ログアウトダイアログ　タイトル</comment>
   </data>
   <data name="APP_09_01_BTN_CANCEL" xml:space="preserve">
@@ -314,8 +318,13 @@
     <value>フォントのダウンロードに失敗しました</value>
     <comment>[通知センター]フォントのダウンロード失敗</comment>
   </data>
+  <data name="FUNC_01_03_01_NOTIFIED_FailedToDownloadFonts_Text" xml:space="preserve">
+    <value>{0}のダウンロードに失敗しました。</value>
+    <comment>[通知センター]フォントのダウンロード失敗　本文</comment>
+  </data>
   <data name="FUNC_01_03_01_NOTIFIED_LackOfDiscSpace" xml:space="preserve">
-    <value>ディスク容量が不足しています</value>
+    <value>ディスク容量が不足しています。
+ディスクの空き容量を増やしてから再度行ってください。</value>
     <comment>[通知センター]インストール対象のフォントサイズに対してディスク容量が不足</comment>
   </data>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
@@ -355,6 +364,10 @@
   <data name="IMG_LOGO" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>IMG_LOGO.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="LOG_ERROR_ApplicationDownloadService_Fail" xml:space="preserve">
+    <value>更新プログラムのダウンロードに失敗しました。</value>
+    <comment>更新プログラムダウンロード　ダウンロード処理　失敗</comment>
+  </data>
   <data name="LOG_ERR_AuthenticationService_Login_InvalidOperationException" xml:space="preserve">
     <value>ログイン処理を利用する場合はコンストラクタの引数に IResourceWrapper, IAuthenticationInformationRepository, IDevicesRepository, IUserStatusRepository, IVolatileSettingRepository を設定してください</value>
     <comment>ログイン処理　正しいコンストラクタを設定していない場合のログメッセージ</comment>
@@ -362,6 +375,10 @@
   <data name="LOG_ERR_AuthenticationService_Logout_InvalidOperationException" xml:space="preserve">
     <value>ログアウト処理を利用する場合はコンストラクタの引数に IResourceWrapper, IAuthenticationInformationRepository, IUserStatusRepository, IReceiveNotificationRepository, IVolatileSettingRepository, ICustomerRepository, IFontManagerService を設定してください</value>
     <comment>ログアウト処理　正しいコンストラクタを設定していない場合のログメッセージ</comment>
+  </data>
+  <data name="LOG_ERR_DeletedFontCheck_GetInstallFontInformations" xml:space="preserve">
+    <value>サーバから削除されたフォントの一覧を取得できませんでした。</value>
+    <comment>起動時チェック処理　ーバから削除されたフォントの削除チェック　削除されたフォント一覧の取得に失敗した場合のエラーメッセージ</comment>
   </data>
   <data name="LOG_ERR_DeviceSettingsViewModel_ActivateUserDevice_Exception" xml:space="preserve">
     <value>自端末の使用中設定時に例外が発生しました</value>
@@ -378,6 +395,18 @@
   <data name="LOG_ERR_DeviceViewModel_DeactivateDevice_Exception" xml:space="preserve">
     <value>該当端末の解除に失敗しました({0})</value>
     <comment>３台目NG画面　使用中端末一覧　端末解除時例外</comment>
+  </data>
+  <data name="LOG_ERR_ExistsNotificationCheck_unreadNoticeRepository" xml:space="preserve">
+    <value>起動時チェックのお知らせ情報取得処理で例外が発生しました。</value>
+    <comment>起動時チェック　お知らせ情報取得APIでエラーがあった場合のメッセージ</comment>
+  </data>
+  <data name="LOG_ERR_FontCopyCheck_fontSecurityRepository_GetUserId" xml:space="preserve">
+    <value>ユーザIDの取得に失敗しました。</value>
+    <comment>起動時チェック　ユーザID取得APIでエラーがあった場合のメッセージ</comment>
+  </data>
+  <data name="LOG_ERR_FontCopyCheck_fontSecurityRepository_PostFontFileCopyDetection" xml:space="preserve">
+    <value>他端末のフォントがコピーされたことを検知しましたが、サーバに通知できませんでした。</value>
+    <comment>起動時チェック処理　他端末のフォントがコピーされた通知APIで例外発生時のログメッセージ</comment>
   </data>
   <data name="LOG_ERR_FontFileRepository_GetFontInfo_Exception" xml:space="preserve">
     <value>フォント識別情報取得時に例外が発生しました</value>
@@ -423,6 +452,18 @@
     <value>ログイン時に例外が発生しました</value>
     <comment>ログイン画面　ログインボタン押下時処理内　例外発生時</comment>
   </data>
+  <data name="LOG_ERR_NextVersionCheck_clientApplicationVersionAPIRepository" xml:space="preserve">
+    <value>起動時チェックの更新情報取得処理で例外が発生しました。</value>
+    <comment>起動時チェック　更新情報取得APIでエラーがあった場合のメッセージ</comment>
+  </data>
+  <data name="LOG_ERR_StartingVersionCheck_clientApplicationVersionAPIRepository" xml:space="preserve">
+    <value>起動時チェックの起動Ver情報取得処理で例外が発生しました。</value>
+    <comment>起動時チェック　起動Ver情報取得APIでエラーがあった場合のメッセージ</comment>
+  </data>
+  <data name="LOG_ERR_StartProcessService_StartProcessAdministrator_Win32Exception" xml:space="preserve">
+    <value>ファイル実行時にエラーが発生しました。：</value>
+    <comment>ファイル実行時エラー</comment>
+  </data>
   <data name="LOG_ERR_StartupService_GetAllDevicesException" xml:space="preserve">
     <value>ログイン状態確認時の全端末情報取得処理で例外が発生しました</value>
     <comment>ログイン状態確認処理　全端末情報を取得処理で例外発生時のログメッセージ</comment>
@@ -442,6 +483,14 @@
   <data name="LOG_FATAL_UnhandledException" xml:space="preserve">
     <value>致命的なエラーが発生したので、プログラムを終了します</value>
     <comment>グローバル例外時に表示するログメッセージ</comment>
+  </data>
+  <data name="LOG_INFO_ApplicationDownloadService_Start" xml:space="preserve">
+    <value>更新プログラムのダウンロードを開始します。</value>
+    <comment>更新プログラムダウンロード　ダウンロード処理　開始</comment>
+  </data>
+  <data name="LOG_INFO_ApplicationDownloadService_Success" xml:space="preserve">
+    <value>更新プログラムのダウンロードが完了しました。</value>
+    <comment>更新プログラムダウンロード　ダウンロード処理　成功</comment>
   </data>
   <data name="LOG_INFO_ApplicationIconComponent_tasktrayIcon_Click" xml:space="preserve">
     <value>クイックメニューを表示</value>
@@ -547,6 +596,10 @@
     <value>既に定期確認処理が実行中のため処理をスキップする</value>
     <comment>定期間隔処理をスキップする際出力されるログ</comment>
   </data>
+  <data name="LOG_Info_StartingVersionCheck_RebootClientApplicatioLOG_Info_StartingVersionCheck_RebootClientApplication" xml:space="preserve">
+    <value>最新バージョンのアプリケーションがインストール済みであるため、操作中のアプリケーションを終了し、再起動します。</value>
+    <comment>起動時チェック処理　起動指定バージョンチェック処理で指定バージョンのプログラムがインストール済みのログメッセージ</comment>
+  </data>
   <data name="LOG_INFO_StartupService_IsCheckedStartup_IsNoticed" xml:space="preserve">
     <value>「通知あり」の情報を設定</value>
     <comment>起動時チェック処理内で、契約更新の必要と判定された場合に出力されるログ</comment>
@@ -579,6 +632,14 @@
     <value>アカウント</value>
     <comment>クイックメニュー[アカウント]</comment>
   </data>
+  <data name="MENU_ACCOUNT_ERROR_CAPTION" xml:space="preserve">
+    <value>ホーム画面の表示に失敗しました</value>
+    <comment>クイックメニュー[アカウント] &gt; エラーダイアログ &gt; タイトル</comment>
+  </data>
+  <data name="MENU_ACCOUNT_ERROR_TEXT" xml:space="preserve">
+    <value>ホーム画面のURLが取得できません。</value>
+    <comment>クイックメニュー[アカウント] &gt; エラーダイアログ &gt; 本文</comment>
+  </data>
   <data name="MENU_ANNOUNCE" xml:space="preserve">
     <value>お知らせ</value>
     <comment>クイックメニュー[お知らせ]</comment>
@@ -607,6 +668,14 @@
     <value>フォント</value>
     <comment>クイックメニュー[フォント]</comment>
   </data>
+  <data name="MENU_FONT_ERROR_CAPTION" xml:space="preserve">
+    <value>フォント一覧画面の表示に失敗しました</value>
+    <comment>クイックメニュー[フォント] &gt; エラーダイアログ &gt; タイトル</comment>
+  </data>
+  <data name="MENU_FONT_ERROR_TEXT" xml:space="preserve">
+    <value>フォント一覧画面のURLが取得できません。</value>
+    <comment>クイックメニュー[フォント] &gt; エラーダイアログ &gt; 本文</comment>
+  </data>
   <data name="MENU_LOGIN_MAILADDRESS" xml:space="preserve">
     <value>MailAddress</value>
     <comment>クイックメニュー[ログイン中(状態表示)]　メールアドレス表示部</comment>
@@ -631,8 +700,32 @@
     <value>アップデートが完了しました。</value>
     <comment>クイックメニュー[アップデート中(状態表示)]　完了</comment>
   </data>
+  <data name="MENU_UPDATE_CONFIRM_CAPTION" xml:space="preserve">
+    <value>確認</value>
+    <comment>クイックメニュー[アップデート] &gt; 確認ダイアログ &gt; タイトル</comment>
+  </data>
+  <data name="MENU_UPDATE_CONFIRM_TEXT" xml:space="preserve">
+    <value>LETSデスクトップアプリのアップデートを開始します。</value>
+    <comment>クイックメニュー[アップデート] &gt; 確認ダイアログ &gt; 本文</comment>
+  </data>
   <data name="MENU_UPDATE_LOADING" xml:space="preserve">
     <value>アップデート中...</value>
     <comment>クイックメニュー[アップデート中(状態表示)]　処理中</comment>
+  </data>
+  <data name="ResponseCode_AcountLocked" xml:space="preserve">
+    <value>アカウントがロックされています</value>
+    <comment>レスポンスコード：1004</comment>
+  </data>
+  <data name="ResponseCode_ContractExpired" xml:space="preserve">
+    <value>契約が終了しています</value>
+    <comment>レスポンスコード：1006</comment>
+  </data>
+  <data name="ResponseCode_InternalServerError" xml:space="preserve">
+    <value>サーバーエラー</value>
+    <comment>レスポンスコード：2000</comment>
+  </data>
+  <data name="ResponseCode_InvalidArgument" xml:space="preserve">
+    <value>システムエラー(引数不正)</value>
+    <comment>レスポンスコード：1001</comment>
   </data>
 </root>

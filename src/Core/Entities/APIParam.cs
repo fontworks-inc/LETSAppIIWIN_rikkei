@@ -44,5 +44,14 @@ namespace Core.Entities
 
         /// <summary>Contains</summary>
         Contains,
+
+        /// <summary>OriginalUserId</summary>
+        OriginalUserId,
+
+        /// <summary>OriginalDeviceId</summary>
+        OriginalDeviceId,
+
+        /// <summary>Detected</summary>
+        Detected,
     }
 }

@@ -30,6 +30,12 @@ namespace ApplicationService.Interfaces
         public delegate void FontDownloadCompletedEvent(IList<InstallFont> fontList);
 
         /// <summary>
+        /// ダウンロード失敗時のイベント
+        /// </summary>
+        /// <param name="font">失敗したフォント</param>
+        public delegate void FontDownloadFailedEvent(InstallFont font);
+
+        /// <summary>
         /// フォントの同期処理を実施する
         /// </summary>
         /// <param name="font">アクティベート対象フォント</param>
@@ -77,5 +83,16 @@ namespace ApplicationService.Interfaces
         /// </summary>
         void BroadcastFontChange();
 
+        /// <summary>
+        /// サーバより削除されたフォント情報の一覧を取得する
+        /// </summary>
+        /// <returns>サーバより削除されたフォント情報の一覧</returns>
+        IList<InstallFont> GetDeletedFontInformations();
+
+        /// <summary>
+        /// フォントをアンインストールする
+        /// </summary>
+        /// <param name="font">対象フォント</param>
+        void Uninstall(Font font);
     }
 }

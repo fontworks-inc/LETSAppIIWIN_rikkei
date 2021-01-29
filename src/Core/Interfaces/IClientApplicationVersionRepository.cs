@@ -8,10 +8,26 @@ namespace Core.Interfaces
     public interface IClientApplicationVersionRepository
     {
         /// <summary>
+        /// クライアントアプリケーションの更新情報を取得する
+        /// </summary>
+        /// <param name="deviceId">デバイスID</param>
+        /// <param name="accessToken">アクセストークン</param>
+        /// <returns>更新情報</returns>
+        ClientApplicationUpdateInfomation GetClientApplicationUpdateInfomation(string deviceId, string accessToken);
+
+        /// <summary>
         /// クライアントアプリケーションの起動バージョン情報を取得する
         /// </summary>
         /// <returns>ユーザ別フォント情報</returns>
         ClientApplicationVersion GetClientApplicationVersion();
+
+        /// <summary>
+        /// クライアントアプリケーションの起動バージョン情報を取得する
+        /// </summary>
+        /// <param name="deviceId">デバイスID</param>
+        /// <param name="accessToken">アクセストークン</param>
+        /// <returns>ユーザ別フォント情報</returns>
+        ClientApplicationVersion GetClientApplicationVersion(string deviceId, string accessToken);
 
         /// <summary>
         /// クライアントアプリケーションの起動バージョン情報を保存する

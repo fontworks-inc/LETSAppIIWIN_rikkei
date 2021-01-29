@@ -88,7 +88,8 @@ namespace Client.UI.Resources {
         }
         
         /// <summary>
-        ///   認証コードの期限が切れています に類似しているローカライズされた文字列を検索します。
+        ///   認証コードの期限が切れています
+        ///もう一度最初からログイン操作を行ってください。 に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string APP_04_01_2fa_ERR_03 {
             get {
@@ -161,7 +162,7 @@ namespace Client.UI.Resources {
         }
         
         /// <summary>
-        ///   メールアドレスID に類似しているローカライズされた文字列を検索します。
+        ///   メールアドレス に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string APP_04_01_LBL_MAILADRESS {
             get {
@@ -224,7 +225,7 @@ namespace Client.UI.Resources {
         }
         
         /// <summary>
-        ///   LETS アカウント に類似しているローカライズされた文字列を検索します。
+        ///   LETS に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string APP_04_WIN_TITLE {
             get {
@@ -297,7 +298,8 @@ namespace Client.UI.Resources {
         }
         
         /// <summary>
-        ///   LETSウェブサイトのデバイス管理ページからも同様に確認・変更ができます。 に類似しているローカライズされた文字列を検索します。
+        ///   次回、別のデバイスをご使用の場合には、LETSウェブサイトのデバイス管理ページからも
+        ///同様に確認・変更ができます。 に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string APP_05_01_PROC_DESCRIPTION2 {
             get {
@@ -360,7 +362,7 @@ namespace Client.UI.Resources {
         }
         
         /// <summary>
-        ///   LETSデスクトップアプリの強制アップデートを開始します に類似しているローカライズされた文字列を検索します。
+        ///   LETSデスクトップアプリのアップデートを開始します に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string APP_07_01_PROC_TITLE {
             get {
@@ -379,7 +381,8 @@ namespace Client.UI.Resources {
         
         /// <summary>
         ///   現在行っている作業を保存し、以下の「ログアウト」ボタンを押下してください。
-        ///引き続きLETSのフォントを使用する場合は、クイックメニューからログインしてください。 に類似しているローカライズされた文字列を検索します。
+        ///引き続きLETSのフォントを使用する場合は、LETSデスクトップアプリの
+        ///クイックメニューからログインしてください。 に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string APP_08_01_PROC_DESCRIPTION {
             get {
@@ -388,8 +391,9 @@ namespace Client.UI.Resources {
         }
         
         /// <summary>
-        ///   このデバイスがログアウトされたため、LETSデスクトップアプリを
-        ///ログアウトします に類似しているローカライズされた文字列を検索します。
+        ///   デバイス管理ページからログアウトされたか、
+        ///別のデバイスをログインしたために、このデバイスがログアウトされました。
+        ///LETSデスクトップアプリをログアウトしてください。 に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string APP_08_01_PROC_TITLE {
             get {
@@ -398,7 +402,7 @@ namespace Client.UI.Resources {
         }
         
         /// <summary>
-        ///   LETS アカウント に類似しているローカライズされた文字列を検索します。
+        ///   LETS に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string APP_08_01_WIN_TITLE {
             get {
@@ -498,7 +502,17 @@ namespace Client.UI.Resources {
         }
         
         /// <summary>
-        ///   ディスク容量が不足しています に類似しているローカライズされた文字列を検索します。
+        ///   {0}のダウンロードに失敗しました。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string FUNC_01_03_01_NOTIFIED_FailedToDownloadFonts_Text {
+            get {
+                return ResourceManager.GetString("FUNC_01_03_01_NOTIFIED_FailedToDownloadFonts_Text", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   ディスク容量が不足しています。
+        ///ディスクの空き容量を増やしてから再度行ってください。 に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string FUNC_01_03_01_NOTIFIED_LackOfDiscSpace {
             get {
@@ -645,6 +659,15 @@ namespace Client.UI.Resources {
         }
         
         /// <summary>
+        ///   サーバから削除されたフォントの一覧を取得できませんでした。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string LOG_ERR_DeletedFontCheck_GetInstallFontInformations {
+            get {
+                return ResourceManager.GetString("LOG_ERR_DeletedFontCheck_GetInstallFontInformations", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   自端末の使用中設定時に例外が発生しました に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string LOG_ERR_DeviceSettingsViewModel_ActivateUserDevice_Exception {
@@ -677,6 +700,33 @@ namespace Client.UI.Resources {
         internal static string LOG_ERR_DeviceViewModel_DeactivateDevice_Exception {
             get {
                 return ResourceManager.GetString("LOG_ERR_DeviceViewModel_DeactivateDevice_Exception", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   起動時チェックのお知らせ情報取得処理で例外が発生しました。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string LOG_ERR_ExistsNotificationCheck_unreadNoticeRepository {
+            get {
+                return ResourceManager.GetString("LOG_ERR_ExistsNotificationCheck_unreadNoticeRepository", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   ユーザIDの取得に失敗しました。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string LOG_ERR_FontCopyCheck_fontSecurityRepository_GetUserId {
+            get {
+                return ResourceManager.GetString("LOG_ERR_FontCopyCheck_fontSecurityRepository_GetUserId", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   他端末のフォントがコピーされたことを検知しましたが、サーバに通知できませんでした。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string LOG_ERR_FontCopyCheck_fontSecurityRepository_PostFontFileCopyDetection {
+            get {
+                return ResourceManager.GetString("LOG_ERR_FontCopyCheck_fontSecurityRepository_PostFontFileCopyDetection", resourceCulture);
             }
         }
         
@@ -780,6 +830,33 @@ namespace Client.UI.Resources {
         }
         
         /// <summary>
+        ///   起動時チェックの更新情報取得処理で例外が発生しました。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string LOG_ERR_NextVersionCheck_clientApplicationVersionAPIRepository {
+            get {
+                return ResourceManager.GetString("LOG_ERR_NextVersionCheck_clientApplicationVersionAPIRepository", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   起動時チェックの起動Ver情報取得処理で例外が発生しました。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string LOG_ERR_StartingVersionCheck_clientApplicationVersionAPIRepository {
+            get {
+                return ResourceManager.GetString("LOG_ERR_StartingVersionCheck_clientApplicationVersionAPIRepository", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   ファイル実行時にエラーが発生しました。： に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string LOG_ERR_StartProcessService_StartProcessAdministrator_Win32Exception {
+            get {
+                return ResourceManager.GetString("LOG_ERR_StartProcessService_StartProcessAdministrator_Win32Exception", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   ログイン状態確認時の全端末情報取得処理で例外が発生しました に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string LOG_ERR_StartupService_GetAllDevicesException {
@@ -816,11 +893,38 @@ namespace Client.UI.Resources {
         }
         
         /// <summary>
+        ///   更新プログラムのダウンロードに失敗しました。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string LOG_ERROR_ApplicationDownloadService_Fail {
+            get {
+                return ResourceManager.GetString("LOG_ERROR_ApplicationDownloadService_Fail", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   致命的なエラーが発生したので、プログラムを終了します に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string LOG_FATAL_UnhandledException {
             get {
                 return ResourceManager.GetString("LOG_FATAL_UnhandledException", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   更新プログラムのダウンロードを開始します。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string LOG_INFO_ApplicationDownloadService_Start {
+            get {
+                return ResourceManager.GetString("LOG_INFO_ApplicationDownloadService_Start", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   更新プログラムのダウンロードが完了しました。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string LOG_INFO_ApplicationDownloadService_Success {
+            get {
+                return ResourceManager.GetString("LOG_INFO_ApplicationDownloadService_Success", resourceCulture);
             }
         }
         
@@ -1060,6 +1164,16 @@ namespace Client.UI.Resources {
         }
         
         /// <summary>
+        ///   最新バージョンのアプリケーションがインストール済みであるため、操作中のアプリケーションを終了し、再起動します。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string LOG_Info_StartingVersionCheck_RebootClientApplicatioLOG_Info_StartingVersionCheck_RebootClientApplication {
+            get {
+                return ResourceManager.GetString("LOG_Info_StartingVersionCheck_RebootClientApplicatioLOG_Info_StartingVersionCheck" +
+                        "_RebootClientApplication", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   「通知あり」の情報を設定 に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string LOG_INFO_StartupService_IsCheckedStartup_IsNoticed {
@@ -1132,6 +1246,24 @@ namespace Client.UI.Resources {
         }
         
         /// <summary>
+        ///   ホーム画面の表示に失敗しました に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string MENU_ACCOUNT_ERROR_CAPTION {
+            get {
+                return ResourceManager.GetString("MENU_ACCOUNT_ERROR_CAPTION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   ホーム画面のURLが取得できません。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string MENU_ACCOUNT_ERROR_TEXT {
+            get {
+                return ResourceManager.GetString("MENU_ACCOUNT_ERROR_TEXT", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   お知らせ に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string MENU_ANNOUNCE {
@@ -1195,6 +1327,24 @@ namespace Client.UI.Resources {
         }
         
         /// <summary>
+        ///   フォント一覧画面の表示に失敗しました に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string MENU_FONT_ERROR_CAPTION {
+            get {
+                return ResourceManager.GetString("MENU_FONT_ERROR_CAPTION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   フォント一覧画面のURLが取得できません。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string MENU_FONT_ERROR_TEXT {
+            get {
+                return ResourceManager.GetString("MENU_FONT_ERROR_TEXT", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   MailAddress に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string MENU_LOGIN_MAILADDRESS {
@@ -1249,11 +1399,65 @@ namespace Client.UI.Resources {
         }
         
         /// <summary>
+        ///   確認 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string MENU_UPDATE_CONFIRM_CAPTION {
+            get {
+                return ResourceManager.GetString("MENU_UPDATE_CONFIRM_CAPTION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   LETSデスクトップアプリのアップデートを開始します。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string MENU_UPDATE_CONFIRM_TEXT {
+            get {
+                return ResourceManager.GetString("MENU_UPDATE_CONFIRM_TEXT", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   アップデート中... に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string MENU_UPDATE_LOADING {
             get {
                 return ResourceManager.GetString("MENU_UPDATE_LOADING", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   アカウントがロックされています に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string ResponseCode_AcountLocked {
+            get {
+                return ResourceManager.GetString("ResponseCode_AcountLocked", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   契約が終了しています に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string ResponseCode_ContractExpired {
+            get {
+                return ResourceManager.GetString("ResponseCode_ContractExpired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   サーバーエラー に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string ResponseCode_InternalServerError {
+            get {
+                return ResourceManager.GetString("ResponseCode_InternalServerError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   システムエラー(引数不正) に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string ResponseCode_InvalidArgument {
+            get {
+                return ResourceManager.GetString("ResponseCode_InvalidArgument", resourceCulture);
             }
         }
     }

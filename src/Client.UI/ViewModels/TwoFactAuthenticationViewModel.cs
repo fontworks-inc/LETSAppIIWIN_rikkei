@@ -315,7 +315,7 @@ namespace Client.UI.ViewModels
 
                     default:
                         // その他
-                        this.ErrorMessage = string.Format(this.resouceWrapper.GetString("APP_04_ERR_EXCEPTION"), responseMessage);
+                        this.ErrorMessage = string.Format(this.resouceWrapper.GetString("APP_04_ERR_EXCEPTION"), this.GetErrorMessageByResponseCode(responseCode));
                         this.ErrorMessageVisibility = Visibility.Visible;
                         Logger.Error(this.ErrorMessage);
                         break;
@@ -335,6 +335,32 @@ namespace Client.UI.ViewModels
                 Logger.Error(exception);
                 this.loginWindow.Close();
             }
+        }
+
+        /// <summary>
+        /// レスポンスコードに応じたメッセージ
+        /// <paramref name="responseCode"/>レスポンスコード<>
+        /// </summary>
+        private string GetErrorMessageByResponseCode(ResponseCode responseCode)
+        {
+            string message = string.Empty;
+            switch (responseCode)
+            {
+                case ResponseCode.InvalidArgument:
+                    message = this.resouceWrapper.GetString("ResponseCode_InvalidArgument");
+                    break;
+                case ResponseCode.AcountLocked:
+                    message = this.resouceWrapper.GetString("ResponseCode_AcountLocked");
+                    break;
+                case ResponseCode.ContractExpired:
+                    message = this.resouceWrapper.GetString("ResponseCode_ContractExpired");
+                    break;
+                default:
+                    message = this.resouceWrapper.GetString("ResponseCode_InternalServerError");
+                    break;
+            }
+
+            return message;
         }
     }
 }

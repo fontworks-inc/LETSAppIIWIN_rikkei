@@ -135,18 +135,17 @@ namespace ApplicationService.Authentication
         /// <returns>認証情報</returns>
         public AuthenticationInformationResponse Login(string mailAddress, string password)
         {
-            Logger.Info(string.Format(
-                "AuthenticationService:Login Enter",
-                "Enter"));
+            Logger.Debug("AuthenticationService:Login Enter");
             if (this.devicesRepository == null)
             {
                 throw new InvalidOperationException(this.resourceWrapper.GetString("LOG_ERR_AuthenticationService_Login_InvalidOperationException"));
             }
 
+            // ログインするときは、接続状態をONにしておく
+            this.volatileSettingRepository.GetVolatileSetting().IsConnected = true;
+
             // ユーザ別保存：デバイスIDを取得
-            Logger.Info(string.Format(
-                "AuthenticationService:Login ユーザ別保存：デバイスIDを取得",
-                "ユーザ別保存：デバイスIDを取得"));
+            Logger.Debug("AuthenticationService:Login ユーザ別保存：デバイスIDを取得");
             var userStatus = this.userStatusRepository.GetStatus();
             var deviceId = userStatus.DeviceId;
 
@@ -154,9 +153,7 @@ namespace ApplicationService.Authentication
             if (string.IsNullOrEmpty(deviceId))
             {
                 // 配信サービスよりデバイスIDを発行
-                Logger.Info(string.Format(
-                    "AuthenticationService:Login 配信サービスよりデバイスIDを発行",
-                    "配信サービスよりデバイスIDを発行"));
+                Logger.Debug("AuthenticationService:Login 配信サービスよりデバイスIDを発行");
                 var user = new User()
                 {
                     MailAddress = mailAddress,
@@ -177,17 +174,13 @@ namespace ApplicationService.Authentication
                 }
 
                 // ユーザ別保存：デバイスIDに保存
-                Logger.Info(string.Format(
-                    "AuthenticationService:Login ユーザ別保存：デバイスIDに保存",
-                    "ユーザ別保存：デバイスIDに保存"));
+                Logger.Debug("AuthenticationService:Login ユーザ別保存：デバイスIDに保存");
                 userStatus.DeviceId = deviceId;
                 this.userStatusRepository.SaveStatus(userStatus);
             }
 
             // ログイン処理を実行
-            Logger.Info(string.Format(
-                "AuthenticationService:Login ログイン処理を実行",
-                "ログイン処理を実行"));
+            Logger.Debug("AuthenticationService:Login ログイン処理を実行");
             return this.authenticationInformationRepository.Login(
                     deviceId, mailAddress, password);
         }
@@ -206,9 +199,9 @@ namespace ApplicationService.Authentication
             volatileSetting.AccessToken = authenticationInformation.AccessToken;
             volatileSetting.RefreshToken = authenticationInformation.RefreshToken;
 
-            Logger.Info("AccessToken = " + volatileSetting.AccessToken, string.Empty);
-            Logger.Info("UserAgent = " + volatileSetting.UserAgent, string.Empty);
-            Logger.Info("RefreshToken = " + volatileSetting.RefreshToken, string.Empty);
+            Logger.Debug("AccessToken = " + volatileSetting.AccessToken, string.Empty);
+            Logger.Debug("UserAgent = " + volatileSetting.UserAgent, string.Empty);
+            Logger.Debug("RefreshToken = " + volatileSetting.RefreshToken, string.Empty);
 
             // ユーザ別保存情報取得
             var userStatus = this.userStatusRepository.GetStatus();
@@ -218,10 +211,8 @@ namespace ApplicationService.Authentication
             userStatus.IsLoggingIn = true;
             this.userStatusRepository.SaveStatus(userStatus);
 
-            ////  起動時チェック済みをfalseにする
-            //volatileSetting.IsCheckedStartup = false;
-
-            if(!isFirstLogined) {
+            if (!isFirstLogined)
+            {
                 // ユーザー配下のフォントフォルダ
                 var local = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
                 var userFontsDir = @$"{local}\Microsoft\Windows\Fonts";
@@ -232,16 +223,15 @@ namespace ApplicationService.Authentication
 
             isFirstLogined = true;
 
-            //this.fontManagerService.Synchronize(false);
-
             volatileSetting.IsCheckedStartup = false;
         }
 
         /// <summary>
         /// ログアウトする
         /// </summary>
+        /// <param name="isCallApi">ログアウトAPIを呼び出すかどうか</param>
         /// <returns>ログアウト処理の成功時にtrue、それ以外はfalse</returns>
-        public bool Logout()
+        public bool Logout(bool isCallApi)
         {
             if (this.receiveNotificationRepository == null
                 || this.customerRepository == null
@@ -257,15 +247,17 @@ namespace ApplicationService.Authentication
             // アクセストークン取得
             var accessToken = this.volatileSettingRepository.GetVolatileSetting().AccessToken;
 
-            try
+            if (isCallApi) 
             {
-                // ログアウト処理を実行
-                this.authenticationInformationRepository.Logout(deviceId, accessToken);
-            }
-            catch (Exception ex)
-            {
-                Logger.Warn(ex);
-                return false;
+                try
+                {
+                    // ログアウト処理を実行
+                    this.authenticationInformationRepository.Logout(deviceId, accessToken);
+                }
+                catch (Exception ex)
+                {
+                    Logger.Warn(ex);
+                }
             }
 
             // 通知停止
@@ -276,6 +268,7 @@ namespace ApplicationService.Authentication
 
             // [ユーザー別保存：ログイン状態]に「ログアウト」を保存する
             userStatus.IsLoggingIn = false;
+            userStatus.DeviceId = string.Empty; // デバイスIDをクリアする
             this.userStatusRepository.SaveStatus(userStatus);
 
             // お客様情報の削除

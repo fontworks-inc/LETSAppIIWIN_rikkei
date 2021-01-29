@@ -27,6 +27,7 @@ namespace Client.UI.Entities
             {
                 return;
             }
+
             string urlString = url.ToString().Replace("&", "^&");
             Process.Start(new ProcessStartInfo("cmd", $"/c start {urlString}") { CreateNoWindow = true });
         }

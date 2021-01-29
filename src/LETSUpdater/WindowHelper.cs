@@ -121,15 +121,40 @@ namespace Updater
             SetWindowLong(handle, GWLSTYLE, style);
         }
 
-        private static bool loginSended = false;
+        private static bool messageSended = false;
 
-        public static void  LoginLETS()
+        private static uint messageCode = 0x8001;
+        private static int lParam = 1;
+
+        public static void LoginLETS()
+        {
+            messageCode = 0x8001;
+            lParam = 1;
+            MessageOperation();
+        }
+
+        public static void ExitLETS()
+        {
+            messageCode = 0x8001;
+            lParam = 2;
+            MessageOperation();
+        }
+
+        public static void UpdateProgressLETS(int percent)
+        {
+            messageCode = 0x8002;
+            lParam = percent;
+            MessageOperation();
+        }
+
+        private static void MessageOperation()
         {
             int retryCount = 5;
-            while (!loginSended && retryCount > 0)
+            messageSended = false;
+            while (!messageSended && retryCount > 0)
             {
                 EnumWindows(new EnumWindowsDelegate(EnumWindowCallBack), IntPtr.Zero);
-                if (loginSended) break;
+                if (messageSended) break;
                 retryCount--;
                 System.Threading.Thread.Sleep(500);
             }
@@ -153,10 +178,6 @@ namespace Updater
         private static extern int GetClassName(IntPtr hWnd,
             StringBuilder lpClassName, int nMaxCount);
 
-        //[DllImport("Kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        //private static extern int GetModuleFileName(IntPtr hWnd,
-        //    StringBuilder lpClassName, int nMaxCount);
-
         [DllImport("user32.dll", SetLastError = true)]
         public static extern int GetWindowThreadProcessId(IntPtr hWnd, out int lpdwProcessId);
 
@@ -179,8 +200,8 @@ namespace Updater
                 //ウィンドウのタイトルが"LETS"ならばログインメッセージを送信する
                 if (tsb.ToString() == "LETS" && procname == "LETS")
                 {
-                    SendMessageTimeout(hWnd, (uint)0x8001, IntPtr.Zero, new IntPtr(1), 0x2, 10*1000, out UIntPtr lpdwResult);
-                    loginSended = true;
+                    SendMessageTimeout(hWnd, messageCode, IntPtr.Zero, new IntPtr(lParam), 0x2, 10*1000, IntPtr.Zero);
+                    messageSended = true;
                 }
             }
 
@@ -233,7 +254,7 @@ namespace Updater
         private static extern IntPtr SendMessage(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);
 
         [DllImport("user32.dll", SetLastError = true)]
-        private static extern IntPtr SendMessageTimeout(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam, int fuFlags, int uTimeout, out UIntPtr lpdwResult);
+        private static extern IntPtr SendMessageTimeout(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam, int fuFlags, int uTimeout, IntPtr lpdwResult);
 
         /// <summary>
         /// メニューのハンドル取得

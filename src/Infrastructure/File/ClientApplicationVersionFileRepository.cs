@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
 using Core.Entities;
 using Core.Interfaces;
+using Infrastructure.API;
 
 namespace Infrastructure.File
 {
@@ -9,13 +10,30 @@ namespace Infrastructure.File
     /// </summary>
     public class ClientApplicationVersionFileRepository : EncryptFileBase, IClientApplicationVersionRepository
     {
+        private ClientApplicationVersionAPIRepository clientApplicationVersionAPIRepository;
+
         /// <summary>
         /// インスタンスを初期化する
         /// </summary>
         /// <param name="filePath">ファイルパス</param>
-        public ClientApplicationVersionFileRepository(string filePath)
+        /// <param name="clientApplicationVersionAPIRepository">クライアントアプリの起動Ver情報を取得するAPIリポジトリ</param>
+        public ClientApplicationVersionFileRepository(string filePath, ClientApplicationVersionAPIRepository clientApplicationVersionAPIRepository)
             : base(filePath)
         {
+            this.clientApplicationVersionAPIRepository = clientApplicationVersionAPIRepository;
+        }
+
+        /// <summary>
+        /// クライアントアプリケーションの更新情報を取得する
+        /// </summary>
+        /// <param name="deviceId">デバイスID</param>
+        /// <param name="accessToken">アクセストークン</param>
+        /// <returns>更新情報</returns>
+        public ClientApplicationUpdateInfomation GetClientApplicationUpdateInfomation(string deviceId, string accessToken)
+        {
+            ClientApplicationUpdateInfomation clientApplicationUpdateInfomation = this.clientApplicationVersionAPIRepository.GetClientApplicationUpdateInfomation(deviceId, accessToken);
+
+            return clientApplicationUpdateInfomation;
         }
 
         /// <summary>
@@ -35,6 +53,23 @@ namespace Infrastructure.File
                 // ファイルが存在しない場合、新規のオブジェクトを返す
                 return new ClientApplicationVersion();
             }
+        }
+
+        /// <summary>
+        /// クライアントアプリケーションの起動バージョン情報を取得する
+        /// </summary>
+        /// <param name="deviceId">デバイスID</param>
+        /// <param name="accessToken">アクセストークン</param>
+        /// <returns>ユーザ別フォント情報</returns>
+        public ClientApplicationVersion GetClientApplicationVersion(string deviceId, string accessToken)
+        {
+            ClientApplicationVersion clientApplicationVersion = this.clientApplicationVersionAPIRepository.GetClientApplicationVersion(deviceId, accessToken);
+            if (clientApplicationVersion != null)
+            {
+                this.SaveClientApplicationVersion(clientApplicationVersion);
+            }
+
+            return clientApplicationVersion;
         }
 
         /// <summary>

@@ -31,6 +31,7 @@ namespace Infrastructure.API
         /// <param name="deviceId">デバイスID</param>
         /// <param name="fontId">フォントID</param>
         /// <remarks>FUNCTION_08_06_03(フォントダウンロードAPI)</remarks>
+        /// <returns>フォントファイルストリーム</returns>
         public FileStream DownloadFonts(string deviceId, string fontId)
         {
             FileStream response = null;
@@ -55,14 +56,11 @@ namespace Infrastructure.API
                 // 通信に失敗or通信しなかった
                 throw;
             }
-            finally
-            {
-                memory.IsDownloading = false;
-            }
 
             return response;
         }
 
+        /// <inheritdoc/>
         public IList<InstallFont> GetInstallFontInformations(string deviceId, VaildFontType type)
         {
             IList<InstallFont> response = new List<InstallFont>();
@@ -114,6 +112,10 @@ namespace Infrastructure.API
                             d.ContractIds);
                         response.Add(f);
                     }
+                }
+                else
+                {
+                    throw new ApiException(ret.Code, ret.Message);
                 }
             }
             catch (ApiException)

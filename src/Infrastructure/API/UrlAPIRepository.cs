@@ -109,11 +109,16 @@ namespace Infrastructure.API
                 {
                     response = new Core.Entities.Url(url: ret.Data.Url);
                 }
+                else
+                {
+                   throw new ApiException(ret.Code, ret.Message);
+                }
             }
             catch (ApiException)
             {
                 // 通信に失敗or通信しなかった
                 // nullを返す
+                throw;
             }
 
             return response;
@@ -173,7 +178,7 @@ namespace Infrastructure.API
             // API通信を行う(リトライ込み)を行う（共通処理）
             try
             {
-                this.Invoke(this.CallGetNoticeUrl);
+                this.Invoke(this.CallGetFontListUrl);
 
                 // 戻り値のセット（個別処理）
                 var ret = (UrlResponse)this.ApiResponse;
@@ -181,11 +186,16 @@ namespace Infrastructure.API
                 {
                     response = new Core.Entities.Url(url: ret.Data.Url);
                 }
+                else
+                {
+                    throw new ApiException(ret.Code, ret.Message);
+                }
             }
             catch (ApiException)
             {
                 // 通信に失敗or通信しなかった
                 // nullを返す
+                throw;
             }
 
             return response;

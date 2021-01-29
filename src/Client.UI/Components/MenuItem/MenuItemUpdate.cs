@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Windows.Forms;
-using NLog;
+using Core.Interfaces;
 
 namespace Client.UI.Components.MenuItem
 {
@@ -10,9 +10,9 @@ namespace Client.UI.Components.MenuItem
     public class MenuItemUpdate : MenuItemBase
     {
         /// <summary>
-        /// ロガー
+        /// 文言の取得を行うインスタンス
         /// </summary>
-        private static readonly Logger Logger = LogManager.GetLogger("nlog.config");
+        private readonly IResourceWrapper resourceWrapper = null;
 
         /// <summary>アップデート</summary>
         private ToolStripMenuItem update;
@@ -24,13 +24,15 @@ namespace Client.UI.Components.MenuItem
         /// コンストラクタ
         /// </summary>
         /// <param name="quickMenu">QuickMenuComponent</param>
-        public MenuItemUpdate(QuickMenuComponent quickMenu)
+        /// <param name="resourceWrapper"> 文言の取得を行うインスタンス</param>
+        public MenuItemUpdate(QuickMenuComponent quickMenu, IResourceWrapper resourceWrapper)
              : base(quickMenu)
         {
             this.update.Click += (s, e) =>
             {
                 this.OnUpdateMenuItemClick();
             };
+            this.resourceWrapper = resourceWrapper;
         }
 
         /// <summary>
@@ -73,10 +75,18 @@ namespace Client.UI.Components.MenuItem
         /// </summary>
         private void OnUpdateMenuItemClick()
         {
-            Logger.Info(this.QuickMenu.Manager.GetResource().GetString("LOG_INFO_MenuItemUpdate_OnUpdateMenuItemClick"));
+            // ダイアログを表示する
+            DialogResult result = MessageBox.Show(
+                this.resourceWrapper.GetString("MENU_UPDATE_CONFIRM_TEXT"),
+                this.resourceWrapper.GetString("MENU_UPDATE_CONFIRM_CAPTION"),
+                MessageBoxButtons.OKCancel,
+                MessageBoxIcon.Question);
 
-            // アップデート開始
-            this.QuickMenu.Manager.StartUpdate();
+            if (result == DialogResult.OK)
+            {
+                // アップデート開始
+                this.QuickMenu.Manager.StartUpdate();
+            }
         }
     }
 }

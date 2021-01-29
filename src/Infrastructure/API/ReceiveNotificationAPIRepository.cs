@@ -78,6 +78,7 @@ namespace Infrastructure.API
         /// SSE接続を開始する
         /// </summary>
         /// <param name="accessToken">アクセストークン</param>
+        /// <param name="deviceid">デバイスID</param>
         /// <returns>SSE接続の成否</returns>
         public bool Start(string accessToken, string deviceid)
         {
@@ -91,27 +92,32 @@ namespace Infrastructure.API
                     ch.UseProxy = true;
                     this.client = new HttpClient(ch);
                 }
-                else {
+                else
+                {
                     this.client = new HttpClient();
                 }
+
                 this.client.BaseAddress = new Uri(this.NotifyBasePath);
                 this.client.Timeout = Timeout.InfiniteTimeSpan;
             }
 
-            // var request = new HttpRequestMessage(HttpMethod.Get, "http://localhost:3000" + "/notifications");
-            //var request = new HttpRequestMessage(HttpMethod.Get, "http://localhost:3000" + "/sse2");
             ApplicationSetting setting = new ApplicationSetting();
-            //var request = new HttpRequestMessage(HttpMethod.Get, setting.NotificationServerUri + "/notifications");
             var request = new HttpRequestMessage(HttpMethod.Get, this.NotifyBasePath + "/notifications");
 
             request.Headers.Add("User-Agent", this.GetUserAgent());
             request.Headers.Add("Connection", "keep-alive");
             request.Headers.Add("Accept", "text/event-stream");
-            request.Headers.Add("Cache-Control", "no-cache,no-store");
+            request.Headers.Add("Cache-Control", "no-cache");
             request.Headers.Add("X-LETS-DEVICEID", deviceid);
             if (accessToken != null)
             {
                 request.Headers.Add("Authorization", $"Bearer {accessToken}");
+            }
+
+            int? lastEventId = this.userStatusRepository.GetStatus().LastEventId;
+            if (lastEventId != null)
+            {
+                request.Headers.Add("Last-Event-ID", lastEventId.ToString());
             }
 
             Task.Run(() => this.Sbscriber(this.client, request));
@@ -160,13 +166,13 @@ namespace Infrastructure.API
             return vSetting.UserAgent;
         }
 
-
         /// <summary>
         /// SSE接続を停止する
         /// </summary>
         public void Stop()
         {
             this.subscribed = false;
+            Logger.Debug("SSE Stop:subscribed = false");
         }
 
         /// <summary>
@@ -187,11 +193,11 @@ namespace Infrastructure.API
         {
             try
             {
-                //Console.WriteLine("Establishing connection");
-                Logger.Info("Establishing connection", string.Empty);
+                Logger.Debug("Establishing connection");
                 this.subscribed = true;
                 var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
                 response.EnsureSuccessStatusCode();
+                Logger.Debug("response.EnsureSuccessStatusCode");
 
                 // SSE サーバに対して GETリクエスト　(非同期stream)
                 using (this.streamReader = new StreamReader(await response.Content.ReadAsStreamAsync()))
@@ -221,8 +227,7 @@ namespace Infrastructure.API
                         }
                     }
 
-                    //Console.WriteLine("Connection Closed");
-                    Logger.Info("Connection Closed", string.Empty);
+                    Logger.Debug("Connection Closed:subscribed = false");
                     this.subscribed = false;
                     messageList.Clear();
                     this.emitter(messageList);
@@ -230,10 +235,13 @@ namespace Infrastructure.API
             }
             catch (Exception ex)
             {
-                Logger.Info($"Error: {ex.Message}", string.Empty);
+                Logger.Debug($"Connection Error:subscribed = false {ex.StackTrace}");
                 this.subscribed = false;
                 this.emitter(new List<string>());
             }
+
+            Logger.Debug("Sbscriber Exit:subscribed = false");
+            this.subscribed = false;
         }
 
         /// <summary>
@@ -251,19 +259,30 @@ namespace Infrastructure.API
                 var sseMessage = SseMessage.BuildMessage(messageList);
                 if (!sseMessage.IsCommentOnly())
                 {
+                    Logger.Debug("NotifyMessage:" + sseMessage.Data);
                     ActivateFont font = JsonConvert.DeserializeObject<ActivateFont>(sseMessage.Data);
+                    UserStatus userStatus = this.userStatusRepository.GetStatus();
+                    try
+                    {
+                        userStatus.LastEventId = int.Parse(sseMessage.Id);
+                    }
+                    catch (Exception)
+                    {
+                        // Parseに失敗したら設定しない
+                    }
+                    this.userStatusRepository.SaveStatus(userStatus);
                     switch (sseMessage.EventType)
                     {
                         case "font-activate":
-                            Logger.Info("font-activate", string.Empty);
+                            Logger.Debug("font-activate");
                             this.fontNotificationService.Activate(font);
                             break;
                         case "font-deactivate":
-                            Logger.Info("font-deactivate", string.Empty);
+                            Logger.Debug("font-deactivate");
                             this.fontNotificationService.Deactivate(font.FontId);
                             break;
                         case "font-all-uninstall":
-                            Logger.Info("font-all-uninstall", string.Empty);
+                            Logger.Debug("font-all-uninstall");
                             this.fontNotificationService.AllUninstall();
                             break;
                         default:
@@ -282,9 +301,10 @@ namespace Infrastructure.API
                 RegistryKey key = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Internet Settings");
                 proxyserver = (string)key.GetValue("ProxyServer");
 
-                if (proxyserver == null || proxyserver == "")
+                if (proxyserver == null || proxyserver == string.Empty)
                 {
                     Process p = new Process();
+
                     // コマンドプロンプトと同じように実行します
                     p.StartInfo.FileName = System.Environment.GetEnvironmentVariable("ComSpec");
                     p.StartInfo.Arguments = "/c " + "netsh winhttp show proxy"; // 実行するファイル名（コマンド）
@@ -299,22 +319,22 @@ namespace Infrastructure.API
                     foreach (string line in lines)
                     {
                         var words = line.Replace("  ", " ").Split(' ');
-                        string preWord = "";
+                        string preWord = string.Empty;
                         foreach (string w in words)
                         {
                             if (preWord == "サーバー:")
                             {
                                 proxyserver = w;
                             }
+
                             preWord = w;
                         }
                     }
-
                 }
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                //Proxy設定に失敗したら握りつぶす
+                // Proxy設定に失敗したら無視する
             }
 
             return proxyserver;

@@ -14,6 +14,11 @@ namespace Client.UI.Components
     public class QuickMenuComponent : Component
     {
         /// <summary>
+        /// 文言の取得を行うインスタンス
+        /// </summary>
+        private readonly IResourceWrapper resourceWrapper = null;
+
+        /// <summary>
         /// ロガー
         /// </summary>
         private static readonly Logger Logger = LogManager.GetLogger("nlog.config");
@@ -50,6 +55,7 @@ namespace Client.UI.Components
             IContainerProvider containerProvider = (System.Windows.Application.Current as PrismApplication).Container;
 
             // 設定ファイルを読み込む
+            this.resourceWrapper = containerProvider.Resolve<IResourceWrapper>();
             this.volatileSettingRepository = containerProvider.Resolve<IVolatileSettingRepository>();
             this.userStatusRepository = containerProvider.Resolve<IUserStatusRepository>();
 
@@ -195,7 +201,7 @@ namespace Client.UI.Components
             // 【Phase2】
             this.MenuLoginStatus.Hide();
             this.MenuDownloadStatus.Hide();
-            this.MenuUpdate.Hide(); // 【Phase2】画面項目書では表示のままのため、非表示とするかどうか要確認
+            this.MenuUpdate.Hide();
 
             this.MenuUpdateStatus.Show();
         }
@@ -240,10 +246,10 @@ namespace Client.UI.Components
             this.MenuUpdateStatus = new MenuItemUpdateStatus(this);
             this.MenuDownloadStatus = new MenuItemDownloadStatus(this);
             this.MenuAnnouncePage = new MenuItemAnnouncePage(this, this.volatileSettingRepository, this.userStatusRepository, this.urlRepository);
-            this.MenuAccountPage = new MenuItemAccountPage(this);
-            this.MenuFontListPage = new MenuItemFontListPage(this);
+            this.MenuAccountPage = new MenuItemAccountPage(this, this.resourceWrapper, this.volatileSettingRepository, this.userStatusRepository, this.urlRepository);
+            this.MenuFontListPage = new MenuItemFontListPage(this, this.resourceWrapper, this.volatileSettingRepository, this.userStatusRepository, this.urlRepository);
             this.MenuLogout = new MenuItemLogout(this);
-            this.MenuUpdate = new MenuItemUpdate(this);
+            this.MenuUpdate = new MenuItemUpdate(this, this.resourceWrapper);
 
             // クイックメニューアイテムの初期表示状態を設定
             this.MenuAnnouncePage.Show();

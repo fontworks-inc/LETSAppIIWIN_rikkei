@@ -25,7 +25,8 @@ namespace ApplicationService.Interfaces
         /// <summary>
         /// ログアウトする
         /// </summary>
+        /// <param name="isCallApi">ログアウトAPIを呼び出すかどうか</param>
         /// <returns>ログアウト処理の成功時にtrue、それ以外はfalse</returns>
-        bool Logout();
+        bool Logout(bool isCallApi);
     }
 }

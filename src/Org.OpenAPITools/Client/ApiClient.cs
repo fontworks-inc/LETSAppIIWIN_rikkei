@@ -427,8 +427,7 @@ namespace Org.OpenAPITools.Client
                 RegistryKey key = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Internet Settings");
                 var proxyserver = (string)key.GetValue("ProxyServer");
                 client.Proxy = new WebProxy(proxyserver);
-                Logger.Info(string.Format(
-                    "ApiClient:ProxyByRegistry=" + proxyserver, ""));
+                Logger.Debug("ApiClient:ProxyByRegistry=" + proxyserver);
 
                 if(proxyserver == null || proxyserver == "")
                 {
@@ -468,8 +467,7 @@ namespace Org.OpenAPITools.Client
             catch (Exception e)
             {
                 //Proxy設定に失敗したら握りつぶす
-                Logger.Info(string.Format(
-                    "ApiClient:ProxyByGetDefaultProxy=" + e.Message, ""));
+                Logger.Debug("ApiClient:ProxyByGetDefaultProxy=" + e.Message + "\n" + e.StackTrace);
             }
 
             var response = client.Execute<T>(req);

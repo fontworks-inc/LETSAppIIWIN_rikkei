@@ -50,7 +50,6 @@ namespace Infrastructure.API
 
                 // 戻り値のセット（個別処理）
                 var ret = new CustomerResponse(this.ApiResponse);
-                //var ret = (CustomerResponse)this.ApiResponse;
                 if (ret.Code == (int)ResponseCode.Succeeded)
                 {
                     response.MailAddress = ret.Data.MailAddress;

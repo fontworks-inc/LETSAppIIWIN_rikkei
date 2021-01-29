@@ -32,19 +32,25 @@ namespace Infrastructure.API
         /// <param name="apiConfiguration">設定情報</param>
         protected APIRepositoryBase(APIConfiguration apiConfiguration)
         {
+            this.APIConfiguration = apiConfiguration;
             this.BasePath = apiConfiguration.BasePath;
             this.NotifyBasePath = apiConfiguration.NotifyBasePath;
 
-            //TODO:削除する（証明書エラー回避用）
-            ServicePointManager.ServerCertificateValidationCallback +=
-               (sender, certificate, chain, sslPolicyErrors) => true;
         }
+
+        /// <summary>
+        /// API設定
+        /// </summary>
+        protected APIConfiguration APIConfiguration { get; set; } = null;
 
         /// <summary>
         /// API呼び出し先のURL
         /// </summary>
         protected string BasePath { get; set; } = null;
 
+        /// <summary>
+        /// 通知サーバーのURL
+        /// </summary>
         protected string NotifyBasePath { get; set; } = null;
 
         /// <summary>
@@ -55,7 +61,7 @@ namespace Infrastructure.API
         /// <summary>
         /// リトライ回数
         /// </summary>
-        protected int CommunicationRetryCount { get; set; } = 10;
+        protected int CommunicationRetryCount { get; set; } = 2;
 
         /// <summary>
         /// APIパラメータ受け渡し用
@@ -101,25 +107,11 @@ namespace Infrastructure.API
             {
                 try
                 {
-                    //if (!this.ApiParam.ContainsKey(APIParam.AccessToken) || this.ApiParam[APIParam.AccessToken].ToString() == string.Empty)
-                    //{
-                    //    if (this.ApiParam.ContainsKey(APIParam.DeviceId) && this.ApiParam[APIParam.DeviceId].ToString() != string.Empty
-                    //        && this.ApiParam.ContainsKey(APIParam.RefreshToken) && this.ApiParam[APIParam.RefreshToken].ToString() != string.Empty)
-                    //    {
-                    //        // アクセストークンの更新
-                    //        if (!this.RefreshAccessToken())
-                    //        {
-                    //            // 更新に失敗したのでループを止めてエラーコードを返す。
-                    //            break;
-                    //        }
-                    //    }
-                    //}
-
                     // 実APIの呼び出し
                     action();
 
                     // アクセストークン有効期限切れエラーかチェック
-                    if (this.IsAccessTokenExpired(this.ApiResponse))
+                    if (this.IsAccessTokenExpired(this.ApiResponse, vSetting.AccessToken))
                     {
                         // アクセストークンの更新
                         if (!this.RefreshAccessToken())
@@ -129,6 +121,15 @@ namespace Infrastructure.API
                         }
 
                         // 改めてAPIを実行する(次のループで実行される)
+                    }
+                    else if (this.IsRefreshTokenExpired(this.ApiResponse))
+                    {
+                        if (this.APIConfiguration.ForceLogout != null) 
+                        {
+                            this.APIConfiguration.ForceLogout();
+                        }
+
+                        break;
                     }
                     else
                     {
@@ -140,7 +141,7 @@ namespace Infrastructure.API
                 {
                     // 通信エラーが発生した(ErrorCode:503など)
                     // [共通設定：通信リトライ回数]まで繰り返す
-                    Logger.Debug("APIRepositoryBase:" + ex.Message, string.Empty);
+                    Logger.Debug("APIRepositoryBase:" + ex.Message + "\n" + ex.StackTrace);
                     if (i++ >= retry_count)
                     {
                         if (vSetting.IsConnected)
@@ -236,10 +237,11 @@ namespace Infrastructure.API
             Configuration config = new Configuration();
             config.BasePath = this.BasePath;
             config.UserAgent = (string)this.ApiParam[APIParam.UserAgent];
-            if(!this.ApiParam.ContainsKey(APIParam.RefreshToken) || (string)this.ApiParam[APIParam.RefreshToken] == string.Empty)
+            if (!this.ApiParam.ContainsKey(APIParam.RefreshToken) || (string)this.ApiParam[APIParam.RefreshToken] == string.Empty)
             {
                 this.ApiParam[APIParam.RefreshToken] = vSetting.RefreshToken;
             }
+
             LoginApi apiInstance = new LoginApi(config);
             AccessTokenResponse tokenResponse;
             try
@@ -248,6 +250,7 @@ namespace Infrastructure.API
                 {
                     this.ApiParam.Remove(APIParam.AccessToken);
                 }
+
                 tokenResponse = apiInstance.Token(
                     (string)this.ApiParam[APIParam.DeviceId],
                     (string)this.ApiParam[APIParam.UserAgent],
@@ -256,7 +259,7 @@ namespace Infrastructure.API
                 {
                     vSetting.AccessToken = tokenResponse.Data.AccessToken;
                     this.ApiParam[APIParam.AccessToken] = vSetting.AccessToken;
-                    Logger.Debug("RefreshAccessToken:Code=" + tokenResponse.Code, string.Empty);
+                    Logger.Debug("RefreshAccessToken:Code=" + tokenResponse.Code);
                     Logger.Debug("RefreshAccessToken:DeviceId=" + this.ApiParam[APIParam.DeviceId]);
                     Logger.Debug("RefreshAccessToken:RefreshToken=" + this.ApiParam[APIParam.RefreshToken]);
                     Logger.Debug("RefreshAccessToken:AccessToken=" + this.ApiParam[APIParam.AccessToken]);
@@ -265,14 +268,14 @@ namespace Infrastructure.API
                 {
                     // 認証エラー
                     //  デバイスIDが無効になっていると思われる
-                    Logger.Debug("RefreshAccessToken:Code=" + tokenResponse.Code, string.Empty);
+                    Logger.Debug("RefreshAccessToken:Code=" + tokenResponse.Code);
                     Logger.Debug("RefreshAccessToken:DeviceId=" + this.ApiParam[APIParam.DeviceId]);
                     Logger.Debug("RefreshAccessToken:RefreshToken=" + this.ApiParam[APIParam.RefreshToken]);
                     return false;
                 }
                 else
                 {
-                    Logger.Debug("RefreshAccessToken:Code=" + tokenResponse.Code, string.Empty);
+                    Logger.Debug("RefreshAccessToken:Code=" + tokenResponse.Code);
                     Logger.Debug("RefreshAccessToken:DeviceId=" + this.ApiParam[APIParam.DeviceId]);
                     Logger.Debug("RefreshAccessToken:RefreshToken=" + this.ApiParam[APIParam.RefreshToken]);
                     return false;
@@ -288,7 +291,7 @@ namespace Infrastructure.API
             catch (Exception e)
             {
                 // throw;
-                Logger.Debug("RefreshAccessToken:Exception=" + e.Message, string.Empty);
+                Logger.Debug("RefreshAccessToken:Exception=" + e.Message + "\n" + e.StackTrace);
                 return false;
             }
 
@@ -300,59 +303,131 @@ namespace Infrastructure.API
         /// </summary>
         /// <param name="obj">APIResponse</param>
         /// <returns>有効期限切れエラーならtrue</returns>
-        private bool IsAccessTokenExpired(object obj)
+        private bool IsAccessTokenExpired(object obj, string accessToken)
+        {
+            if (string.IsNullOrEmpty(accessToken))
+            {
+                if (this.ApiParam.ContainsKey(APIParam.DeviceId) && (string)this.ApiParam[APIParam.DeviceId] != string.Empty)
+                {
+                    return true;
+                }
+            }
+
+            if (obj == null)
+            {
+                return false;
+            }
+
+            int code = (int)ResponseCode.Succeeded;
+
+            try
+            {
+                {
+                    string objnm = obj.GetType().Name;
+                    Logger.Debug("IsAccessTokenExpired:objtype=" + objnm);
+                }
+
+                if (typeof(AccessTokenRefreshTokenResponse) == obj.GetType())
+                {
+                    code = ((AccessTokenRefreshTokenResponse)obj).Code;
+                }
+                else if (typeof(AccessTokenResponse) == obj.GetType())
+                {
+                    code = ((AccessTokenResponse)obj).Code;
+                }
+                else if (typeof(DeviceIdResponse) == obj.GetType())
+                {
+                    code = ((DeviceIdResponse)obj).Code;
+                }
+                else if (typeof(DevicesResponse) == obj.GetType())
+                {
+                    code = ((DevicesResponse)obj).Code;
+                }
+                else if (typeof(UrlResponse) == obj.GetType())
+                {
+                    code = ((UrlResponse)obj).Code;
+                }
+                else if (typeof(Model200) == obj.GetType())
+                {
+                    code = ((Model200)obj).Code;
+                }
+                else if (typeof(CustomerResponse) == obj.GetType())
+                {
+                    code = ((CustomerResponse)obj).Code;
+                }
+
+                {
+                    Logger.Debug("IsAccessTokenExpired:code=" + code.ToString());
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Debug("IsAccessTokenExpired:" + ex.Message + "\n" + ex.StackTrace);
+            }
+
+            return code == (int)ResponseCode.AccessTokenExpired;
+        }
+
+        /// <summary>
+        /// リフレッシュトークン有効期限切れエラーか。
+        /// </summary>
+        /// <param name="obj">APIResponse</param>
+        /// <returns>有効期限切れエラーならtrue</returns>
+        private bool IsRefreshTokenExpired(object obj)
         {
             if (obj == null)
             {
                 return false;
             }
 
-            {
-                string objnm = obj.GetType().Name; 
-                Logger.Info(string.Format("IsAccessTokenExpired:objtype=" + objnm, String.Empty));
-            }
-
             int code = (int)ResponseCode.Succeeded;
 
-            if (typeof(AccessTokenRefreshTokenResponse) == obj.GetType())
+            try
             {
-                code = ((AccessTokenRefreshTokenResponse)obj).Code;
+                {
+                    string objnm = obj.GetType().Name;
+                    Logger.Debug("IsAccessTokenExpired:objtype=" + objnm);
+                }
+
+                if (typeof(AccessTokenRefreshTokenResponse) == obj.GetType())
+                {
+                    code = ((AccessTokenRefreshTokenResponse)obj).Code;
+                }
+                else if (typeof(AccessTokenResponse) == obj.GetType())
+                {
+                    code = ((AccessTokenResponse)obj).Code;
+                }
+                else if (typeof(DeviceIdResponse) == obj.GetType())
+                {
+                    code = ((DeviceIdResponse)obj).Code;
+                }
+                else if (typeof(DevicesResponse) == obj.GetType())
+                {
+                    code = ((DevicesResponse)obj).Code;
+                }
+                else if (typeof(UrlResponse) == obj.GetType())
+                {
+                    code = ((UrlResponse)obj).Code;
+                }
+                else if (typeof(Model200) == obj.GetType())
+                {
+                    code = ((Model200)obj).Code;
+                }
+                else if (typeof(CustomerResponse) == obj.GetType())
+                {
+                    code = ((CustomerResponse)obj).Code;
+                }
+
+                {
+                    Logger.Debug("IsAccessTokenExpired:code=" + code.ToString());
+                }
             }
-            else if (typeof(AccessTokenResponse) == obj.GetType())
+            catch (Exception ex)
             {
-                code = ((AccessTokenResponse)obj).Code;
-            }
-            else if (typeof(DeviceIdResponse) == obj.GetType())
-            {
-                code = ((DeviceIdResponse)obj).Code;
-            }
-            else if (typeof(DevicesResponse) == obj.GetType())
-            {
-                code = ((DevicesResponse)obj).Code;
-            }
-            else if (typeof(UrlResponse) == obj.GetType())
-            {
-                code = ((UrlResponse)obj).Code;
-            }
-            else if (typeof(Model200) == obj.GetType())
-            {
-                code = ((Model200)obj).Code;
-            }
-            else if (typeof(CustomerResponse) == obj.GetType())
-            {
-                code = ((CustomerResponse)obj).Code;
+                Logger.Debug("IsAccessTokenExpired:" + ex.Message + "\n" + ex.StackTrace);
             }
 
-            {
-                Logger.Info(string.Format("IsAccessTokenExpired:code=" + code.ToString(), String.Empty));
-            }
-
-            return code == (int)ResponseCode.AccessTokenExpired;
-            //return code == (int)ResponseCode.AccessTokenExpired
-            //    || code == (int)ResponseCode.AuthenticationFailed;
-            //return code == (int)ResponseCode.AccessTokenExpired
-            //    || code == (int)ResponseCode.AuthenticationFailed
-            //    || code == (int)ResponseCode.InvalidArgument;
+            return code == (int)ResponseCode.RefreshTokenExpired;
         }
     }
 }
