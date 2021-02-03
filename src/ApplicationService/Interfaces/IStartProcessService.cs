@@ -15,6 +15,7 @@ namespace ApplicationService.Interfaces
         /// <param name="directoryPath">実行するフォルダのパス</param>
         /// <param name="fileName">ファイル名</param>
         /// <param name="arg">コマンド引数</param>
-        void StartProcessAdministrator(string directoryPath, string fileName, string[] arg);
+        /// <param name="runAdmin">管理者権限実行フラグ</param>
+        void StartProcessAdministrator(string directoryPath, string fileName, string[] arg, bool runAdmin = true);
     }
 }

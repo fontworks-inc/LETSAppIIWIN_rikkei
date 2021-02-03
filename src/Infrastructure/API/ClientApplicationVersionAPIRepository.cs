@@ -95,7 +95,7 @@ namespace Infrastructure.API
         /// </summary>
         /// <param name="deviceId">デバイスID</param>
         /// <param name="accessToken">アクセストークン</param>
-        /// <returns>ユーザ別フォント情報</returns>
+        /// <returns>クライアントアプリケーションの起動バージョン</returns>
         public ClientApplicationVersion GetClientApplicationVersion(string deviceId, string accessToken)
         {
             ClientApplicationVersion response = null;

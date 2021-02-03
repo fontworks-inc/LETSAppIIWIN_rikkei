@@ -71,9 +71,6 @@ namespace Client.UI
         /// <param name="containerRegistry">コンテナレジストリ</param>
         protected override void RegisterTypes(IContainerRegistry containerRegistry)
         {
-            File.WriteAllText(Path.GetTempPath() + @"\username.txt", Environment.UserName);
-            File.WriteAllText(Path.GetTempPath() + @"\basedir.txt", Environment.CurrentDirectory);
-
             // メモリ上で保存する情報
             var volatileSettingMemoryRepository = new VolatileSettingMemoryRepository();
             containerRegistry.RegisterInstance<IVolatileSettingRepository>(volatileSettingMemoryRepository);
@@ -102,7 +99,7 @@ namespace Client.UI
 
             // APIConfiguration
             ApplicationSetting applicationSetting = applicationSettingRepository.GetSetting();
-            var apiConfiguration = new APIConfiguration(applicationSetting.FontDeliveryServerUri, applicationSetting.NotificationServerUri);
+            var apiConfiguration = new APIConfiguration(applicationSetting.FontDeliveryServerUri, applicationSetting.NotificationServerUri, applicationSetting.FixedTermConfirmationInterval, applicationSetting.CommunicationRetryCount);
 
             // 各種画面で利用する情報
             var resourceWrapper = new ResourceWrapper();

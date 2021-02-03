@@ -39,6 +39,11 @@ namespace Client.UI.Components
         private static IntPtr myhWnd = IntPtr.Zero;
 
         /// <summary>
+        /// アップデート確認画面を表示しているかどうか
+        /// </summary>
+        private static bool isShownForceUpdate = false;
+
+        /// <summary>
         /// 認証サービス
         /// </summary>
         private readonly IAuthenticationService authenticationService;
@@ -255,6 +260,7 @@ namespace Client.UI.Components
                 else
                 {
                     // アップデート完了時に共通保存情報をリセットする
+                    Logger.Debug("Exit:ApplicationRuntime:Reset");
                     this.applicationRuntimeRepository.SaveApplicationRuntime(new ApplicationRuntime());
 
                     // 更新後のプログラムを起動する
@@ -280,18 +286,32 @@ namespace Client.UI.Components
         /// </summary>
         public void ForcedUpdate()
         {
-            // タスクトレイアイコンを操作不可とする
-            this.ApplicationIcon.Enabled = false;
+            if (isShownForceUpdate)
+            {
+                return;
+            }
 
-            // 強制アップデートダイアログを表示
-            var forcedUpdateDialog = new ForceUpdateNotification();
-            forcedUpdateDialog.ShowDialog();
+            try
+            {
+                isShownForceUpdate = true;
 
-            // アップデート処理を実施
-            this.StartUpdate();
+                // タスクトレイアイコンを操作不可とする
+                this.ApplicationIcon.Enabled = false;
 
-            // タスクトレイアイコンを操作可能とする
-            this.ApplicationIcon.Enabled = true;
+                // 強制アップデートダイアログを表示
+                var forcedUpdateDialog = new ForceUpdateNotification();
+                forcedUpdateDialog.ShowDialog();
+
+                // アップデート処理を実施
+                this.StartUpdate();
+
+                // タスクトレイアイコンを操作可能とする
+                this.ApplicationIcon.Enabled = true;
+            }
+            finally
+            {
+                isShownForceUpdate = false;
+            }
         }
 
         /// <summary>
@@ -511,6 +531,7 @@ namespace Client.UI.Components
 
                         case LParamType.Shutdown:
                             // 終了メッセージ(ディアクティベートなし)
+                            Logger.Debug("WndProc:LParamType.Shutdown");
                             this.Exit(false);
                             break;
 
@@ -526,8 +547,9 @@ namespace Client.UI.Components
                     break;
 
                 case WindowMessageType.ProgressOfUpdate:
-                    // プログラムアップデート進捗メッセージ【Phase2】
+                    // プログラムアップデート進捗メッセージ
                     int progressRate = (int)m.LParam;
+                    Logger.Debug("WndProc:WindowMessageType.ProgressOfUpdate:" + progressRate.ToString());
                     this.QuickMenu.ShowUpdateStatus();
                     this.QuickMenu.MenuUpdateStatus.SetProgressStatus(progressRate);
                     break;
@@ -610,7 +632,7 @@ namespace Client.UI.Components
                         return;
                     }
 
-                    Thread.Sleep(1000);
+                    Thread.Sleep(500);
                 }
             }
             catch (Exception ex)

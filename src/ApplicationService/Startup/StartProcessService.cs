@@ -39,12 +39,17 @@ namespace ApplicationService.Startup
         /// <param name="directoryPath">実行するフォルダのパス</param>
         /// <param name="fileName">ファイル名</param>
         /// <param name="arg">コマンド引数(null可能)</param>
-        public void StartProcessAdministrator(string directoryPath, string fileName, string[] arg)
+        /// <param name="runAdmin">管理者権限実行フラグ</param>
+        public void StartProcessAdministrator(string directoryPath, string fileName, string[] arg, bool runAdmin)
         {
             var proc = new System.Diagnostics.Process();
 
             proc.StartInfo.FileName = Path.Combine(directoryPath, fileName);
-            proc.StartInfo.Verb = "RunAs";
+            if (runAdmin)
+            {
+                proc.StartInfo.Verb = "RunAs";
+            }
+
             proc.StartInfo.UseShellExecute = true;
 
             if (arg != null && arg.Length != 0)

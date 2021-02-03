@@ -96,21 +96,23 @@ namespace Infrastructure.API
                 var ret = (InlineResponse200)this.ApiResponse;
                 if (ret.Code == (int)ResponseCode.Succeeded)
                 {
-                    foreach (InlineResponse200Font d in ret.Data.Fonts)
-                    {
-                        InstallFont f = new InstallFont(
-                            d.UserFontId,
-                            d.ActivateFlg,
-                            d.FontId,
-                            d.DisplayFontName,
-                            d.FileName,
-                            d.FileSize,
-                            d.Version,
-                            d.NeedFontVersionUpdate,
-                            d.IsAvailableFont,
-                            d.IsFreemium,
-                            d.ContractIds);
-                        response.Add(f);
+                    if (ret.Data != null) {
+                        foreach (InlineResponse200Font d in ret.Data.Fonts)
+                        {
+                            InstallFont f = new InstallFont(
+                                d.UserFontId,
+                                d.ActivateFlg,
+                                d.FontId,
+                                d.DisplayFontName,
+                                d.FileName,
+                                d.FileSize,
+                                d.Version,
+                                d.NeedFontVersionUpdate,
+                                d.IsAvailableFont,
+                                d.IsFreemium,
+                                d.ContractIds);
+                            response.Add(f);
+                        }
                     }
                 }
                 else

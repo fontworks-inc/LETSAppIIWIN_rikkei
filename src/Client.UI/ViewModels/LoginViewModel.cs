@@ -496,10 +496,11 @@ namespace Client.UI.ViewModels
             }
             catch (Exception ex)
             {
-                // 配信サーバアクセスでエラーが発生したときは、画面を閉じ以後の処理を行わない
+                // 配信サーバアクセスでエラーが発生したときは、エラーメッセージを表示
                 var exception = new Exception(this.resouceWrapper.GetString("LOG_ERR_LoginViewModel_Login_Exception"), ex);
                 Logger.Error(exception);
-                this.loginWindow.Close();
+                this.ErrorMessage = this.resouceWrapper.GetString("APP_04_01_ERR_Fatal");
+                this.ErrorMessageVisibility = Visibility.Visible;
             }
         }
 

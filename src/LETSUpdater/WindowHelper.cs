@@ -137,6 +137,8 @@ namespace Updater
         {
             messageCode = 0x8001;
             lParam = 2;
+            //string tmppath = Path.GetTempPath();
+            //File.AppendAllText($@"{tmppath}Message.log", "SEND:0x8001:" + "2\n");
             MessageOperation();
         }
 
@@ -144,19 +146,24 @@ namespace Updater
         {
             messageCode = 0x8002;
             lParam = percent;
+            //string tmppath = Path.GetTempPath();
+            //File.AppendAllText($@"{tmppath}Message.log", "SEND:0x8002:" + percent.ToString() + "\n");
             MessageOperation();
         }
 
         private static void MessageOperation()
         {
-            int retryCount = 5;
+            int retryCount = 10;
             messageSended = false;
             while (!messageSended && retryCount > 0)
             {
                 EnumWindows(new EnumWindowsDelegate(EnumWindowCallBack), IntPtr.Zero);
-                if (messageSended) break;
+                if (messageSended)
+                {
+                    break;
+                }
                 retryCount--;
-                System.Threading.Thread.Sleep(500);
+                System.Threading.Thread.Sleep(100);
             }
         }
 
@@ -200,7 +207,9 @@ namespace Updater
                 //ウィンドウのタイトルが"LETS"ならばログインメッセージを送信する
                 if (tsb.ToString() == "LETS" && procname == "LETS")
                 {
-                    SendMessageTimeout(hWnd, messageCode, IntPtr.Zero, new IntPtr(lParam), 0x2, 10*1000, IntPtr.Zero);
+                    SendMessageTimeout(hWnd, messageCode, IntPtr.Zero, new IntPtr(lParam), 0x2, 500, IntPtr.Zero);
+                    //string tmppath = Path.GetTempPath();
+                    //File.AppendAllText($@"{tmppath}Message.log", "SendMessageTimeout:" + messageCode.ToString() + ":" + lParam.ToString() + "\n");
                     messageSended = true;
                 }
             }

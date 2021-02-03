@@ -163,6 +163,10 @@
     <value>正しく入力されていません</value>
     <comment>ログイン画面　エラーメッセージ個別(パスワード)</comment>
   </data>
+  <data name="APP_04_01_ERR_Fatal" xml:space="preserve">
+    <value>通信エラーが発生しました。</value>
+    <comment>ログイン画面　エラーメッセージ 通信エラー</comment>
+  </data>
   <data name="APP_04_01_LBL_MAILADRESS" xml:space="preserve">
     <value>メールアドレス</value>
     <comment>ログイン画面　メールアドレスID　ラベル</comment>

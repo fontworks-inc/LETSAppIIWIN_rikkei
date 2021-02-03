@@ -18,6 +18,20 @@ namespace InstallerUtil
         public CustomAction() : base()
         {
             BeforeUninstall += CustomAction_BeforeUninstall;
+            AfterUninstall += CustomAction_AfterUninstall;
+        }
+
+        private void CustomAction_AfterUninstall(object sender, System.Configuration.Install.InstallEventArgs e)
+        {
+            // 親フォームを作成
+            using (Form f = new Form())
+            {
+                f.TopMost = true; // 親フォームを常に最前面に表示する
+                f.Activate();
+                                  // 作成したフォームを親フォームとしてメッセージボックスに設定
+                MessageBox.Show(f, "アンインストールを完了するためには、PCの再起動が必要です。\n編集中のファイルがある場合は保存したのち、再起動を実施してください。");
+                f.TopMost = false;
+            }
         }
 
         private void CustomAction_BeforeUninstall(object sender, System.Configuration.Install.InstallEventArgs e)

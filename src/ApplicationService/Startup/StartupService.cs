@@ -352,7 +352,7 @@ namespace ApplicationService.Startup
                 string startingVersionDirectoryPath = this.applicationVersionService.GetTargetVerisonDirectory(startingVersion);
                 if (Directory.Exists(startingVersionDirectoryPath))
                 {
-                    this.startProcessService.StartProcessAdministrator(startingVersionDirectoryPath, "LETS.exe", null);
+                    this.startProcessService.StartProcessAdministrator(startingVersionDirectoryPath, "LETS.exe", null, false);
 
                     Logger.Info(this.resourceWrapper.GetString("LOG_Info_StartingVersionCheck_RebootClientApplication"));
                     return false;
@@ -390,6 +390,12 @@ namespace ApplicationService.Startup
             // 更新情報がある場合
             if (clientApplicationUpdateInfomation != null)
             {
+                if (this.CheckVersionInstalled(clientApplicationUpdateInfomation.ClientApplicationVersion.Version))
+                {
+                    // 次バージョンがインストール済みの時は処理を続行する
+                    return true;
+                }
+
                 if (this.CheckDownloadCompleted(clientApplicationUpdateInfomation))
                 {
                     // 次バージョンの更新プログラムがダウンロードされている場合の処理
@@ -607,6 +613,21 @@ namespace ApplicationService.Startup
             return true;
         }
 
+        private bool CheckVersionInstalled(string version)
+        {
+            // 起動指定バージョンのプログラムフォルダが存在する場合、そちらのクライアントアプリケーションで再起動する
+            string versionDirectoryPath = this.applicationVersionService.GetTargetVerisonDirectory(version);
+            if (Directory.Exists(versionDirectoryPath))
+            {
+                if (File.Exists(Path.Combine(versionDirectoryPath, "LETS.exe")))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         /// <summary>
         /// 指定の更新情報と、共通保存が持つ更新情報を確認し、既に更新プログラムがダウンロードされているか確認する
         /// </summary>
@@ -680,6 +701,12 @@ namespace ApplicationService.Startup
         {
             var local = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
             var userFontsDir = @$"{local}\Microsoft\Windows\Fonts";
+            if (!Directory.Exists(userFontsDir))
+            {
+                // 空のリストを返す
+                return new List<string>();
+            }
+
             return Directory.EnumerateFiles(userFontsDir, "*", SearchOption.TopDirectoryOnly);
         }
 

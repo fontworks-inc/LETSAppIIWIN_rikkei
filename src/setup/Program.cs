@@ -36,12 +36,19 @@ namespace setup
 
             // LETSアプリの起動(ショートカットを実行する)
             string shortcut = $@"{homedrive}\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\LETS デスクトップアプリ.lnk";
-            Process p2 = Process.Start(shortcut);
+            // ショートカットの作成日時を確認する
+            DateTime dtCreate = File.GetCreationTime(shortcut);
 
-            // チュートリアル画面の起動
-            Thread.Sleep(5000); // アプリの起動待ち
-            string updator = $@"{homedrive}\ProgramData\Fontworks\LETS\LETSUpdater.exe";
-            Process p3 = Process.Start(updator);
+            // ショートカット作成から1分以内なら起動処理を行う
+            if ((DateTime.Now.CompareTo(dtCreate.AddMinutes(1))) <= 0)
+            {
+                Process p2 = Process.Start(shortcut);
+
+                // チュートリアル画面の起動
+                Thread.Sleep(5000); // アプリの起動待ち
+                string updator = $@"{homedrive}\ProgramData\Fontworks\LETS\LETSUpdater.exe";
+                Process p3 = Process.Start(updator);
+            }
         }
     }
 }

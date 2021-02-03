@@ -8,6 +8,7 @@
     <EnableDefaultItems Condition=" '$(EnableDefaultItems)' == '' ">false</EnableDefaultItems>
     <EnableDefaultCompileItems Condition=" '$(EnableDefaultCompileItems)' == '' ">false</EnableDefaultCompileItems>
     <ApplicationIcon>LETS.ico</ApplicationIcon>
+    <Version>1.0.0</Version>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
     <DebugType>none</DebugType>

@@ -162,6 +162,15 @@ namespace Client.UI.Resources {
         }
         
         /// <summary>
+        ///   通信エラーが発生しました。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string APP_04_01_ERR_Fatal {
+            get {
+                return ResourceManager.GetString("APP_04_01_ERR_Fatal", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   メールアドレス に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string APP_04_01_LBL_MAILADRESS {

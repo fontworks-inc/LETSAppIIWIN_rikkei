@@ -14,11 +14,15 @@
         /// インスタンスの初期化を行う
         /// </summary>
         /// <param name="basePath">API接続先のベースURL</param>
-        /// <param name="notifyBasePath">notifyBasePath-Agent</param>
-        public APIConfiguration(string basePath, string notifyBasePath)
+        /// <param name="notifyBasePath">通知サーバーのURL</param>
+        /// <param name="fixedTermConfirmationInterval">定期確認間隔</param>
+        /// <param name="communicationRetryCount">リトライ回数</param>
+        public APIConfiguration(string basePath, string notifyBasePath, int fixedTermConfirmationInterval, int communicationRetryCount)
         {
             this.BasePath = basePath;
             this.NotifyBasePath = notifyBasePath;
+            this.FixedTermConfirmationInterval = fixedTermConfirmationInterval;
+            this.CommunicationRetryCount = communicationRetryCount;
         }
 
         /// <summary>
@@ -27,7 +31,20 @@
         /// <example>"http://api/v1</example>
         public string BasePath { get; }
 
+        /// <summary>
+        /// 通知サーバーのURL
+        /// </summary>
         public string NotifyBasePath { get; }
+
+        /// <summary>
+        /// 定期確認間隔
+        /// </summary>
+        public int FixedTermConfirmationInterval { get; }
+
+        /// <summary>
+        /// リトライ回数
+        /// </summary>
+        public int CommunicationRetryCount { get; }
 
         /// <summary>
         /// 強制ログアウトを実施するイベント

@@ -35,7 +35,8 @@ namespace Infrastructure.API
             this.APIConfiguration = apiConfiguration;
             this.BasePath = apiConfiguration.BasePath;
             this.NotifyBasePath = apiConfiguration.NotifyBasePath;
-
+            this.FixedTermConfirmationInterval = apiConfiguration.FixedTermConfirmationInterval;
+            this.CommunicationRetryCount = apiConfiguration.CommunicationRetryCount;
         }
 
         /// <summary>
@@ -84,8 +85,7 @@ namespace Infrastructure.API
         {
             VolatileSetting vSetting = new VolatileSettingMemoryRepository().GetVolatileSetting();
             DateTime lastAccess = vSetting.LastAccessAt ?? default(DateTime);
-            //int retry_count = this.CommunicationRetryCount;
-            int retry_count = 2;
+            int retry_count = this.CommunicationRetryCount;
 
             int i = 0;
 
