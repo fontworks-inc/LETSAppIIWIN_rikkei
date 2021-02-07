@@ -203,9 +203,6 @@ namespace Client.UI.Components
                 loginWindow = new LoginWindow();
             }
 
-            // 最前面にする
-            loginWindow.Topmost = true;
-
             // 非表示の場合は再表示する
             if (loginWindow.Visibility != System.Windows.Visibility.Visible)
             {
@@ -216,7 +213,6 @@ namespace Client.UI.Components
             if (loginWindow.WindowState == System.Windows.WindowState.Minimized)
             {
                 loginWindow.WindowState = System.Windows.WindowState.Normal;
-                loginWindow.Topmost = false;
             }
 
             loginWindow.Activate();
@@ -253,9 +249,6 @@ namespace Client.UI.Components
                 {
                     // ログアウト処理を実行する
                     this.Logout();
-
-                    // 「LETSフォント」のフォントファイルパスを出力する
-                    this.fontManagerService.OutputLetsFontsList();
                 }
                 else
                 {
@@ -580,34 +573,52 @@ namespace Client.UI.Components
 
         [DllImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
-        public extern static bool EnumWindows(EnumWindowsDelegate lpEnumFunc,
-            IntPtr lparam);
+
+        /// <summary>
+        /// ウィンドウを列挙する
+        /// </summary>
+        /// <param name="lpEnumFunc">コールバック関数</param>
+        /// <param name="lparam">コールバック関数パラメタ</param>
+#pragma warning disable SA1204 // Static elements should appear before instance elements
+        private static extern bool EnumWindows(EnumWindowsDelegate lpEnumFunc, IntPtr lparam);
+#pragma warning restore SA1204 // Static elements should appear before instance elements
 
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+
         /// <summary>
         /// ウィンドウのタイトルを取得する
         /// </summary>
-        private static extern int GetWindowText(IntPtr hWnd,
-            StringBuilder lpString, int nMaxCount);
+        /// <param name="hWnd">ウィンドウハンドル</param>
+        /// <param name="lpString">タイトル文字列</param>
+        /// <param name="nMaxCount">文字列最大長</param>
+        private static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
 
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+
         /// <summary>
         /// ウィンドウのクラス名を取得する
         /// </summary>
-        private static extern int GetClassName(IntPtr hWnd,
-            StringBuilder lpClassName, int nMaxCount);
+        /// <param name="hWnd">ウィンドウハンドル</param>
+        /// <param name="lpClassName">クラス名文字列</param>
+        /// <param name="nMaxCount">文字列最大長</param>
+        private static extern int GetClassName(IntPtr hWnd, StringBuilder lpClassName, int nMaxCount);
 
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+
         /// <summary>
         /// ウィンドウのタイトル長さを取得する
         /// </summary>
+        /// <param name="hWnd">ウィンドウハンドル</param>
         private static extern int GetWindowTextLength(IntPtr hWnd);
 
         [DllImport("user32.dll", SetLastError = true)]
+
         /// <summary>
         /// ウィンドウのプロセスIDを取得する
         /// </summary>
-        public static extern int GetWindowThreadProcessId(IntPtr hWnd, out int lpdwProcessId);
+        /// <param name="hWnd">ウィンドウハンドル</param>
+        /// <param name="lpdwProcessId">プロセスID</param>
+        private static extern int GetWindowThreadProcessId(IntPtr hWnd, out int lpdwProcessId);
 
         [DllImport("user32.dll")]
         private static extern int SendMessage(IntPtr hWnd, uint msg, int wParam, int lParam);
@@ -615,12 +626,15 @@ namespace Client.UI.Components
         /// <summary>
         /// LETSが存在したか
         /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.OrderingRules", "SA1201:Elements should appear in the correct order", Justification = "<保留中>")]
         private static bool isExitLETS = false;
 
-        private ComponentManager compManager;
+        /// <summary>
+        /// ウィンドウのプロセスIDを取得する
+        /// </summary>
+        /// <param name="compManager">コンポーネントマネージャ</param>
         private void ExitLETS(ComponentManager compManager)
         {
-            this.compManager = compManager;
             try
             {
                 isExitLETS = false;
@@ -632,7 +646,7 @@ namespace Client.UI.Components
                         return;
                     }
 
-                    Thread.Sleep(500);
+                    Thread.Sleep(1000);
                 }
             }
             catch (Exception ex)
@@ -641,8 +655,16 @@ namespace Client.UI.Components
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.OrderingRules", "SA1201:Elements should appear in the correct order", Justification = "<保留中>")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1615:Element return value should be documented", Justification = "<保留中>")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1600:Elements should be documented", Justification = "<保留中>")]
         public delegate bool EnumWindowsDelegate(IntPtr hWnd, IntPtr lparam);
 
+        /// <summary>
+        /// ウィンドウ列挙のコールバック関数
+        /// </summary>
+        /// <param name="hWnd">ウィンドウハンドル</param>
+        /// <param name="lparam">コールバックパラメタ</param>
         private bool EnumWindowCallBack(IntPtr hWnd, IntPtr lparam)
         {
             try
@@ -651,31 +673,38 @@ namespace Client.UI.Components
                 int textLen = GetWindowTextLength(hWnd);
                 if (textLen > 0)
                 {
-                    // ウィンドウのタイトルを取得する
-                    StringBuilder tsb = new StringBuilder(textLen + 1);
-                    GetWindowText(hWnd, tsb, tsb.Capacity);
-
-                    // ウィンドウのクラス名を取得する
-                    StringBuilder csb = new StringBuilder(256);
-                    GetClassName(hWnd, csb, csb.Capacity);
-
-                    // プロセスIDからプロセス名を取得する
-                    int pid;
-                    GetWindowThreadProcessId(hWnd, out pid);
-                    Process p = Process.GetProcessById(pid);
-                    string procname = p.ProcessName;
-
-                    if (tsb.ToString().Contains("LETS-Ver") && csb.ToString().Contains("#32770") && procname.Contains("msiexec"))
+                    try
                     {
-                        Logger.Debug("EnumWindowCallBack:" + tsb.ToString());
-                        Logger.Debug("EnumWindowCallBack:ProcName=" + procname);
-                        isExitLETS = true;
-                        if (myhWnd != IntPtr.Zero)
-                        {
-                            SendMessage(myhWnd, 0x8001, 0, 3);
-                        }
+                        // ウィンドウのタイトルを取得する
+                        StringBuilder tsb = new StringBuilder(textLen + 1);
+                        GetWindowText(hWnd, tsb, tsb.Capacity);
 
-                        return false;
+                        // ウィンドウのクラス名を取得する
+                        StringBuilder csb = new StringBuilder(256);
+                        GetClassName(hWnd, csb, csb.Capacity);
+
+                        // プロセスIDからプロセス名を取得する
+                        int pid;
+                        GetWindowThreadProcessId(hWnd, out pid);
+                        Process p = Process.GetProcessById(pid);
+                        string procname = p.ProcessName;
+
+                        if (tsb.ToString().Contains("LETS-Ver") && csb.ToString().Contains("#32770") && procname.Contains("msiexec"))
+                        {
+                            Logger.Debug("EnumWindowCallBack:" + tsb.ToString());
+                            Logger.Debug("EnumWindowCallBack:ProcName=" + procname);
+                            isExitLETS = true;
+                            if (myhWnd != IntPtr.Zero)
+                            {
+                                SendMessage(myhWnd, 0x8001, 0, 3);
+                            }
+
+                            return false;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Debug("EnumWindowCallBack:" + ex.Message + "\n");
                     }
                 }
             }
@@ -686,6 +715,5 @@ namespace Client.UI.Components
 
             return true;
         }
-
     }
 }

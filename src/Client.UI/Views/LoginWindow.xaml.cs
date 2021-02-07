@@ -57,7 +57,9 @@ namespace Client.UI.Views
         {
             this.WindowState = WindowState.Normal;
             this.ShowInTaskbar = true;
-            this.Topmost = false;
+
+            // 最前面フラグを立てておく
+            this.Topmost = true;
 
             // 画面サイズを初期化
             this.Width = LoginWindow.WindowWidth;
@@ -68,6 +70,16 @@ namespace Client.UI.Views
 
             this.MainFrame.NavigationService.Navigate(new Login());
             base.ShowDialog();
+        }
+
+        /// <summary>
+        /// 画面がアクティブになった時の処理
+        /// </summary>
+        protected override void OnActivated(EventArgs e)
+        {
+            // 最前面フラグを落とす
+            this.Topmost = false;
+            base.OnActivated(e);
         }
 
         /// <summary>
@@ -82,6 +94,8 @@ namespace Client.UI.Views
 
             // 認証情報をクリア
             this.loginWindowWrapper.SetAuthenticationInformation(null);
+
+            this.Topmost = false;
         }
 
         /// <summary>

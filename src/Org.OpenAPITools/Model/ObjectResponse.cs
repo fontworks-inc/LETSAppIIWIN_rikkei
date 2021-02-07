@@ -1,4 +1,4 @@
-/* 
+﻿/* 
  * フォント配信サービス
  *
  * フォント配信サービスのインタフェース仕様です。
@@ -22,65 +22,64 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using System.ComponentModel.DataAnnotations;
 using OpenAPIDateConverter = Org.OpenAPITools.Client.OpenAPIDateConverter;
+using NLog;
+
 
 namespace Org.OpenAPITools.Model
 {
     /// <summary>
-    /// CustomerResponse
+    /// ObjectResponse
     /// </summary>
     [DataContract]
-    public partial class CustomerResponse :  IEquatable<CustomerResponse>, IValidatableObject
+    public partial class ObjectResponse : IEquatable<ObjectResponse>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="CustomerResponse" /> class.
+        /// ロガー
         /// </summary>
-        /// <param name="code">code.</param>
-        /// <param name="message">message.</param>
-        /// <param name="data">data.</param>
-        public CustomerResponse(int code = default(int), string message = default(string), CustomerData data = default(CustomerData))
+        private static readonly Logger Logger = LogManager.GetLogger("nlog.config");
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ObjectResponse" /> class.
+        /// </summary>
+        public ObjectResponse()
+        { 
+        }
+
+            /// <summary>
+            /// Initializes a new instance of the <see cref="ObjectResponse" /> class.
+            /// </summary>
+            /// <param name="code">code.</param>
+            /// <param name="message">message.</param>
+            /// <param name="data">data.</param>
+            public ObjectResponse(int code = default(int), string message = default(string), ClientVersionData data = default(ClientVersionData))
         {
             this.Code = code;
             this.Message = message;
-            this.Data = data;
         }
 
         /// <summary>
-        /// お客様情報のレスポンス(APIレスポンスからデシリアライズ)
+        /// Initializes a new instance of the <see cref="ObjectResponse" /> class.
         /// </summary>
-        /// <param name="apiResponse">APIレスポンスデータ</param>
-        public CustomerResponse(object apiResponse)
+        /// <param name="apiResponse">apiResponse.</param>
+        public ObjectResponse(object apiResponse)
         {
-            CustomerResponse response = 
-            JsonConvert.DeserializeObject<CustomerResponse>(apiResponse.ToString());
+            ObjectResponse response =
+            JsonConvert.DeserializeObject<ObjectResponse>(apiResponse.ToString());
             this.Code = response.Code;
             this.Message = response.Message;
-            this.Data = response.Data;
-        }
-
-        /// <summary>
-        /// お客様情報のレスポンス
-        /// </summary>
-        public CustomerResponse()
-        {
         }
 
         /// <summary>
         /// Gets or Sets Code
         /// </summary>
-        [DataMember(Name="code", EmitDefaultValue=false)]
+        [DataMember(Name = "code", EmitDefaultValue = false)]
         public int Code { get; set; }
 
         /// <summary>
         /// Gets or Sets Message
         /// </summary>
-        [DataMember(Name="message", EmitDefaultValue=false)]
+        [DataMember(Name = "message", EmitDefaultValue = false)]
         public string Message { get; set; }
-
-        /// <summary>
-        /// Gets or Sets Data
-        /// </summary>
-        [DataMember(Name="data", EmitDefaultValue=false)]
-        public CustomerData Data { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -89,14 +88,13 @@ namespace Org.OpenAPITools.Model
         public override string ToString()
         {
             var sb = new StringBuilder();
-            sb.Append("class CustomerResponse {\n");
+            sb.Append("class ObjectResponse {\n");
             sb.Append("  Code: ").Append(Code).Append("\n");
             sb.Append("  Message: ").Append(Message).Append("\n");
-            sb.Append("  Data: ").Append(Data).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
-  
+
         /// <summary>
         /// Returns the JSON string presentation of the object
         /// </summary>
@@ -113,33 +111,28 @@ namespace Org.OpenAPITools.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as CustomerResponse);
+            return this.Equals(input as ObjectResponse);
         }
 
         /// <summary>
-        /// Returns true if CustomerResponse instances are equal
+        /// Returns true if ObjectResponse instances are equal
         /// </summary>
-        /// <param name="input">Instance of CustomerResponse to be compared</param>
+        /// <param name="input">Instance of ObjectResponse to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(CustomerResponse input)
+        public bool Equals(ObjectResponse input)
         {
             if (input == null)
                 return false;
 
-            return 
+            return
                 (
                     this.Code == input.Code ||
                     this.Code.Equals(input.Code)
-                ) && 
+                ) &&
                 (
                     this.Message == input.Message ||
                     (this.Message != null &&
                     this.Message.Equals(input.Message))
-                ) && 
-                (
-                    this.Data == input.Data ||
-                    (this.Data != null &&
-                    this.Data.Equals(input.Data))
                 );
         }
 
@@ -155,8 +148,6 @@ namespace Org.OpenAPITools.Model
                 hashCode = hashCode * 59 + this.Code.GetHashCode();
                 if (this.Message != null)
                     hashCode = hashCode * 59 + this.Message.GetHashCode();
-                if (this.Data != null)
-                    hashCode = hashCode * 59 + this.Data.GetHashCode();
                 return hashCode;
             }
         }
@@ -171,5 +162,4 @@ namespace Org.OpenAPITools.Model
             yield break;
         }
     }
-
 }

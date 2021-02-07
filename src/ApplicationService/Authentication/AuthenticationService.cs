@@ -19,6 +19,11 @@ namespace ApplicationService.Authentication
         private static readonly Logger Logger = LogManager.GetLogger("nlog.config");
 
         /// <summary>
+        /// 最初のログインフラグ
+        /// </summary>
+        private static bool isFirstLogined = false;
+
+        /// <summary>
         /// 文言の取得を行うインスタンス
         /// </summary>
         private readonly IResourceWrapper resourceWrapper = null;
@@ -185,8 +190,6 @@ namespace ApplicationService.Authentication
                     deviceId, mailAddress, password);
         }
 
-        static private bool isFirstLogined = false; // インストールから未ログインを示す（暫定処置）
-
         /// <summary>
         /// ログイン情報を保存する（ログイン完了処理）
         /// </summary>
@@ -240,6 +243,9 @@ namespace ApplicationService.Authentication
                 throw new InvalidOperationException(this.resourceWrapper.GetString("LOG_ERR_AuthenticationService_Logout_InvalidOperationException"));
             }
 
+            // [フォント：フォント情報]でアクティベートされているLETSフォントをディアクティベート
+            this.fontManagerService.DeactivateSettingFonts();
+
             // ユーザ別保存：デバイスIDを取得
             var userStatus = this.userStatusRepository.GetStatus();
             var deviceId = userStatus.DeviceId;
@@ -247,7 +253,7 @@ namespace ApplicationService.Authentication
             // アクセストークン取得
             var accessToken = this.volatileSettingRepository.GetVolatileSetting().AccessToken;
 
-            if (isCallApi) 
+            if (isCallApi)
             {
                 try
                 {
@@ -262,9 +268,6 @@ namespace ApplicationService.Authentication
 
             // 通知停止
             this.receiveNotificationRepository.Stop();
-
-            // [フォント：フォント情報]でアクティベートされているLETSフォントをディアクティベート
-            this.fontManagerService.DeactivateSettingFonts();
 
             // [ユーザー別保存：ログイン状態]に「ログアウト」を保存する
             userStatus.IsLoggingIn = false;

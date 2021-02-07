@@ -22,7 +22,6 @@ namespace Infrastructure.File
         /// <summary>
         /// 通信リトライ回数 デフォルト値
         /// </summary>
-        //private static readonly int CommunicationRetryCount = 10;
         private static readonly int CommunicationRetryCount = 2;
 
         /// <summary>

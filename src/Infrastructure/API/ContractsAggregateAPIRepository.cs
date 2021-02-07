@@ -75,10 +75,11 @@ namespace Infrastructure.API
                         {
                             contract.ContractEndDate = DateTime.Parse(item.ContractEndDate);
                         }
-                        catch (Exception ex)
+                        catch (Exception)
                         {
                             contract.ContractEndDate = new DateTime(0);
                         }
+
                         response.Contracts.Add(contract);
                     };
                     ret.Data.Contracts.ForEach(action);

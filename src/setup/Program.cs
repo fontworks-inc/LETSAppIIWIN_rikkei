@@ -29,6 +29,9 @@ namespace setup
             System.Reflection.Assembly executionAsm = System.Reflection.Assembly.GetExecutingAssembly();
             string actualPath = System.IO.Path.GetDirectoryName(executionAsm.Location);
 
+            // インストーラ開始日時を取得する
+            DateTime inststt = DateTime.Now;
+
             // インストーラの起動
             string installer = actualPath + @"\LETS-Installer.msi";
             Process p1 = Process.Start(installer);
@@ -36,11 +39,12 @@ namespace setup
 
             // LETSアプリの起動(ショートカットを実行する)
             string shortcut = $@"{homedrive}\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\LETS デスクトップアプリ.lnk";
+
             // ショートカットの作成日時を確認する
             DateTime dtCreate = File.GetCreationTime(shortcut);
 
-            // ショートカット作成から1分以内なら起動処理を行う
-            if ((DateTime.Now.CompareTo(dtCreate.AddMinutes(1))) <= 0)
+            // ショートカット作成日時がインストーラ起動日時より後ならば、起動を行う
+            if (inststt.CompareTo(dtCreate) <= 0)
             {
                 Process p2 = Process.Start(shortcut);
 

@@ -36,6 +36,7 @@ namespace Org.OpenAPITools.Model
         /// </summary>
         /// <param name="userFontId">userFontId.</param>
         /// <param name="activateFlg">activateFlg.</param>
+        /// <param name="fontId">fontId.</param>
         /// <param name="displayFontName">displayFontName.</param>
         /// <param name="fileName">fileName.</param>
         /// <param name="fileSize">fileSize.</param>

@@ -96,5 +96,10 @@ namespace Core.Entities
         /// クライアントアプリケーションのパス
         /// </summary>
         public string ClientApplicationPath { get; set; } = string.Empty;
+
+        /// <summary>
+        /// ProxyServer
+        /// </summary>
+        public string ProxyServer { get; set; } = string.Empty;
     }
 }

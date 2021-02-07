@@ -119,8 +119,9 @@ namespace Infrastructure.API
                 // 戻り値のセット（個別処理）
                 var ret = (AccessTokenRefreshTokenResponse)this.ApiResponse;
                 if (ret.Code == (int)ResponseCode.Succeeded
-                    || ret.Code == (int)ResponseCode.MaximumNumberOfDevicesInUse)   //暫定的に端末数オーバーもOKとする(本来はないはず)
+                    || ret.Code == (int)ResponseCode.MaximumNumberOfDevicesInUse)
                 {
+                    // 暫定的に端末数オーバーもOKとする(本来はないはず)
                     response.AccessToken = ret.Data.AccessToken;
                     response.RefreshToken = ret.Data.RefreshToken;
                 }

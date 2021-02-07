@@ -192,7 +192,6 @@ namespace OS.Services
             // 起動中の他のアプリケーションに通知
             if (result > 0)
             {
-                //SendMessage((IntPtr)HWNDBROADCAST, WMFONTCHANGE, 0, 0);
                 fontChange = true;
             }
         }
@@ -272,40 +271,6 @@ namespace OS.Services
             regkey.Close();
         }
 
-        public bool IsExistRegistry(string key)
-        {
-            RegistryKey regkey = null;
-            try
-            {
-                regkey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(this.registryFontsPath, true);
-                if (regkey != null)
-                {
-                    if (string.IsNullOrEmpty(key) == false)
-                    {
-                        if (regkey.GetValue(key) != null)
-                        {
-                            return true;
-                        }
-                    }
-                    else
-                    {
-                        return true;
-                    }
-                }
-            }
-            catch (Exception)
-            {
-            }
-            finally
-            {
-                if (regkey != null)
-                {
-                    regkey.Close();
-                }
-            }
-            return false;
-        }
-
         /// <summary>
         /// フォント設定ファイルにキーを追加する
         /// </summary>
@@ -318,9 +283,6 @@ namespace OS.Services
             if (target != null)
             {
                 // 登録済（ディアクティベート⇒アクティベート）の場合
-                //font.IsActivated = true;
-                //font.RegistryKey = key;
-                //target = font;
                 target.IsActivated = true;
                 target.RegistryKey = key;
             }
@@ -347,7 +309,7 @@ namespace OS.Services
             }
             catch (Exception)
             {
-                //  無視
+                // 無視
             }
         }
 
@@ -363,9 +325,6 @@ namespace OS.Services
             if (target != null)
             {
                 // 登録済（アクティベート⇒ディアクティベート）の場合
-                //font.IsActivated = false;
-                //font.RegistryKey = string.Empty;
-                //target = font;
                 target.IsActivated = false;
                 target.RegistryKey = string.Empty;
             }
@@ -385,8 +344,6 @@ namespace OS.Services
             var target = settings.Fonts.FirstOrDefault(f => f.Path == font.Path);
             if (target != null)
             {
-                //font.IsRemove = true;
-                //target = font;
                 target.IsRemove = true;
             }
 

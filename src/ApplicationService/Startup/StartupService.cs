@@ -330,7 +330,7 @@ namespace ApplicationService.Startup
             }
             catch (Exception e)
             {
-                Logger.Warn(e, this.resourceWrapper.GetString("LOG_ERR_StartingVersionCheck_clientApplicationVersionAPIRepository"));
+                Logger.Debug(e, this.resourceWrapper.GetString("LOG_ERR_StartingVersionCheck_clientApplicationVersionAPIRepository"));
 
                 // APIから取れなければキャッシュからバージョンを取得する
                 startingVersion = this.clientApplicationVersionFileRepository.GetClientApplicationVersion().Version;

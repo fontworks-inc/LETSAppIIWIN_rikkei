@@ -71,6 +71,13 @@ namespace Client.UI
         /// <param name="containerRegistry">コンテナレジストリ</param>
         protected override void RegisterTypes(IContainerRegistry containerRegistry)
         {
+            {
+                string selfpath = System.Reflection.Assembly.GetExecutingAssembly().Location;
+                System.IO.FileInfo fi = new System.IO.FileInfo(selfpath);
+                Logger.Debug("===========================================");
+                Logger.Debug("LETS.exe:CreationTime=" + fi.CreationTime);
+            }
+
             // メモリ上で保存する情報
             var volatileSettingMemoryRepository = new VolatileSettingMemoryRepository();
             containerRegistry.RegisterInstance<IVolatileSettingRepository>(volatileSettingMemoryRepository);

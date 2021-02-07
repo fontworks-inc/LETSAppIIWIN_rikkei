@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Net;
 using ApplicationService.Interfaces;
 using Core.Entities;
 using Core.Interfaces;
+using Microsoft.Win32;
 using NLog;
 
 namespace ApplicationService.Startup
@@ -101,6 +103,7 @@ namespace ApplicationService.Startup
             // [共通保存：更新プログラム情報.ダウンロード状態]に「ダウンロード中」を設定する
             ApplicationRuntime applicationRuntime = this.applicationRuntimeRepository.GetApplicationRuntime();
             applicationRuntime.NextVersionInstaller.DownloadStatus = DownloadStatus.Running;
+            this.applicationRuntimeRepository.SaveApplicationRuntime(applicationRuntime);
 
             // メモリに「ダウンロード中」を設定する
             VolatileSetting volatileSetting = this.volatileSettingRepository.GetVolatileSetting();
@@ -159,6 +162,7 @@ namespace ApplicationService.Startup
 
             // ダウンロードURL
             Uri url = new Uri(installer.Url);
+            string proxyserver = this.GetProxyServer();
 
             // ダウンロード先のファイルパス
             string homedrive = Environment.GetEnvironmentVariable("HOMEDRIVE");
@@ -175,6 +179,10 @@ namespace ApplicationService.Startup
             if (this.webClient == null)
             {
                 this.webClient = new MyWebClient(this.timeoutMillisecond);
+                if (!string.IsNullOrEmpty(proxyserver))
+                {
+                    this.webClient.Proxy = new WebProxy(proxyserver);
+                }
 
                 // イベントハンドラの作成
                 this.webClient.DownloadFileCompleted += new System.ComponentModel.AsyncCompletedEventHandler(this.NotifyDownloading);
@@ -213,6 +221,62 @@ namespace ApplicationService.Startup
                 VolatileSetting volatileSetting = this.volatileSettingRepository.GetVolatileSetting();
                 volatileSetting.IsDownloading = false;
             }
+        }
+
+        private string GetProxyServer()
+        {
+            VolatileSetting vSetting = this.volatileSettingRepository.GetVolatileSetting();
+            if (vSetting.ProxyServer != string.Empty)
+            {
+                return vSetting.ProxyServer;
+            }
+
+            string proxyserver = null;
+
+            try
+            {
+                RegistryKey key = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Internet Settings");
+                proxyserver = (string)key.GetValue("ProxyServer");
+
+                if (proxyserver == null || proxyserver == string.Empty)
+                {
+                    Process p = new Process();
+
+                    // コマンドプロンプトと同じように実行します
+                    p.StartInfo.FileName = System.Environment.GetEnvironmentVariable("ComSpec");
+                    p.StartInfo.Arguments = "/c " + "netsh winhttp show proxy"; // 実行するファイル名（コマンド）
+                    p.StartInfo.CreateNoWindow = true; // コンソール・ウィンドウは開かない
+                    p.StartInfo.UseShellExecute = false; // シェル機能を使用しない
+                    p.StartInfo.RedirectStandardOutput = true;
+                    p.Start();
+                    string cmdresult = p.StandardOutput.ReadToEnd();
+                    p.WaitForExit();
+
+                    var lines = cmdresult.Replace("\r\n", "\n").Split(new[] { '\n', '\r' });
+                    foreach (string line in lines)
+                    {
+                        var words = line.Replace("  ", " ").Split(' ');
+                        string preWord = string.Empty;
+                        foreach (string w in words)
+                        {
+                            if (preWord == "サーバー:")
+                            {
+                                proxyserver = w;
+                            }
+
+                            preWord = w;
+                        }
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                // Proxy設定に失敗したら無視する
+            }
+
+            vSetting.ProxyServer = proxyserver;
+
+            return proxyserver;
         }
 
         private class MyWebClient : WebClient

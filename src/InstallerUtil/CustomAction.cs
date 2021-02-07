@@ -8,6 +8,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 using System.Windows.Forms;
+using Microsoft.Win32;
+using System.Net;
 
 namespace InstallerUtil
 {
@@ -23,15 +25,17 @@ namespace InstallerUtil
 
         private void CustomAction_AfterUninstall(object sender, System.Configuration.Install.InstallEventArgs e)
         {
-            // 親フォームを作成
-            using (Form f = new Form())
+            using (UninstallConfirm f = new UninstallConfirm())
             {
-                f.TopMost = true; // 親フォームを常に最前面に表示する
-                f.Activate();
-                                  // 作成したフォームを親フォームとしてメッセージボックスに設定
-                MessageBox.Show(f, "アンインストールを完了するためには、PCの再起動が必要です。\n編集中のファイルがある場合は保存したのち、再起動を実施してください。");
-                f.TopMost = false;
+                f.ShowDialog();
             }
+            //// 親フォームを作成
+            //using (Form f = new Form())
+            //{
+            //    f.TopMost = true; // 親フォームを常に最前面に表示する
+            //    MessageBox.Show(f, "アンインストールを完了するためには、PCの再起動が必要です。\n編集中のファイルがある場合は保存したのち、再起動を実施してください。");
+            //    f.TopMost = false;
+            //}
         }
 
         private void CustomAction_BeforeUninstall(object sender, System.Configuration.Install.InstallEventArgs e)
@@ -47,15 +51,18 @@ namespace InstallerUtil
 
             // uninstallfontバッチファイル名
             string uninstallbat = "uninstallfonts.bat";
-            string uninstallfonts = $@"{letsfolder}\{uninstallbat}";
+            string uninstallfontsbat = $@"{letsfolder}\{uninstallbat}";
+
+            // レジストリ削除バッチファイル名
+            string uninstregbat = $@"{letsfolder}\.uninstreg.bat";
 
             // ユーザ情報クリアバッチ名
-            string clearinfobat = $@"{letsfolder}\clearuserdata.bat";
+            string clearinfobat = $@"{letsfolder}\.clearuserdata.bat";
 
             try
             {
-                // フォント削除バッチの登録
-                if (File.Exists(uninstallfonts))
+                // フォント削除バッチ登録
+                if (File.Exists(uninstallfontsbat))
                 {
                     // バッチファイルが存在したらショートカットへ登録
                     string shortcutfolder = $@"{homedrive}\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp";
@@ -64,14 +71,23 @@ namespace InstallerUtil
                     {
                         File.Delete(destfile);
                     }
-                    File.Move($@"{letsfolder}\{uninstallbat}", destfile);
+                    File.Move($@"{uninstallfontsbat}", destfile);
+                }
+
+                // レジストリ削除バッチの実行
+                if (File.Exists(uninstregbat))
+                {
+                    // バッチファイルが存在したら実行
+                    this.SetHidden(uninstregbat, false);
+                    Process.Start(new ProcessStartInfo(uninstregbat) { CreateNoWindow = true, UseShellExecute = false });
                 }
 
                 // ユーザ情報削除バッチの実行
                 if (File.Exists(clearinfobat))
                 {
                     // バッチファイルが存在したら実行
-                    Process.Start(clearinfobat);
+                    this.SetHidden(clearinfobat, false);
+                    Process.Start(new ProcessStartInfo(clearinfobat) { CreateNoWindow = true, UseShellExecute = false });
                 }
             }
             catch(Exception ex)
@@ -103,8 +119,8 @@ namespace InstallerUtil
 
             try
             {
-                // configフォルダの削除
-                Delete($@"{letsfolder}\config");
+                //// configフォルダの削除
+                //Delete($@"{letsfolder}\config");
 
                 // LETS-Ver*フォルダを削除
                 string[] verFolders = Directory.GetDirectories(letsfolder, "LETS-Ver*");
@@ -117,6 +133,21 @@ namespace InstallerUtil
             {
                 File.WriteAllText($@"{letsfolder}\Uninst.log", ex.Message);
             }
+        }
+
+        private void SetHidden(string filepath, bool isHidden)
+        {
+            FileAttributes fa = System.IO.File.GetAttributes(filepath);
+            if (isHidden)
+            {
+                fa = fa | FileAttributes.Hidden;
+            }
+            else
+            {
+                fa = fa & ~FileAttributes.Hidden;
+            }
+
+            System.IO.File.SetAttributes(filepath, fa);
         }
 
         /// <summary>
@@ -161,6 +192,9 @@ namespace InstallerUtil
                 // 消せないフォルダも無視する
             }
         }
+
+        [DllImport("gdi32.dll", EntryPoint = "RemoveFontResourceW", SetLastError = true)]
+        private static extern int RemoveFontResource([In][MarshalAs(UnmanagedType.LPWStr)] string lpFileName);
 
         [DllImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]

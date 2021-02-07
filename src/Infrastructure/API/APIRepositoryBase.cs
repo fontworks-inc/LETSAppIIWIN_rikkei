@@ -124,7 +124,7 @@ namespace Infrastructure.API
                     }
                     else if (this.IsRefreshTokenExpired(this.ApiResponse))
                     {
-                        if (this.APIConfiguration.ForceLogout != null) 
+                        if (this.APIConfiguration.ForceLogout != null)
                         {
                             this.APIConfiguration.ForceLogout();
                         }
@@ -354,6 +354,26 @@ namespace Infrastructure.API
                 else if (typeof(CustomerResponse) == obj.GetType())
                 {
                     code = ((CustomerResponse)obj).Code;
+                }
+                else if (typeof(ClientVersionResponse) == obj.GetType())
+                {
+                    code = ((ClientVersionResponse)obj).Code;
+                }
+                else if (typeof(InlineResponse200) == obj.GetType())
+                {
+                    code = ((InlineResponse200)obj).Code;
+                }
+                else
+                {
+                    try
+                    {
+                        ObjectResponse objectResponse = new ObjectResponse(obj.ToString());
+                        code = objectResponse.Code;
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Debug("IsAccessTokenExpired:" + ex.StackTrace);
+                    }
                 }
 
                 {

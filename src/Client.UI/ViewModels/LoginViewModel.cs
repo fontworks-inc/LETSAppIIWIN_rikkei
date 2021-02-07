@@ -501,6 +501,7 @@ namespace Client.UI.ViewModels
                 Logger.Error(exception);
                 this.ErrorMessage = this.resouceWrapper.GetString("APP_04_01_ERR_Fatal");
                 this.ErrorMessageVisibility = Visibility.Visible;
+                Logger.Error(ex, this.ErrorMessage);
             }
         }
 

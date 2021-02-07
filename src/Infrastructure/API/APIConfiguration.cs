@@ -17,6 +17,7 @@
         /// <param name="notifyBasePath">通知サーバーのURL</param>
         /// <param name="fixedTermConfirmationInterval">定期確認間隔</param>
         /// <param name="communicationRetryCount">リトライ回数</param>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.OrderingRules", "SA1201:Elements should appear in the correct order", Justification = "<保留中>")]
         public APIConfiguration(string basePath, string notifyBasePath, int fixedTermConfirmationInterval, int communicationRetryCount)
         {
             this.BasePath = basePath;

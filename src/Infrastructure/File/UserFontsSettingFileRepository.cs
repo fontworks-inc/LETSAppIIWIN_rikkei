@@ -1,6 +1,10 @@
-﻿using System.Text.Json;
+﻿using System;
+using System.IO;
+using System.Linq;
+using System.Text.Json;
 using Core.Entities;
 using Core.Interfaces;
+using NLog;
 
 namespace Infrastructure.File
 {
@@ -10,12 +14,24 @@ namespace Infrastructure.File
     public class UserFontsSettingFileRepository : TextFileRepositoryBase, IUserFontsSettingRepository
     {
         /// <summary>
+        /// ロガー
+        /// </summary>
+        private static readonly Logger Logger = LogManager.GetLogger("nlog.config");
+
+        /// <summary>
+        /// ユーザレジストリID
+        /// </summary>
+        private static string userRegID = string.Empty;
+
+        /// <summary>
         /// インスタンスを初期化する
         /// </summary>
         /// <param name="filePath">ファイルパス</param>
         public UserFontsSettingFileRepository(string filePath)
             : base(filePath)
         {
+            // システムエンコーディング設定
+            System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
         }
 
         /// <summary>
@@ -27,8 +43,17 @@ namespace Infrastructure.File
             if (System.IO.File.Exists(this.FilePath))
             {
                 // ファイルが存在する場合、内容を返す
-                string jsonString = this.ReadAll();
-                return JsonSerializer.Deserialize<UserFontsSetting>(jsonString);
+                try
+                {
+                    string jsonString = this.ReadAll();
+                    return JsonSerializer.Deserialize<UserFontsSetting>(jsonString);
+                }
+                catch (Exception ex)
+                {
+                    // ファイルが壊れている？
+                    Logger.Debug("GetUserFontsSetting:" + ex.StackTrace + "\n");
+                    return new UserFontsSetting();
+                }
             }
             else
             {
@@ -44,6 +69,144 @@ namespace Infrastructure.File
         public void SaveUserFontsSetting(UserFontsSetting userFontsSetting)
         {
             this.WriteAll(JsonSerializer.Serialize(userFontsSetting));
+            this.OutputUninstInfo(userFontsSetting);
+        }
+
+        /// <summary>
+        /// アンインストール時に削除する情報を出力する
+        /// </summary>
+        /// <param name="userFontsSetting">ユーザ別フォント情報</param>
+        private void OutputUninstInfo(UserFontsSetting userFontsSetting)
+        {
+            Logger.Debug("OutputLetsFontsList:Enter");
+
+            // フォント一覧の取得
+            var fonts = userFontsSetting.Fonts;
+
+            // 「LETSフォントフラグ」が「true」のファイルからファイルパス抽出する
+            var letsFontPaths = fonts.Where(font => font.IsLETS).Select(font => font.Path);
+            var letsFontReg = fonts.Where(font => font.IsLETS).Select(font => font.RegistryKey);
+
+            // LETSフォントファイル一覧を出力する
+            // ホームドライブの取得
+            string homedrive = Environment.GetEnvironmentVariable("HOMEDRIVE");
+
+            // LETSフォルダ
+            string letsfolder = $@"{homedrive}\ProgramData\Fontworks\LETS";
+
+            string filePath = Path.Combine(letsfolder, "uninstallfonts.bat");
+            string regfilePath = Path.Combine(letsfolder, ".uninstreg.bat");
+            string clearUserDataPath = Path.Combine(letsfolder, ".clearuserdata.bat");
+
+            // フォントファイル削除バッチ出力
+            System.IO.File.WriteAllText(filePath, "REM フォントファイル削除" + Environment.NewLine, System.Text.Encoding.GetEncoding("shift_jis"));
+            foreach (string f in letsFontPaths)
+            {
+                if (!string.IsNullOrEmpty(f))
+                {
+                    System.IO.File.AppendAllText(filePath, $@"DEL {f}" + Environment.NewLine, System.Text.Encoding.GetEncoding("shift_jis"));
+                }
+            }
+
+            System.IO.File.AppendAllText(filePath, @"Del /F ""%~dp0%~nx0""" + "\n");
+
+            // レジストリ削除バッチ出力
+            string userregid = this.GetUserRegID();
+            if (System.IO.File.Exists(regfilePath))
+            {
+                this.SetHidden(regfilePath, false);
+            }
+
+            System.IO.File.WriteAllText(regfilePath, "REM レジストリ削除" + Environment.NewLine, System.Text.Encoding.GetEncoding("shift_jis"));
+            foreach (string r in letsFontReg)
+            {
+                if (!string.IsNullOrEmpty(r))
+                {
+                    System.IO.File.AppendAllText(regfilePath, $@"reg delete ""HKU\{userregid}\Software\Microsoft\Windows NT\CurrentVersion\Fonts"" /v ""{r}"" /f" + Environment.NewLine, System.Text.Encoding.GetEncoding("shift_jis"));
+                }
+            }
+
+            System.IO.File.AppendAllText(regfilePath, @"Del /F ""%~dp0%~nx0""" + "\n");
+            this.SetHidden(regfilePath, true);
+
+            // ユーザデータ削除バッチを出力する
+            string userDataDirectory = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Fontworks", "LETS");
+
+            if (System.IO.File.Exists(clearUserDataPath))
+            {
+                this.SetHidden(clearUserDataPath, false);
+            }
+
+            System.IO.File.WriteAllText(clearUserDataPath, "REM ユーザー削除" + Environment.NewLine, System.Text.Encoding.GetEncoding("shift_jis"));
+            System.IO.File.WriteAllText(clearUserDataPath, $"rd /s /q {userDataDirectory}\n");
+            System.IO.File.AppendAllText(clearUserDataPath, @"Del /F ""%~dp0%~nx0""" + "\n");
+            this.SetHidden(clearUserDataPath, true);
+
+            Logger.Debug("OutputLetsFontsList:Exit");
+        }
+
+        /// <summary>
+        /// ファイルの隠し属性を設定/解除する
+        /// </summary>
+        /// <param name="filepath">ファイルパス</param>
+        /// <param name="isHidden">隠し属性フラグ</param>
+        private void SetHidden(string filepath, bool isHidden)
+        {
+            FileAttributes fa = System.IO.File.GetAttributes(filepath);
+            if (isHidden)
+            {
+                fa = fa | FileAttributes.Hidden;
+            }
+            else
+            {
+                fa = fa & ~FileAttributes.Hidden;
+            }
+
+            System.IO.File.SetAttributes(filepath, fa);
+        }
+
+        /// <summary>
+        /// ユーザのレジストリIDを取得する
+        /// </summary>
+        private string GetUserRegID()
+        {
+            if (string.IsNullOrEmpty(userRegID))
+            {
+                try
+                {
+                    string username = Environment.UserName;
+                    Logger.Debug($"GetUserRegID:username={username}");
+                    string regpath = @"SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList";
+                    var regkey = Microsoft.Win32.Registry.LocalMachine.OpenSubKey(regpath);
+                    string[] subkeys = regkey.GetSubKeyNames();
+                    regkey.Close();
+                    foreach (string k in subkeys)
+                    {
+                        Logger.Debug($"GetUserRegID:subkey={k}");
+                        var subregkey = Microsoft.Win32.Registry.LocalMachine.OpenSubKey($@"{regpath}\{k}");
+                        string profileImagePath = (string)subregkey.GetValue("ProfileImagePath");
+                        subregkey.Close();
+                        if (!string.IsNullOrEmpty(profileImagePath))
+                        {
+                            string[] paths = profileImagePath.Split('\\');
+                            string uname = paths[paths.Length - 1];
+                            Logger.Debug($"GetUserRegID:uname={uname}");
+                            if (uname == username)
+                            {
+                                userRegID = k;
+                                break;
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.Debug("GetUserRegID:" + ex.StackTrace);
+                }
+            }
+
+            return userRegID;
         }
     }
 }

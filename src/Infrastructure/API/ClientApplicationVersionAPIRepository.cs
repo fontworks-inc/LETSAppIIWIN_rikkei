@@ -1,11 +1,11 @@
-﻿using Core.Entities;
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+using Core.Entities;
 using Core.Interfaces;
 using Org.OpenAPITools.Api;
 using Org.OpenAPITools.Client;
 using Org.OpenAPITools.Model;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Infrastructure.API
 {

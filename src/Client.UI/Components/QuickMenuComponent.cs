@@ -14,14 +14,14 @@ namespace Client.UI.Components
     public class QuickMenuComponent : Component
     {
         /// <summary>
-        /// 文言の取得を行うインスタンス
-        /// </summary>
-        private readonly IResourceWrapper resourceWrapper = null;
-
-        /// <summary>
         /// ロガー
         /// </summary>
         private static readonly Logger Logger = LogManager.GetLogger("nlog.config");
+
+        /// <summary>
+        /// 文言の取得を行うインスタンス
+        /// </summary>
+        private readonly IResourceWrapper resourceWrapper = null;
 
         /// <summary>
         /// メモリで保持する情報を格納するリポジトリ

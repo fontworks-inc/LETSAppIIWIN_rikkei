@@ -80,7 +80,6 @@ namespace Infrastructure.API
                 default:
                     this.ApiParam[APIParam.Contains] = "availableFonts,deletedFonts";
                     break;
-
             }
 
             var memory = new VolatileSettingMemoryRepository().GetVolatileSetting();
@@ -92,11 +91,11 @@ namespace Infrastructure.API
                 this.Invoke(this.CallGetInstallFonts);
 
                 // 戻り値のセット（個別処理）
-                //var ret = new CustomerResponse(this.ApiResponse);
                 var ret = (InlineResponse200)this.ApiResponse;
                 if (ret.Code == (int)ResponseCode.Succeeded)
                 {
-                    if (ret.Data != null) {
+                    if (ret.Data != null)
+                    {
                         foreach (InlineResponse200Font d in ret.Data.Fonts)
                         {
                             InstallFont f = new InstallFont(

@@ -143,7 +143,6 @@ namespace ApplicationService.Schedulers
             : base(60 * MillisecondMultiplier, exceptionNotify, resourceWrapper)
         {
             this.originalInterval = interval;
-            //this.originalInterval = 300;    // 5分にしておく
             this.volatileSettingRepository = volatileSettingRepository;
             this.userStatusRepository = userStatusRepository;
             this.startupService = startupService;

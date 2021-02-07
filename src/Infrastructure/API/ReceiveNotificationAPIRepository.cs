@@ -169,6 +169,7 @@ namespace Infrastructure.API
         /// <summary>
         /// SSE接続を停止する
         /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.OrderingRules", "SA1202:Elements should be ordered by access", Justification = "<保留中>")]
         public void Stop()
         {
             this.subscribed = false;
@@ -270,6 +271,7 @@ namespace Infrastructure.API
                     {
                         // Parseに失敗したら設定しない
                     }
+
                     this.userStatusRepository.SaveStatus(userStatus);
                     switch (sseMessage.EventType)
                     {
@@ -294,6 +296,12 @@ namespace Infrastructure.API
 
         private string GetProxyServer()
         {
+            VolatileSetting vSetting = SingletonVolatileSetting.GetInstance();
+            if (vSetting.ProxyServer != string.Empty)
+            {
+                return vSetting.ProxyServer;
+            }
+
             string proxyserver = null;
 
             try
@@ -336,6 +344,8 @@ namespace Infrastructure.API
             {
                 // Proxy設定に失敗したら無視する
             }
+
+            vSetting.ProxyServer = proxyserver;
 
             return proxyserver;
         }

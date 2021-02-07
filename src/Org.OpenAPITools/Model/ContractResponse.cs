@@ -37,6 +37,9 @@ namespace Org.OpenAPITools.Model
         /// </summary>
         private static readonly Logger Logger = LogManager.GetLogger("nlog.config");
 
+        /// <summary>
+        /// 契約情報のレスポンス
+        /// </summary>
         public ContractResponse()
         {
         }
@@ -55,10 +58,12 @@ namespace Org.OpenAPITools.Model
             this.Data = data;
         }
 
+        /// <summary>
+        /// 契約情報のレスポンス(APIレスポンスからデシリアライズ)
+        /// </summary>
+        /// <param name="apiResponse">APIレスポンスデータ</param>
         public ContractResponse(object apiResponse)
         {
-            //Logger.Info(string.Format(
-            //    "ContractResponse:apiResponse=" + apiResponse.ToString(), ""));
             ContractResponse response =
             JsonConvert.DeserializeObject<ContractResponse>(apiResponse.ToString());
             this.Code = response.Code;

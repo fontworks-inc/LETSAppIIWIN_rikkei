@@ -48,7 +48,6 @@ namespace Updater
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            WindowHelper.LoginLETS();
             Close();
         }
     }

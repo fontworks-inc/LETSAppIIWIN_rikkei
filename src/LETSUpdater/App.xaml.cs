@@ -41,6 +41,7 @@ namespace Updater
             app.StartupUri = new Uri("MainWindow.xaml", UriKind.Relative);
             app.InitializeComponent();
             app.Run();
+            WindowHelper.LoginLETS();
         }
 
         private static void updateLETS(string updateVersion, string runVersion)

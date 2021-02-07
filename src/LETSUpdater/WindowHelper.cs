@@ -194,23 +194,28 @@ namespace Updater
             int textLen = GetWindowTextLength(hWnd);
             if (0 < textLen)
             {
-                //ウィンドウのタイトルを取得する
-                StringBuilder tsb = new StringBuilder(textLen + 1);
-                GetWindowText(hWnd, tsb, tsb.Capacity);
-
-                // プロセスIDからプロセス名を取得する
-                int pid;
-                GetWindowThreadProcessId(hWnd, out pid);
-                Process p = Process.GetProcessById(pid);
-                string procname = p.ProcessName;
-
-                //ウィンドウのタイトルが"LETS"ならばログインメッセージを送信する
-                if (tsb.ToString() == "LETS" && procname == "LETS")
+                try
                 {
-                    SendMessageTimeout(hWnd, messageCode, IntPtr.Zero, new IntPtr(lParam), 0x2, 500, IntPtr.Zero);
-                    //string tmppath = Path.GetTempPath();
-                    //File.AppendAllText($@"{tmppath}Message.log", "SendMessageTimeout:" + messageCode.ToString() + ":" + lParam.ToString() + "\n");
-                    messageSended = true;
+                    //ウィンドウのタイトルを取得する
+                    StringBuilder tsb = new StringBuilder(textLen + 1);
+                    GetWindowText(hWnd, tsb, tsb.Capacity);
+
+                    // プロセスIDからプロセス名を取得する
+                    int pid;
+                    GetWindowThreadProcessId(hWnd, out pid);
+                    Process p = Process.GetProcessById(pid);
+                    string procname = p.ProcessName;
+
+                    //ウィンドウのタイトルが"LETS"ならばログインメッセージを送信する
+                    if (tsb.ToString() == "LETS" && procname == "LETS")
+                    {
+                        SendMessageTimeout(hWnd, messageCode, IntPtr.Zero, new IntPtr(lParam), 0x2, 100, IntPtr.Zero);
+                        messageSended = true;
+                    }
+                }
+                catch (Exception)
+                {
+                    //無視
                 }
             }
 

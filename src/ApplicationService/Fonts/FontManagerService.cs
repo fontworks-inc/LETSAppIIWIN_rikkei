@@ -75,27 +75,6 @@ namespace ApplicationService.Fonts
         private bool isExecuting;
 
         /// <summary>
-        /// エラーダイアログ表示用のイベント
-        /// </summary>
-        public ShowErrorDialogEvent ShowErrorDialogEvent { get; set; }
-
-        /// <summary>
-        /// ダウンロード開始時のイベント
-        /// </summary>
-        public FontStartDownloadEvent FontStartDownloadEvent { get; set; }
-
-        /// <summary>
-        /// ダウンロード完了時のイベント
-        /// </summary>
-        public FontDownloadCompletedEvent FontDownloadCompletedEvent { get; set; }
-
-        /// <summary>
-        /// ダウンロード失敗時のイベント
-        /// </summary>
-        /// <param name="font">失敗したフォント</param>
-        public FontDownloadFailedEvent FontDownloadFailedEvent { get; set; }
-
-        /// <summary>
         /// インスタンスを初期化する
         /// </summary>
         /// <param name="resourceWrapper">文言の取得を行うインスタンス</param>
@@ -127,6 +106,27 @@ namespace ApplicationService.Fonts
         }
 
         /// <summary>
+        /// エラーダイアログ表示用のイベント
+        /// </summary>
+        public ShowErrorDialogEvent ShowErrorDialogEvent { get; set; }
+
+        /// <summary>
+        /// ダウンロード開始時のイベント
+        /// </summary>
+        public FontStartDownloadEvent FontStartDownloadEvent { get; set; }
+
+        /// <summary>
+        /// ダウンロード完了時のイベント
+        /// </summary>
+        public FontDownloadCompletedEvent FontDownloadCompletedEvent { get; set; }
+
+        /// <summary>
+        /// ダウンロード失敗時のイベント
+        /// </summary>
+        /// <param name="font">失敗したフォント</param>
+        public FontDownloadFailedEvent FontDownloadFailedEvent { get; set; }
+
+        /// <summary>
         /// フォントの同期処理を実施する
         /// </summary>
         /// <param name="font">アクティベート対象フォント</param>
@@ -150,8 +150,9 @@ namespace ApplicationService.Fonts
                     {
                         // バージョンによる更新ができないので、無効とする
                         //// アクティベート対象フォントのバージョンが新しい場合、インストール対象フォントに加える
-                        //installFont = new InstallFont(string.Empty, true, font.FontId, font.DisplayFontName, string.Empty, font.FileSize, font.Version, false, true, font.IsFreemium, font.ContractIds);
+                        // installFont = new InstallFont(string.Empty, true, font.FontId, font.DisplayFontName, string.Empty, font.FileSize, font.Version, false, true, font.IsFreemium, font.ContractIds);
                     }
+
                     // Activateのみ実行する
                     this.fontActivationService.Activate(userFont);
                 }
@@ -265,7 +266,8 @@ namespace ApplicationService.Fonts
                         {
                             Logger.Info("ダウンロード開始");
                             this.isExecuting = true;
-                            while (targetFontList.Count > 0) {
+                            while (targetFontList.Count > 0)
+                            {
                                 this.DownloadFontFile(targetFontList);
                                 targetFontList = new List<InstallFont>(this.volatileSettingRepository.GetVolatileSetting().InstallTargetFonts);
                             }
@@ -400,47 +402,6 @@ namespace ApplicationService.Fonts
         }
 
         /// <summary>
-        /// 「LETSフォント」一覧を出力する
-        /// </summary>
-        public void OutputLetsFontsList()
-        {
-            Logger.Debug("OutputLetsFontsList:Enter");
-
-            // フォント一覧の取得
-            var fonts = this.userFontsSettingRepository.GetUserFontsSetting().Fonts;
-
-            // 「LETSフォントフラグ」が「true」のファイルからファイルパス抽出する
-            var letsFontPaths = fonts.Where(font => font.IsLETS).Select(font => font.Path);
-
-            // LETSフォントファイル一覧を出力する
-            string dirPath = Directory.GetParent(
-                this.volatileSettingRepository.GetVolatileSetting().ClientApplicationPath).Parent.FullName;
-            string filePath = Path.Combine(dirPath, "uninstallfonts.bat");
-            if (!File.Exists(filePath))
-            {
-                // ファイルが無ければ新規作成
-                File.CreateText(filePath).Close();
-            }
-
-            File.WriteAllText(filePath, "REM LETSフォント削除\n");
-            foreach (string l in letsFontPaths)
-            {
-                File.AppendAllText(filePath, $"DEL {l}\n");
-            }
-
-            File.AppendAllText(filePath, @"Del /F ""%~dp0%~nx0""" + "\n");
-
-            // ユーザデータ削除バッチを出力する
-            string clearUserDataPath = Path.Combine(dirPath, "clearuserdata.bat");
-            string userDataDirectory = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Fontworks", "LETS");
-            File.WriteAllText(clearUserDataPath, $"rd /s /q {userDataDirectory}\n");
-            File.AppendAllText(clearUserDataPath, @"Del /F ""%~dp0%~nx0""" + "\n");
-
-            Logger.Debug("OutputLetsFontsList:Exit");
-        }
-
-        /// <summary>
         /// フォントチェンジメッセージを送信する
         /// </summary>
         public void BroadcastFontChange()
@@ -516,7 +477,7 @@ namespace ApplicationService.Fonts
                     if (!matchActivate || !matchVersion)
                     {
                         // アンインストール実施済み
-                        bool didUninstall = false;
+                        // bool didUninstall = false;
 
                         /*
                          *  [フリーミアムフォントフラグ]
@@ -537,7 +498,8 @@ namespace ApplicationService.Fonts
                         {
                             this.fontActivationService.Uninstall(userFont); // ディアクティベート実行 + 削除フラグ
                             isFontChange = true;
-                            didUninstall = true;
+
+                            // didUninstall = true;
                         }
                         else if (!installFont.IsAvailableFont)
                         {
@@ -565,13 +527,14 @@ namespace ApplicationService.Fonts
                          *      インストール対象フォント | 保持しているフォント | 処理
                          *       true                    | -                    | インストール対象フォントに加える
                          */
-                        //if (installFont.NeedFontVersionUpdate && !didUninstall)
-                        //{
+
+                        // if (installFont.NeedFontVersionUpdate && !didUninstall)
+                        // {
                         //    if (!this.volatileSettingRepository.GetVolatileSetting().InstallTargetFonts.Contains(installFont))
                         //    {
                         //        this.volatileSettingRepository.GetVolatileSetting().InstallTargetFonts.Add(installFont);
                         //    }
-                        //}
+                        // }
                     }
 
                     if (isFontChange)
@@ -603,7 +566,9 @@ namespace ApplicationService.Fonts
         /// <summary>
         /// インストール対象フォントをダウンロードする
         /// </summary>
+#pragma warning disable CS1998 // 非同期メソッドは、'await' 演算子がないため、同期的に実行されます
         private async void DownloadFontFile(IList<InstallFont> installFontList)
+#pragma warning restore CS1998 // 非同期メソッドは、'await' 演算子がないため、同期的に実行されます
         {
             lock (SynchronizeLockHandler)
             {

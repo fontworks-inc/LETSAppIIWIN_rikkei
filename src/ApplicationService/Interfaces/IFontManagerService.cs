@@ -74,11 +74,6 @@ namespace ApplicationService.Interfaces
         void UpdateFontsList(string userFontsDir);
 
         /// <summary>
-        /// 「LETSフォント」一覧を出力する
-        /// </summary>
-        void OutputLetsFontsList();
-
-        /// <summary>
         /// フォントチェンジメッセージを送信する
         /// </summary>
         void BroadcastFontChange();
