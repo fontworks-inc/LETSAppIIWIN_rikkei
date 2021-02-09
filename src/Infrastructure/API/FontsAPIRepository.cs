@@ -5,6 +5,7 @@ using System.IO;
 using Core.Entities;
 using Core.Interfaces;
 using Infrastructure.Memory;
+using NLog;
 using Org.OpenAPITools.Api;
 using Org.OpenAPITools.Client;
 using Org.OpenAPITools.Model;
@@ -16,6 +17,11 @@ namespace Infrastructure.API
     /// </summary>
     public class FontsAPIRepository : APIRepositoryBase, IFontsRepository
     {
+        /// <summary>
+        /// ロガー
+        /// </summary>
+        private static readonly Logger Logger = LogManager.GetLogger("nlog.config");
+
         /// <summary>
         /// インスタンスの初期化を行う
         /// </summary>
@@ -98,6 +104,11 @@ namespace Infrastructure.API
                     {
                         foreach (InlineResponse200Font d in ret.Data.Fonts)
                         {
+                            if (d.IsFreemium)
+                            {
+                                Logger.Debug("Freemium:" + d.DisplayFontName);
+                            }
+
                             InstallFont f = new InstallFont(
                                 d.UserFontId,
                                 d.ActivateFlg,

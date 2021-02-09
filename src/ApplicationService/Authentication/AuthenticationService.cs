@@ -153,36 +153,42 @@ namespace ApplicationService.Authentication
             Logger.Debug("AuthenticationService:Login ユーザ別保存：デバイスIDを取得");
             var userStatus = this.userStatusRepository.GetStatus();
             var deviceId = userStatus.DeviceId;
+            var deviceKey = userStatus.DeviceKey;
 
-            // デバイスIDの値がない場合
-            if (string.IsNullOrEmpty(deviceId))
+            if (string.IsNullOrEmpty(deviceKey))
             {
-                // 配信サービスよりデバイスIDを発行
-                Logger.Debug("AuthenticationService:Login 配信サービスよりデバイスIDを発行");
-                var user = new User()
-                {
-                    MailAddress = mailAddress,
-                    Password = password,
-                    HostName = Dns.GetHostName(),
-                    OSUserName = Environment.UserName,
-                };
-                try
-                {
-                    deviceId = this.devicesRepository.GetDeviceId(user);
-                }
-                catch (SystemException ret)
-                {
-                    return new AuthenticationInformationResponse()
-                    {
-                        Code = int.Parse(ret.Message),
-                    };
-                }
-
-                // ユーザ別保存：デバイスIDに保存
-                Logger.Debug("AuthenticationService:Login ユーザ別保存：デバイスIDに保存");
-                userStatus.DeviceId = deviceId;
+                // デバイスキーが保存されていない場合、作成する
+                Guid guid = System.Guid.NewGuid();
+                deviceKey = guid.ToString("N");
+                userStatus.DeviceKey = deviceKey;
                 this.userStatusRepository.SaveStatus(userStatus);
             }
+
+            // 配信サービスよりデバイスIDを発行
+            Logger.Debug("AuthenticationService:Login 配信サービスよりデバイスIDを発行");
+            var user = new User()
+            {
+                MailAddress = mailAddress,
+                Password = password,
+                HostName = Dns.GetHostName(),
+                OSUserName = Environment.UserName,
+            };
+            try
+            {
+                deviceId = this.devicesRepository.GetDeviceId(user, deviceKey);
+            }
+            catch (SystemException ret)
+            {
+                return new AuthenticationInformationResponse()
+                {
+                    Code = int.Parse(ret.Message),
+                };
+            }
+
+            // ユーザ別保存：デバイスIDに保存
+            Logger.Debug("AuthenticationService:Login ユーザ別保存：デバイスIDに保存");
+            userStatus.DeviceId = deviceId;
+            this.userStatusRepository.SaveStatus(userStatus);
 
             // ログイン処理を実行
             Logger.Debug("AuthenticationService:Login ログイン処理を実行");

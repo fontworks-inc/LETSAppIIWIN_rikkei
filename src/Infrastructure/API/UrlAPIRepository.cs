@@ -28,7 +28,6 @@ namespace Infrastructure.API
         /// <remarks>FUNCTION_08_01_10(パスワードを忘れた方_再設定画面URLの取得API)</remarks>
         public Core.Entities.Url GetResetPasswordPageUrl()
         {
-            this.ApiParam.Clear();
             Core.Entities.Url response = null;
 
             // API通信を行う(リトライ込み)を行う（共通処理）
@@ -59,7 +58,6 @@ namespace Infrastructure.API
         /// <remarks>FUNCTION_08_01_11(会員登録画面URLの取得API)</remarks>
         public Core.Entities.Url GetUserRegistrationPageUrl()
         {
-            this.ApiParam.Clear();
             Core.Entities.Url response = null;
 
             // API通信を行う(リトライ込み)を行う（共通処理）
@@ -92,9 +90,8 @@ namespace Infrastructure.API
         /// <remarks>FUNCTION_08_03_01(ホーム画面URLの取得API)</remarks>
         public Core.Entities.Url GetUserPageUrl(string deviceId, string accessToken)
         {
-            this.ApiParam.Clear();
-            this.ApiParam.Add(APIParam.DeviceId, deviceId);
-            this.ApiParam.Add(APIParam.AccessToken, accessToken);
+            this.ApiParam[APIParam.DeviceId] = deviceId;
+            this.ApiParam[APIParam.AccessToken] = accessToken;
 
             Core.Entities.Url response = null;
 
@@ -133,9 +130,8 @@ namespace Infrastructure.API
         /// <remarks>FUNCTION_08_04_01(お知らせ画面URLの取得API)</remarks>
         public Core.Entities.Url GetAnnouncePageUrl(string deviceId, string accessToken)
         {
-            this.ApiParam.Clear();
-            this.ApiParam.Add(APIParam.DeviceId, deviceId);
-            this.ApiParam.Add(APIParam.AccessToken, accessToken);
+            this.ApiParam[APIParam.DeviceId] = deviceId;
+            this.ApiParam[APIParam.AccessToken] = accessToken;
 
             Core.Entities.Url response = null;
 
@@ -169,9 +165,8 @@ namespace Infrastructure.API
         /// <remarks>FUNCTION_08_06_01(フォント一覧画面URLの取得API)</remarks>
         public Core.Entities.Url GetFontListPageUrl(string deviceId, string accessToken)
         {
-            this.ApiParam.Clear();
-            this.ApiParam.Add(APIParam.DeviceId, deviceId);
-            this.ApiParam.Add(APIParam.AccessToken, accessToken);
+            this.ApiParam[APIParam.DeviceId] = deviceId;
+            this.ApiParam[APIParam.AccessToken] = accessToken;
 
             Core.Entities.Url response = null;
 

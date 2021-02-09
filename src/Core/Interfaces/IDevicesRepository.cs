@@ -39,8 +39,9 @@ namespace Core.Interfaces
         /// デバイスIDを発行する
         /// </summary>
         /// <param name="user">ユーザ情報</param>
+        /// <param name="deviceKey">デバイスキー</param>
         /// <returns>デバイスID</returns>
         /// <remarks>FUNCTION_08_01_12(デバイスID発行API)</remarks>
-        string GetDeviceId(User user);
+        string GetDeviceId(User user, string deviceKey);
     }
 }

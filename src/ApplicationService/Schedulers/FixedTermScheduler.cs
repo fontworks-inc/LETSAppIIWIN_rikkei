@@ -205,6 +205,13 @@ namespace ApplicationService.Schedulers
             if (!volatileSetting.IsCheckedStartup || ((DateTime)volatileSetting.CheckedStartupAt)
                 .AddHours(ElapsedHours).CompareTo(DateTime.Now) >= 0)
             {
+                // ユーザー配下のフォントフォルダ
+                var local = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+                var userFontsDir = @$"{local}\Microsoft\Windows\Fonts";
+
+                // フォント一覧の更新
+                this.fontManagerService.UpdateFontsList(userFontsDir);
+
                 // 起動時チェック処理を実行する
                 if (this.startupService.IsCheckedStartup(
                     this.shutdownClientApplicationRequiredEvent,

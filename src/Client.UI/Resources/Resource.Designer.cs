@@ -380,6 +380,15 @@ namespace Client.UI.Resources {
         }
         
         /// <summary>
+        ///   LETS に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string APP_07_01_WIN_TITLE {
+            get {
+                return ResourceManager.GetString("APP_07_01_WIN_TITLE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   ログアウト に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string APP_08_01_BTN_LOGOUT {

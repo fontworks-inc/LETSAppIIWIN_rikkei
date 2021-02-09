@@ -6,6 +6,11 @@
     public class UserStatus
     {
         /// <summary>
+        /// デバイスキー
+        /// </summary>
+        public string DeviceKey { get; set; } = string.Empty;
+
+        /// <summary>
         /// デバイスID
         /// </summary>
         public string DeviceId { get; set; } = string.Empty;

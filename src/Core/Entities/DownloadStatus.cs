@@ -14,5 +14,10 @@
         /// ダウンロード完了
         /// </summary>
         Completed = 2,
+
+        /// <summary>
+        /// アップデータ実行
+        /// </summary>
+        Update = 3,
     }
 }

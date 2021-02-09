@@ -51,6 +51,9 @@ namespace Core.Entities
         /// <summary>OriginalDeviceId</summary>
         OriginalDeviceId,
 
+        /// <summary>DeviceKey</summary>
+        DeviceKey,
+
         /// <summary>Detected</summary>
         Detected,
     }

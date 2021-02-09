@@ -141,7 +141,7 @@ namespace Infrastructure.API
         /// <param name="user">ユーザ情報</param>
         /// <returns>デバイスID</returns>
         /// <remarks>FUNCTION_08_01_12(デバイスID発行API)</remarks>
-        public string GetDeviceId(User user)
+        public string GetDeviceId(User user, string deviceKey)
         {
             string response = null;
 
@@ -150,6 +150,7 @@ namespace Infrastructure.API
             this.ApiParam[APIParam.Password] = user.Password;
             this.ApiParam[APIParam.HostName] = user.HostName;
             this.ApiParam[APIParam.OSUserName] = user.OSUserName;
+            this.ApiParam[APIParam.DeviceKey] = deviceKey;
 
             // API通信を行う(リトライ込み)を行う（共通処理）
             try
@@ -236,7 +237,8 @@ namespace Infrastructure.API
                 (string)this.ApiParam[APIParam.MailAddress],
                 (string)this.ApiParam[APIParam.Password],
                 (string)this.ApiParam[APIParam.HostName],
-                (string)this.ApiParam[APIParam.OSUserName]);
+                (string)this.ApiParam[APIParam.OSUserName],
+                (string)this.ApiParam[APIParam.DeviceKey]);
             this.ApiResponse = apiInstance.PostDeviceId(config.UserAgent, body);
         }
     }

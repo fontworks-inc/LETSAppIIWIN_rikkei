@@ -249,7 +249,11 @@
     <value>ログインが完了しました</value>
     <comment>ログイン完了画面　処理タイトル</comment>
   </data>
-  <data name="APP_07_01_BTN_OK" xml:space="preserve">
+	<data name="APP_07_01_WIN_TITLE" xml:space="preserve">
+    <value>LETS</value>
+    <comment>強制アップデートダイアログ　タイトル</comment>
+  </data>
+	<data name="APP_07_01_BTN_OK" xml:space="preserve">
     <value>OK</value>
     <comment>強制アップデートダイアログ　OKボタン</comment>
   </data>

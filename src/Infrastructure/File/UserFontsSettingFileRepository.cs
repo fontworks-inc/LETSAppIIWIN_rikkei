@@ -1,6 +1,8 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Security.AccessControl;
+using System.Security.Principal;
 using System.Text.Json;
 using Core.Entities;
 using Core.Interfaces;
@@ -69,7 +71,14 @@ namespace Infrastructure.File
         public void SaveUserFontsSetting(UserFontsSetting userFontsSetting)
         {
             this.WriteAll(JsonSerializer.Serialize(userFontsSetting));
-            this.OutputUninstInfo(userFontsSetting);
+            try
+            {
+                this.OutputUninstInfo(userFontsSetting);
+            }
+            catch (Exception ex)
+            {
+                Logger.Debug("OutputUninstInfo:" + ex.StackTrace);
+            }
         }
 
         /// <summary>
@@ -80,6 +89,16 @@ namespace Infrastructure.File
         {
             Logger.Debug("OutputLetsFontsList:Enter");
 
+            // ユーザレジストリIDを取得する
+            string userregid = this.GetUserRegID();
+
+            // uninstall情報フォルダを作成
+            // ホームドライブの取得
+            string homedrive = Environment.GetEnvironmentVariable("HOMEDRIVE");
+
+            // LETSフォルダ
+            string letsfolder = $@"{homedrive}\ProgramData\Fontworks\LETS";
+
             // フォント一覧の取得
             var fonts = userFontsSetting.Fonts;
 
@@ -88,30 +107,30 @@ namespace Infrastructure.File
             var letsFontReg = fonts.Where(font => font.IsLETS).Select(font => font.RegistryKey);
 
             // LETSフォントファイル一覧を出力する
-            // ホームドライブの取得
-            string homedrive = Environment.GetEnvironmentVariable("HOMEDRIVE");
-
-            // LETSフォルダ
-            string letsfolder = $@"{homedrive}\ProgramData\Fontworks\LETS";
-
-            string filePath = Path.Combine(letsfolder, "uninstallfonts.bat");
-            string regfilePath = Path.Combine(letsfolder, ".uninstreg.bat");
-            string clearUserDataPath = Path.Combine(letsfolder, ".clearuserdata.bat");
+            string uninstfontsPath = Path.Combine(letsfolder, $"uninstallfonts_{userregid}.bat");
+            string regfilePath = Path.Combine(letsfolder, $"uninstreg_{userregid}.bat");
+            string clearUserDataPath = Path.Combine(letsfolder, $"clearuserdata_{userregid}.bat");
 
             // フォントファイル削除バッチ出力
-            System.IO.File.WriteAllText(filePath, "REM フォントファイル削除" + Environment.NewLine, System.Text.Encoding.GetEncoding("shift_jis"));
+            if (System.IO.File.Exists(uninstfontsPath))
+            {
+                this.SetHidden(uninstfontsPath, false);
+            }
+
+            System.IO.File.WriteAllText(uninstfontsPath, "REM フォントファイル削除" + Environment.NewLine, System.Text.Encoding.GetEncoding("shift_jis"));
             foreach (string f in letsFontPaths)
             {
                 if (!string.IsNullOrEmpty(f))
                 {
-                    System.IO.File.AppendAllText(filePath, $@"DEL {f}" + Environment.NewLine, System.Text.Encoding.GetEncoding("shift_jis"));
+                    System.IO.File.AppendAllText(uninstfontsPath, $@"DEL {f}" + Environment.NewLine, System.Text.Encoding.GetEncoding("shift_jis"));
                 }
             }
 
-            System.IO.File.AppendAllText(filePath, @"Del /F ""%~dp0%~nx0""" + "\n");
+            System.IO.File.AppendAllText(uninstfontsPath, @"Del /F ""%~dp0%~nx0""" + "\n");
+            this.SetFileAccessEveryone(uninstfontsPath);
+            this.SetHidden(uninstfontsPath, true);
 
             // レジストリ削除バッチ出力
-            string userregid = this.GetUserRegID();
             if (System.IO.File.Exists(regfilePath))
             {
                 this.SetHidden(regfilePath, false);
@@ -127,6 +146,7 @@ namespace Infrastructure.File
             }
 
             System.IO.File.AppendAllText(regfilePath, @"Del /F ""%~dp0%~nx0""" + "\n");
+            this.SetFileAccessEveryone(regfilePath);
             this.SetHidden(regfilePath, true);
 
             // ユーザデータ削除バッチを出力する
@@ -139,8 +159,9 @@ namespace Infrastructure.File
             }
 
             System.IO.File.WriteAllText(clearUserDataPath, "REM ユーザー削除" + Environment.NewLine, System.Text.Encoding.GetEncoding("shift_jis"));
-            System.IO.File.WriteAllText(clearUserDataPath, $"rd /s /q {userDataDirectory}\n");
+            System.IO.File.AppendAllText(clearUserDataPath, $"rd /s /q {userDataDirectory}\n");
             System.IO.File.AppendAllText(clearUserDataPath, @"Del /F ""%~dp0%~nx0""" + "\n");
+            this.SetFileAccessEveryone(clearUserDataPath);
             this.SetHidden(clearUserDataPath, true);
 
             Logger.Debug("OutputLetsFontsList:Exit");
@@ -153,17 +174,43 @@ namespace Infrastructure.File
         /// <param name="isHidden">隠し属性フラグ</param>
         private void SetHidden(string filepath, bool isHidden)
         {
-            FileAttributes fa = System.IO.File.GetAttributes(filepath);
-            if (isHidden)
+            try
             {
-                fa = fa | FileAttributes.Hidden;
-            }
-            else
-            {
-                fa = fa & ~FileAttributes.Hidden;
-            }
+                FileAttributes fa = System.IO.File.GetAttributes(filepath);
+                if (isHidden)
+                {
+                    fa = fa | FileAttributes.Hidden;
+                }
+                else
+                {
+                    fa = fa & ~FileAttributes.Hidden;
+                }
 
-            System.IO.File.SetAttributes(filepath, fa);
+                System.IO.File.SetAttributes(filepath, fa);
+            }
+            catch (Exception ex)
+            {
+                Logger.Debug("SetHidden:" + ex.StackTrace);
+            }
+        }
+
+        private void SetFileAccessEveryone(string path)
+        {
+            try
+            {
+                FileSystemAccessRule rule = new FileSystemAccessRule(
+                    new NTAccount("everyone"),
+                    FileSystemRights.FullControl,
+                    AccessControlType.Allow);
+
+                var sec = new FileSecurity();
+                sec.AddAccessRule(rule);
+                System.IO.FileSystemAclExtensions.SetAccessControl(new FileInfo(path), sec);
+            }
+            catch (Exception ex)
+            {
+                Logger.Debug("SetFileAccessEveryone:" + ex.StackTrace);
+            }
         }
 
         /// <summary>

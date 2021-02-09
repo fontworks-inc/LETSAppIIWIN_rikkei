@@ -13,6 +13,13 @@ namespace setup
     {
         static void Main(string[] args)
         {
+            //var os = Environment.OSVersion;
+            //if (os.Version.Major < 10)
+            //{
+            //    System.Windows.Forms.MessageBox.Show("Windows10 未満の OS では LETS をご利用できません。");
+            //    return;
+            //}
+
             // ホームドライブの取得
             string homedrive = Environment.GetEnvironmentVariable("HOMEDRIVE");
 

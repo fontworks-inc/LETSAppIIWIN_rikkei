@@ -521,6 +521,9 @@ namespace ApplicationService.Startup
                 return false;
             }
 
+            // フォントコピー検知フラグ
+            bool existCopiedFont = false;
+
             // フォント一覧の取得
             var fonts = this.userFontsSettingRepository.GetUserFontsSetting().Fonts;
 
@@ -540,6 +543,8 @@ namespace ApplicationService.Startup
                 string fontUserId = this.FormatFontID7digit0padding(fontInfo.UserId);
                 if (!userId.Equals(fontUserId))
                 {
+                    existCopiedFont = true;
+
                     // メモリに「通知あり」と設定し、アイコンを変更
                     VolatileSetting volatileSetting = this.volatileSettingRepository.GetVolatileSetting();
                     volatileSetting.IsNoticed = true;
@@ -563,6 +568,13 @@ namespace ApplicationService.Startup
                         return false;
                     }
                 }
+            }
+
+            if (!existCopiedFont)
+            {
+                this.fontSecurityRepository.NotifyVerifiedFonts(
+                            this.userStatusRepository.GetStatus().DeviceId,
+                            this.volatileSettingRepository.GetVolatileSetting().AccessToken);
             }
 
             return true;

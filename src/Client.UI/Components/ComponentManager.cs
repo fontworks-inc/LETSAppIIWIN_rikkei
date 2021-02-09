@@ -252,10 +252,6 @@ namespace Client.UI.Components
                 }
                 else
                 {
-                    // アップデート完了時に共通保存情報をリセットする
-                    Logger.Debug("Exit:ApplicationRuntime:Reset");
-                    this.applicationRuntimeRepository.SaveApplicationRuntime(new ApplicationRuntime());
-
                     // 更新後のプログラムを起動する
                     // ホームドライブの取得
                     string homedrive = Environment.GetEnvironmentVariable("HOMEDRIVE");
@@ -336,6 +332,11 @@ namespace Client.UI.Components
         /// </summary>
         public void UpdateCompleted()
         {
+            this.volatileSettingRepository.GetVolatileSetting().IsUpdated = true;
+
+            // クイックメニューの状態表示部にアップデート完了を表示
+            this.QuickMenu.ShowUpdateStatus();
+
             // アイコン表示ルールに従いアイコンを設定
             this.ApplicationIcon.SetIcon();
         }
@@ -702,9 +703,9 @@ namespace Client.UI.Components
                             return false;
                         }
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
-                        Logger.Debug("EnumWindowCallBack:" + ex.Message + "\n");
+                        // Logger.Debug("EnumWindowCallBack:" + ex.Message + "\n");
                     }
                 }
             }

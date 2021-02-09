@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Security.AccessControl;
+using System.Security.Principal;
 using System.Threading;
 using System.Windows;
 using ApplicationService.Authentication;
@@ -74,8 +76,10 @@ namespace Client.UI
             {
                 string selfpath = System.Reflection.Assembly.GetExecutingAssembly().Location;
                 System.IO.FileInfo fi = new System.IO.FileInfo(selfpath);
+
                 Logger.Debug("===========================================");
                 Logger.Debug("LETS.exe:CreationTime=" + fi.CreationTime);
+                this.SetLogAccessEveryone();
             }
 
             // メモリ上で保存する情報
@@ -326,6 +330,23 @@ namespace Client.UI
                 // 状態表示：ログイン中を表示する
                 this.componentManager.QuickMenu.ShowLoginStatus();
 
+                // アップデート状態確認：アップデート完了を表示する
+                var applicationRuntimeRepository = container.Resolve<IApplicationRuntimeRepository>();
+                var nextVersionInstaller = applicationRuntimeRepository.GetApplicationRuntime().NextVersionInstaller;
+                if (nextVersionInstaller != null && nextVersionInstaller.DownloadStatus == DownloadStatus.Update)
+                {
+                    var volatileSettingMemoryRepository = container.Resolve<IVolatileSettingRepository>();
+                    volatileSettingMemoryRepository.GetVolatileSetting().IsUpdated = true;
+                    this.componentManager.SetIcon();
+                    this.componentManager.QuickMenu.ShowDownloadStatus();
+                    this.componentManager.QuickMenu.MenuUpdateStatus.SetCompleted();
+                    this.componentManager.QuickMenu.Manager.UpdateCompleted();
+
+                    // アップデート完了時に共通保存情報をリセットする
+                    Logger.Debug("Exit:ApplicationRuntime:Reset");
+                    applicationRuntimeRepository.SaveApplicationRuntime(new ApplicationRuntime());
+                }
+
                 // クイックメニューを設定
                 this.componentManager.ApplicationIcon.Enabled = true;
 
@@ -417,6 +438,37 @@ namespace Client.UI
             // アプリケーションを終了する
             Shell shell = (Shell)(System.Windows.Application.Current as PrismApplication);
             shell.Shutdown();
+        }
+
+        private void SetLogAccessEveryone()
+        {
+            // ホームドライブの取得
+            string homedrive = Environment.GetEnvironmentVariable("HOMEDRIVE");
+
+            // ログフォルダ
+            string letsfolder = $@"{homedrive}\ProgramData\Fontworks\LETS\config";
+
+            // ログファイル名
+            string normallog = Path.Combine(letsfolder, "LETS.log");
+            string debuglog = Path.Combine(letsfolder, "LETS-debug.log");
+
+            FileSystemAccessRule rule = new FileSystemAccessRule(
+                new NTAccount("everyone"),
+                FileSystemRights.FullControl,
+                AccessControlType.Allow);
+
+            var sec = new FileSecurity();
+            sec.AddAccessRule(rule);
+
+            if (File.Exists(normallog))
+            {
+                System.IO.FileSystemAclExtensions.SetAccessControl(new FileInfo(normallog), sec);
+            }
+
+            if (File.Exists(debuglog))
+            {
+                System.IO.FileSystemAclExtensions.SetAccessControl(new FileInfo(debuglog), sec);
+            }
         }
     }
 }

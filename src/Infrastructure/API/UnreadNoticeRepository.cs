@@ -32,9 +32,8 @@ namespace Infrastructure.API
         /// <remarks>FUNCTION_08_04_02(お知らせ情報取得API)</remarks>
         public UnreadNotice GetUnreadNotice(string deviceId, string accessToken)
         {
-            this.ApiParam.Clear();
-            this.ApiParam.Add(APIParam.DeviceId, deviceId);
-            this.ApiParam.Add(APIParam.AccessToken, accessToken);
+            this.ApiParam[APIParam.DeviceId] = deviceId;
+            this.ApiParam[APIParam.AccessToken] = accessToken;
 
             UnreadNotice response = null;
 

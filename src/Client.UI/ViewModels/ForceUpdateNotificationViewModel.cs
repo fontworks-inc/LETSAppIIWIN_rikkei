@@ -26,6 +26,17 @@ namespace Client.UI.ViewModels
         }
 
         /// <summary>
+        /// 画面タイトル
+        /// </summary>
+        public string Title
+        {
+            get
+            {
+                return this.resouceWrapper.GetString("APP_07_01_WIN_TITLE");
+            }
+        }
+
+        /// <summary>
         /// ロゴ画像ソース
         /// </summary>
         public ImageSource ImageLogo

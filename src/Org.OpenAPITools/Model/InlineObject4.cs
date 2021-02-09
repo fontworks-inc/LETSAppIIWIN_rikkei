@@ -38,14 +38,16 @@ namespace Org.OpenAPITools.Model
         /// <param name="password">password.</param>
         /// <param name="hostname">hostname.</param>
         /// <param name="osUserName">osUserName.</param>
-        public InlineObject4(string mailAddress = default(string), string password = default(string), string hostname = default(string), string osUserName = default(string))
+        /// <param name="deviceKey">deviceKey.</param>
+        public InlineObject4(string mailAddress = default(string), string password = default(string), string hostname = default(string), string osUserName = default(string), string deviceKey = default(string))
         {
             this.MailAddress = mailAddress;
             this.Password = password;
             this.Hostname = hostname;
             this.OsUserName = osUserName;
+            this.DeviceKey = deviceKey;
         }
-        
+
         /// <summary>
         /// Gets or Sets MailAddress
         /// </summary>
@@ -67,8 +69,14 @@ namespace Org.OpenAPITools.Model
         /// <summary>
         /// Gets or Sets OsUserName
         /// </summary>
-        [DataMember(Name="osUserName", EmitDefaultValue=false)]
+        [DataMember(Name = "osUserName", EmitDefaultValue = false)]
         public string OsUserName { get; set; }
+
+        /// <summary>
+        /// Gets or Sets DeviceKey
+        /// </summary>
+        [DataMember(Name = "deviceKey", EmitDefaultValue = false)]
+        public string DeviceKey { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -82,6 +90,7 @@ namespace Org.OpenAPITools.Model
             sb.Append("  Password: ").Append(Password).Append("\n");
             sb.Append("  Hostname: ").Append(Hostname).Append("\n");
             sb.Append("  OsUserName: ").Append(OsUserName).Append("\n");
+            sb.Append("  DeviceKey: ").Append(DeviceKey).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -130,11 +139,16 @@ namespace Org.OpenAPITools.Model
                     this.Hostname == input.Hostname ||
                     (this.Hostname != null &&
                     this.Hostname.Equals(input.Hostname))
-                ) && 
+                ) &&
                 (
                     this.OsUserName == input.OsUserName ||
                     (this.OsUserName != null &&
                     this.OsUserName.Equals(input.OsUserName))
+                ) &&
+                (
+                    this.DeviceKey == input.DeviceKey ||
+                    (this.DeviceKey != null &&
+                    this.DeviceKey.Equals(input.DeviceKey))
                 );
         }
 
@@ -155,6 +169,8 @@ namespace Org.OpenAPITools.Model
                     hashCode = hashCode * 59 + this.Hostname.GetHashCode();
                 if (this.OsUserName != null)
                     hashCode = hashCode * 59 + this.OsUserName.GetHashCode();
+                if (this.DeviceKey != null)
+                    hashCode = hashCode * 59 + this.DeviceKey.GetHashCode();
                 return hashCode;
             }
         }

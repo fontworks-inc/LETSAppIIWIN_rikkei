@@ -86,6 +86,9 @@ namespace Client.UI.Components
                     // [メモリ：ダウンロード完了]をFALSEに設定する
                     this.volatileSettingRepository.GetVolatileSetting().CompletedDownload = false;
 
+                    // [メモリ：アップデート完了]をFALSEに設定する
+                    this.volatileSettingRepository.GetVolatileSetting().IsUpdated = false;
+
                     // (ログイン時)クイックメニューを起動する
                     Logger.Info(this.Manager.GetResource().GetString("LOG_INFO_ApplicationIconComponent_tasktrayIcon_Click"));
                     if (mouseEvent.Button == MouseButtons.Left)
@@ -173,8 +176,7 @@ namespace Client.UI.Components
             }
 
             // 完了アイコン表示（ダウンロード完了時、または、アップデート完了時）
-            // 【Phase2】アップデート完了時を追加
-            if (volatileSetting.CompletedDownload)
+            if (volatileSetting.CompletedDownload || volatileSetting.IsUpdated)
             {
                 this.SetCompleteMode();
                 return;

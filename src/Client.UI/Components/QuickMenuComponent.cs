@@ -71,6 +71,12 @@ namespace Client.UI.Components
                 // アイコン表示ルールに従いアイコンを設定
                 this.Manager.SetIcon(this.ContextMenu.Visible);
             };
+
+            // クイックメニューを閉じた時のイベント
+            this.ContextMenu.Closed += (s, e) =>
+            {
+                this.ShowLoginStatus();
+            };
         }
 
         /// <summary>
@@ -184,7 +190,6 @@ namespace Client.UI.Components
         {
             Logger.Info(this.Manager.GetResource().GetString("LOG_INFO_QuickMenuComponent_ShowDownloadStatus"));
 
-            // 【Phase2】
             this.MenuLoginStatus.Hide();
             this.MenuUpdateStatus.Hide();
 
@@ -198,7 +203,6 @@ namespace Client.UI.Components
         {
             Logger.Info(this.Manager.GetResource().GetString("LOG_INFO_QuickMenuComponent_ShowUpdateStatus"));
 
-            // 【Phase2】
             this.MenuLoginStatus.Hide();
             this.MenuDownloadStatus.Hide();
             this.MenuUpdate.Hide();

@@ -102,6 +102,11 @@ namespace ApplicationService.Startup
             // メモリ上に「プログラムアップデート中」を設定する
             VolatileSetting volatileSetting = this.volatileSettingRepository.GetVolatileSetting();
             volatileSetting.IsUpdating = true;
+
+            // 共通保存に「アップデータ実行」を記録する
+            ApplicationRuntime applicationRuntime = this.applicationRuntimeRepository.GetApplicationRuntime();
+            applicationRuntime.NextVersionInstaller.DownloadStatus = DownloadStatus.Update;
+            this.applicationRuntimeRepository.SaveApplicationRuntime(applicationRuntime);
         }
     }
 }

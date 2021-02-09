@@ -39,9 +39,8 @@ namespace Infrastructure.API
         public UserId GetUserId(string deviceId, string accessToken)
         {
             // APIの引数の値をセット(個別処理)
-            this.ApiParam.Clear();
-            this.ApiParam.Add(APIParam.DeviceId, deviceId);
-            this.ApiParam.Add(APIParam.AccessToken, accessToken);
+            this.ApiParam[APIParam.DeviceId] = deviceId;
+            this.ApiParam[APIParam.AccessToken] = accessToken;
 
             UserId response = null;
 
@@ -82,21 +81,53 @@ namespace Infrastructure.API
         public void PostFontFileCopyDetection(string deviceId, string accessToken, string fontId, string originalUserId, string originalDeviceId, string detected)
         {
             // APIの引数の値をセット(個別処理)
-            this.ApiParam.Clear();
-            this.ApiParam.Add(APIParam.DeviceId, deviceId);
-            this.ApiParam.Add(APIParam.AccessToken, accessToken);
-            this.ApiParam.Add(APIParam.FontId, fontId);
-            this.ApiParam.Add(APIParam.OriginalUserId, originalUserId);
-            this.ApiParam.Add(APIParam.OriginalDeviceId, originalDeviceId);
-            this.ApiParam.Add(APIParam.Detected, detected);
+            this.ApiParam[APIParam.DeviceId] = deviceId;
+            this.ApiParam[APIParam.AccessToken] = accessToken;
+            this.ApiParam[APIParam.FontId] = fontId;
+            this.ApiParam[APIParam.OriginalUserId] = originalUserId;
+            this.ApiParam[APIParam.OriginalDeviceId] = originalDeviceId;
+            this.ApiParam[APIParam.Detected] = detected;
 
             // API通信を行う(リトライ込み)を行う（共通処理）
             try
             {
-                this.Invoke(this.CallUserIdAPI);
+                this.Invoke(this.CallNotifyFontFileCopyDetection);
 
                 // 戻り値のセット（個別処理）
-                var ret = JsonConvert.DeserializeObject<Model200>(this.ApiResponse.ToString());
+                var ret = JsonConvert.DeserializeObject<ObjectResponse>(this.ApiResponse.ToString());
+                if (ret.Code != (int)ResponseCode.Succeeded)
+                {
+                    // 正常終了以外の値が返ってきた
+                    throw new ApiException(ret.Code, ret.Message);
+                }
+            }
+            catch (ApiException)
+            {
+                // 通信に失敗or通信しなかった
+                throw;
+            }
+
+            return;
+        }
+
+        /// <summary>
+        /// 異常なフォントなしをFW運用者に通知する
+        /// </summary>
+        /// <param name="deviceId">デバイスID</param>
+        /// <param name="accessToken">アクセストークン</param>
+        public void NotifyVerifiedFonts(string deviceId, string accessToken)
+        {
+            // APIの引数の値をセット(個別処理)
+            this.ApiParam[APIParam.DeviceId] = deviceId;
+            this.ApiParam[APIParam.AccessToken] = accessToken;
+
+            // API通信を行う(リトライ込み)を行う（共通処理）
+            try
+            {
+                this.Invoke(this.CallNotifyVerifiedFonts);
+
+                // 戻り値のセット（個別処理）
+                var ret = JsonConvert.DeserializeObject<ObjectResponse>(this.ApiResponse.ToString());
                 if (ret.Code != (int)ResponseCode.Succeeded)
                 {
                     // 正常終了以外の値が返ってきた
@@ -126,13 +157,14 @@ namespace Infrastructure.API
         }
 
         /// <summary>
-        /// ログインの呼び出し
+        /// 他端末のフォントがコピーされた通知の呼び出し
         /// </summary>
-        private void CallLoginApi()
+        private void CallNotifyFontFileCopyDetection()
         {
             Configuration config = new Configuration();
             config.BasePath = this.BasePath;
             config.UserAgent = (string)this.ApiParam[APIParam.UserAgent];
+            config.AccessToken = (string)this.ApiParam[APIParam.AccessToken];
             FontSecurityApi apiInstance = new FontSecurityApi(config);
             var body = new InlineObject5(
                 (string)this.ApiParam[APIParam.FontId],
@@ -140,6 +172,19 @@ namespace Infrastructure.API
                 (string)this.ApiParam[APIParam.OriginalDeviceId],
                 (string)this.ApiParam[APIParam.Detected]);
             this.ApiResponse = apiInstance.NotifyFontFileCopyDetection((string)this.ApiParam[APIParam.DeviceId], config.UserAgent, body);
+        }
+
+        /// <summary>
+        /// 異常なフォントなしの通知の呼び出し
+        /// </summary>
+        private void CallNotifyVerifiedFonts()
+        {
+            Configuration config = new Configuration();
+            config.BasePath = this.BasePath;
+            config.UserAgent = (string)this.ApiParam[APIParam.UserAgent];
+            config.AccessToken = (string)this.ApiParam[APIParam.AccessToken];
+            FontSecurityApi apiInstance = new FontSecurityApi(config);
+            this.ApiResponse = apiInstance.NotifyVerifiedFonts((string)this.ApiParam[APIParam.DeviceId], config.UserAgent);
         }
     }
 }

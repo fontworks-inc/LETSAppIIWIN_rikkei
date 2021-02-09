@@ -179,6 +179,6 @@
     </Reference>
   </ItemGroup>
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="mkdir &quot;$(TargetDir)..\config&quot;&#xD;&#xA;xcopy &quot;$(ProjectDir)appsettings.json&quot; &quot;$(TargetDir)..\config&quot; /Y" />
+    <Exec Command="mkdir &quot;$(TargetDir)..\config&quot; &gt; NUL 2&gt;&amp;1&#xD;&#xA;xcopy &quot;$(ProjectDir)appsettings.json&quot; &quot;$(TargetDir)..\config&quot; /Y" />
   </Target>
 </Project>

@@ -31,5 +31,14 @@ namespace Core.Interfaces
             string originalUserId,
             string originalDeviceId,
             string detected);
+
+        /// <summary>
+        /// 異常なフォントなしをFW運用者に通知する
+        /// </summary>
+        /// <param name="deviceId">デバイスID</param>
+        /// <param name="accessToken">アクセストークン</param>
+        void NotifyVerifiedFonts(
+            string deviceId,
+            string accessToken);
     }
 }

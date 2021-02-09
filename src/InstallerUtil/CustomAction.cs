@@ -29,13 +29,6 @@ namespace InstallerUtil
             {
                 f.ShowDialog();
             }
-            //// 親フォームを作成
-            //using (Form f = new Form())
-            //{
-            //    f.TopMost = true; // 親フォームを常に最前面に表示する
-            //    MessageBox.Show(f, "アンインストールを完了するためには、PCの再起動が必要です。\n編集中のファイルがある場合は保存したのち、再起動を実施してください。");
-            //    f.TopMost = false;
-            //}
         }
 
         private void CustomAction_BeforeUninstall(object sender, System.Configuration.Install.InstallEventArgs e)
@@ -52,42 +45,46 @@ namespace InstallerUtil
             // uninstallfontバッチファイル名
             string uninstallbat = "uninstallfonts.bat";
             string uninstallfontsbat = $@"{letsfolder}\{uninstallbat}";
-
-            // レジストリ削除バッチファイル名
-            string uninstregbat = $@"{letsfolder}\.uninstreg.bat";
-
-            // ユーザ情報クリアバッチ名
-            string clearinfobat = $@"{letsfolder}\.clearuserdata.bat";
+            string shortcutfolder = $@"{homedrive}\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp";
+            string destfile = $@"{shortcutfolder}\{uninstallbat}";
 
             try
             {
-                // フォント削除バッチ登録
-                if (File.Exists(uninstallfontsbat))
+                string[] pids = this.GetUserregIDs();
+
+                if (pids != null)
                 {
-                    // バッチファイルが存在したらショートカットへ登録
-                    string shortcutfolder = $@"{homedrive}\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp";
-                    string destfile = $@"{shortcutfolder}\{uninstallbat}";
+                    // フォント削除バッチの実行
+                    string[] dellines = this.UninstallFontsAllUser(letsfolder, pids);
+                    File.WriteAllText(uninstallfontsbat, "REM フォントファイル削除" + Environment.NewLine, System.Text.Encoding.GetEncoding("shift_jis"));
+                    File.AppendAllText(uninstallfontsbat, "@ECHO OFF" + Environment.NewLine, System.Text.Encoding.GetEncoding("shift_jis"));
+                    foreach (string l in dellines)
+                    {
+                        File.AppendAllText(uninstallfontsbat, l + Environment.NewLine);
+                    }
+                    File.AppendAllText(uninstallfontsbat, @"Del /F ""%~dp0%~nx0""" + "\n");
                     if (File.Exists(destfile))
                     {
                         File.Delete(destfile);
                     }
                     File.Move($@"{uninstallfontsbat}", destfile);
-                }
 
-                // レジストリ削除バッチの実行
-                if (File.Exists(uninstregbat))
-                {
-                    // バッチファイルが存在したら実行
-                    this.SetHidden(uninstregbat, false);
-                    Process.Start(new ProcessStartInfo(uninstregbat) { CreateNoWindow = true, UseShellExecute = false });
-                }
+                    // レジストリ削除バッチの実行
+                    this.UnregistAllUser(letsfolder, pids);
 
-                // ユーザ情報削除バッチの実行
-                if (File.Exists(clearinfobat))
+                    // ユーザ情報削除バッチの実行
+                    this.ClearAllUserInfo(letsfolder, pids);
+                }
+                else
                 {
-                    // バッチファイルが存在したら実行
-                    this.SetHidden(clearinfobat, false);
-                    Process.Start(new ProcessStartInfo(clearinfobat) { CreateNoWindow = true, UseShellExecute = false });
+                    File.WriteAllText(uninstallfontsbat, "REM フォントファイル削除" + Environment.NewLine, System.Text.Encoding.GetEncoding("shift_jis"));
+                    File.AppendAllText(uninstallfontsbat, "@ECHO OFF" + Environment.NewLine, System.Text.Encoding.GetEncoding("shift_jis"));
+                    File.AppendAllText(uninstallfontsbat, @"Del /F ""%~dp0%~nx0""" + "\n");
+                    if (File.Exists(destfile))
+                    {
+                        File.Delete(destfile);
+                    }
+                    File.Move($@"{uninstallfontsbat}", destfile);
                 }
             }
             catch(Exception ex)
@@ -95,6 +92,76 @@ namespace InstallerUtil
                 File.WriteAllText($@"{letsfolder}\Uninstall.log", ex.Message);
             }
 
+        }
+
+        private string[] UninstallFontsAllUser(string letsfolder, string[] pids)
+        {
+            List<string> alldellines = new List<string>();
+
+            foreach (string pid in pids)
+            {
+                string uninstfontbat = Path.Combine(letsfolder, $"uninstallfonts_{pid}.bat");
+                if (File.Exists(uninstfontbat))
+                {
+                    this.SetHidden(uninstfontbat, false);
+                    string[] lines = File.ReadAllLines(uninstfontbat);
+                    foreach (string l in lines)
+                    {
+                        if(l.StartsWith("DEL "))
+                        {
+                            alldellines.Add(l);
+                        }
+                    }
+                    Process.Start(new ProcessStartInfo(uninstfontbat) { CreateNoWindow = true, UseShellExecute = false });
+                }
+            }
+
+            return alldellines.ToArray();
+        }
+
+        private void UnregistAllUser(string letsfolder, string[] pids)
+        {
+            foreach (string pid in pids)
+            {
+                string uninstregbat = Path.Combine(letsfolder, $"uninstreg_{pid}.bat");
+                if(File.Exists(uninstregbat))
+                {
+                    this.SetHidden(uninstregbat, false);
+                    Process.Start(new ProcessStartInfo(uninstregbat) { CreateNoWindow = true, UseShellExecute = false });
+                }
+            }
+        }
+        private void ClearAllUserInfo(string letsfolder, string[] pids)
+        {
+            foreach (string pid in pids)
+            {
+                string clearuserbat = Path.Combine(letsfolder, $"clearuserdata_{pid}.bat");
+                if (File.Exists(clearuserbat))
+                {
+                    this.SetHidden(clearuserbat, false);
+                    Process.Start(new ProcessStartInfo(clearuserbat) { CreateNoWindow = true, UseShellExecute = false });
+                }
+            }
+        }
+
+
+        private string[] GetUserregIDs()
+        {
+            try
+            {
+                string regpath = @"SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList";
+                var regkey = Microsoft.Win32.Registry.LocalMachine.OpenSubKey(regpath);
+                string[] subkeys = regkey.GetSubKeyNames();
+                regkey.Close();
+
+                return subkeys;
+            }
+            catch (Exception)
+            {
+                // NOP
+            }
+
+            return null;
         }
 
         public override void Install(System.Collections.IDictionary stateSaver)
