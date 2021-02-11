@@ -33,7 +33,7 @@ namespace Org.OpenAPITools.Client
         /// <summary>
         /// Initializes a new instance of the <see cref="ApiException"/> class.
         /// </summary>
-        public ApiException() {}
+        public ApiException() { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ApiException"/> class.

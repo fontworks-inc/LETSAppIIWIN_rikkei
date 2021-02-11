@@ -1,15 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Diagnostics;
-using System.Linq;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading.Tasks;
-using System.IO;
-using System.Windows.Forms;
-using Microsoft.Win32;
-using System.Net;
 
 namespace InstallerUtil
 {
@@ -60,7 +54,7 @@ namespace InstallerUtil
                     File.AppendAllText(uninstallfontsbat, "@ECHO OFF" + Environment.NewLine, System.Text.Encoding.GetEncoding("shift_jis"));
                     foreach (string l in dellines)
                     {
-                        File.AppendAllText(uninstallfontsbat, l + Environment.NewLine);
+                        File.AppendAllText(uninstallfontsbat, l + "> nul" + Environment.NewLine);
                     }
                     File.AppendAllText(uninstallfontsbat, @"Del /F ""%~dp0%~nx0""" + "\n");
                     if (File.Exists(destfile))
@@ -87,7 +81,7 @@ namespace InstallerUtil
                     File.Move($@"{uninstallfontsbat}", destfile);
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 File.WriteAllText($@"{letsfolder}\Uninstall.log", ex.Message);
             }
@@ -107,7 +101,7 @@ namespace InstallerUtil
                     string[] lines = File.ReadAllLines(uninstfontbat);
                     foreach (string l in lines)
                     {
-                        if(l.StartsWith("DEL "))
+                        if (l.StartsWith("DEL "))
                         {
                             alldellines.Add(l);
                         }
@@ -124,7 +118,7 @@ namespace InstallerUtil
             foreach (string pid in pids)
             {
                 string uninstregbat = Path.Combine(letsfolder, $"uninstreg_{pid}.bat");
-                if(File.Exists(uninstregbat))
+                if (File.Exists(uninstregbat))
                 {
                     this.SetHidden(uninstregbat, false);
                     Process.Start(new ProcessStartInfo(uninstregbat) { CreateNoWindow = true, UseShellExecute = false });
@@ -196,7 +190,7 @@ namespace InstallerUtil
                     Delete(f);
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 File.WriteAllText($@"{letsfolder}\Uninst.log", ex.Message);
             }
@@ -236,7 +230,7 @@ namespace InstallerUtil
                     File.SetAttributes(filePath, FileAttributes.Normal);
                     File.Delete(filePath);
                 }
-                catch(Exception)
+                catch (Exception)
                 {
                     // 消せないファイルは無視する
                 }
@@ -254,7 +248,7 @@ namespace InstallerUtil
             {
                 Directory.Delete(targetDirectoryPath, false);
             }
-            catch(Exception)
+            catch (Exception)
             {
                 // 消せないフォルダも無視する
             }
@@ -310,7 +304,7 @@ namespace InstallerUtil
                 //ウィンドウのタイトルが"LETS"ならば終了メッセージを送信する
                 if (tsb.ToString() == "LETS" && procname == "LETS")
                 {
-                    SendMessageTimeout(hWnd, (uint)0x8001, IntPtr.Zero, new IntPtr(3), 0x2, 30*1000, IntPtr.Zero);
+                    SendMessageTimeout(hWnd, (uint)0x8001, IntPtr.Zero, new IntPtr(3), 0x2, 30 * 1000, IntPtr.Zero);
                 }
             }
 

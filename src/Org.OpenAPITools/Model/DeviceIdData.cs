@@ -9,19 +9,12 @@
  */
 
 
-using System;
-using System.Linq;
-using System.IO;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Collections;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Runtime.Serialization;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using OpenAPIDateConverter = Org.OpenAPITools.Client.OpenAPIDateConverter;
+using System.Runtime.Serialization;
+using System.Text;
 
 namespace Org.OpenAPITools.Model
 {
@@ -29,7 +22,7 @@ namespace Org.OpenAPITools.Model
     /// DeviceIdData
     /// </summary>
     [DataContract]
-    public partial class DeviceIdData :  IEquatable<DeviceIdData>, IValidatableObject
+    public partial class DeviceIdData : IEquatable<DeviceIdData>, IValidatableObject
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="DeviceIdData" /> class.
@@ -39,11 +32,11 @@ namespace Org.OpenAPITools.Model
         {
             this.DeviceId = deviceId;
         }
-        
+
         /// <summary>
         /// Gets or Sets DeviceId
         /// </summary>
-        [DataMember(Name="deviceId", EmitDefaultValue=false)]
+        [DataMember(Name = "deviceId", EmitDefaultValue = false)]
         public string DeviceId { get; set; }
 
         /// <summary>
@@ -58,7 +51,7 @@ namespace Org.OpenAPITools.Model
             sb.Append("}\n");
             return sb.ToString();
         }
-  
+
         /// <summary>
         /// Returns the JSON string presentation of the object
         /// </summary>
@@ -88,7 +81,7 @@ namespace Org.OpenAPITools.Model
             if (input == null)
                 return false;
 
-            return 
+            return
                 (
                     this.DeviceId == input.DeviceId ||
                     (this.DeviceId != null &&

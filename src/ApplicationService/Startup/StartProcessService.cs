@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.IO;
-using System.Linq;
 using ApplicationService.Interfaces;
 using Core.Interfaces;
 using NLog;
@@ -34,7 +31,7 @@ namespace ApplicationService.Startup
         }
 
         /// <summary>
-        /// 指定パスのプロセスを管理者権限で実施する
+        /// 指定パスのプロセスを起動する
         /// </summary>
         /// <param name="directoryPath">実行するフォルダのパス</param>
         /// <param name="fileName">ファイル名</param>

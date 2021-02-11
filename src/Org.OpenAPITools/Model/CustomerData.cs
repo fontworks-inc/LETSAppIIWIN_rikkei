@@ -9,19 +9,12 @@
  */
 
 
-using System;
-using System.Linq;
-using System.IO;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Collections;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Runtime.Serialization;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using OpenAPIDateConverter = Org.OpenAPITools.Client.OpenAPIDateConverter;
+using System.Runtime.Serialization;
+using System.Text;
 
 namespace Org.OpenAPITools.Model
 {
@@ -29,7 +22,7 @@ namespace Org.OpenAPITools.Model
     /// CustomerData
     /// </summary>
     [DataContract]
-    public partial class CustomerData :  IEquatable<CustomerData>, IValidatableObject
+    public partial class CustomerData : IEquatable<CustomerData>, IValidatableObject
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="CustomerData" /> class.
@@ -43,23 +36,23 @@ namespace Org.OpenAPITools.Model
             this.LastName = lastName;
             this.FirstName = firstName;
         }
-        
+
         /// <summary>
         /// Gets or Sets MailAddress
         /// </summary>
-        [DataMember(Name="mailAddress", EmitDefaultValue=false)]
+        [DataMember(Name = "mailAddress", EmitDefaultValue = false)]
         public string MailAddress { get; set; }
 
         /// <summary>
         /// Gets or Sets LastName
         /// </summary>
-        [DataMember(Name="lastName", EmitDefaultValue=false)]
+        [DataMember(Name = "lastName", EmitDefaultValue = false)]
         public string LastName { get; set; }
 
         /// <summary>
         /// Gets or Sets FirstName
         /// </summary>
-        [DataMember(Name= "firstName", EmitDefaultValue=false)]
+        [DataMember(Name = "firstName", EmitDefaultValue = false)]
         public string FirstName { get; set; }
 
         /// <summary>
@@ -76,7 +69,7 @@ namespace Org.OpenAPITools.Model
             sb.Append("}\n");
             return sb.ToString();
         }
-  
+
         /// <summary>
         /// Returns the JSON string presentation of the object
         /// </summary>
@@ -106,17 +99,17 @@ namespace Org.OpenAPITools.Model
             if (input == null)
                 return false;
 
-            return 
+            return
                 (
                     this.MailAddress == input.MailAddress ||
                     (this.MailAddress != null &&
                     this.MailAddress.Equals(input.MailAddress))
-                ) && 
+                ) &&
                 (
                     this.LastName == input.LastName ||
                     (this.LastName != null &&
                     this.LastName.Equals(input.LastName))
-                ) && 
+                ) &&
                 (
                     this.FirstName == input.FirstName ||
                     (this.FirstName != null &&

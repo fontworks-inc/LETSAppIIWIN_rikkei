@@ -61,7 +61,7 @@
         bool IsCheckedStartup(
             ShutdownClientApplicationRequiredEvent shutdownClientApplicationRequiredEvent,
             ForceUpdateEvent forceUpdateEvent,
-            DownloadCompletedEvent　downloadCompletedEvent,
+            DownloadCompletedEvent downloadCompletedEvent,
             ExistsUpdateProgramEvent existsUpdateProgramEvent,
             StartDownloadEvent startDownloadEvent,
             NotContainsDeviceEvent notContainsDeviceEvent,

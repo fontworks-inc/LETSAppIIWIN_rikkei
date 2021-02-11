@@ -9,13 +9,8 @@
  */
 
 
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Net;
-using System.Net.Mime;
 using Org.OpenAPITools.Client;
+using System;
 
 namespace Org.OpenAPITools.Api
 {
@@ -38,7 +33,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="cacheControl"></param>
         /// <param name="lastEventID"> (optional)</param>
         /// <returns>string</returns>
-        string Notification (string X_LETS_DEVICEID, string connection, string cacheControl, int? lastEventID = default(int?));
+        string Notification(string X_LETS_DEVICEID, string connection, string cacheControl, int? lastEventID = default(int?));
 
         /// <summary>
         /// クライアントアプリ通知API
@@ -52,7 +47,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="cacheControl"></param>
         /// <param name="lastEventID"> (optional)</param>
         /// <returns>ApiResponse of string</returns>
-        ApiResponse<string> NotificationWithHttpInfo (string X_LETS_DEVICEID, string connection, string cacheControl, int? lastEventID = default(int?));
+        ApiResponse<string> NotificationWithHttpInfo(string X_LETS_DEVICEID, string connection, string cacheControl, int? lastEventID = default(int?));
         #endregion Synchronous Operations
     }
 
@@ -74,7 +69,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="cacheControl"></param>
         /// <param name="lastEventID"> (optional)</param>
         /// <returns>Task of string</returns>
-        System.Threading.Tasks.Task<string> NotificationAsync (string X_LETS_DEVICEID, string connection, string cacheControl, int? lastEventID = default(int?));
+        System.Threading.Tasks.Task<string> NotificationAsync(string X_LETS_DEVICEID, string connection, string cacheControl, int? lastEventID = default(int?));
 
         /// <summary>
         /// クライアントアプリ通知API
@@ -88,7 +83,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="cacheControl"></param>
         /// <param name="lastEventID"> (optional)</param>
         /// <returns>Task of ApiResponse (string)</returns>
-        System.Threading.Tasks.Task<ApiResponse<string>> NotificationAsyncWithHttpInfo (string X_LETS_DEVICEID, string connection, string cacheControl, int? lastEventID = default(int?));
+        System.Threading.Tasks.Task<ApiResponse<string>> NotificationAsyncWithHttpInfo(string X_LETS_DEVICEID, string connection, string cacheControl, int? lastEventID = default(int?));
         #endregion Asynchronous Operations
     }
 
@@ -111,7 +106,7 @@ namespace Org.OpenAPITools.Api
         /// Initializes a new instance of the <see cref="NotificationApi"/> class.
         /// </summary>
         /// <returns></returns>
-        public NotificationApi() : this((string) null)
+        public NotificationApi() : this((string)null)
         {
         }
 
@@ -156,11 +151,11 @@ namespace Org.OpenAPITools.Api
         /// <param name="client">The client interface for synchronous API access.</param>
         /// <param name="asyncClient">The client interface for asynchronous API access.</param>
         /// <param name="configuration">The configuration object.</param>
-        public NotificationApi(Org.OpenAPITools.Client.ISynchronousClient client,Org.OpenAPITools.Client.IAsynchronousClient asyncClient, Org.OpenAPITools.Client.IReadableConfiguration configuration)
+        public NotificationApi(Org.OpenAPITools.Client.ISynchronousClient client, Org.OpenAPITools.Client.IAsynchronousClient asyncClient, Org.OpenAPITools.Client.IReadableConfiguration configuration)
         {
-            if(client == null) throw new ArgumentNullException("client");
-            if(asyncClient == null) throw new ArgumentNullException("asyncClient");
-            if(configuration == null) throw new ArgumentNullException("configuration");
+            if (client == null) throw new ArgumentNullException("client");
+            if (asyncClient == null) throw new ArgumentNullException("asyncClient");
+            if (configuration == null) throw new ArgumentNullException("configuration");
 
             this.Client = client;
             this.AsynchronousClient = asyncClient;
@@ -191,7 +186,7 @@ namespace Org.OpenAPITools.Api
         /// Gets or sets the configuration object
         /// </summary>
         /// <value>An instance of the Configuration</value>
-        public Org.OpenAPITools.Client.IReadableConfiguration Configuration {get; set;}
+        public Org.OpenAPITools.Client.IReadableConfiguration Configuration { get; set; }
 
         /// <summary>
         /// Provides a factory method hook for the creation of exceptions.
@@ -218,10 +213,10 @@ namespace Org.OpenAPITools.Api
         /// <param name="cacheControl"></param>
         /// <param name="lastEventID"> (optional)</param>
         /// <returns>string</returns>
-        public string Notification (string X_LETS_DEVICEID, string connection, string cacheControl, int? lastEventID = default(int?))
+        public string Notification(string X_LETS_DEVICEID, string connection, string cacheControl, int? lastEventID = default(int?))
         {
-             Org.OpenAPITools.Client.ApiResponse<string> localVarResponse = NotificationWithHttpInfo(X_LETS_DEVICEID, connection, cacheControl, lastEventID);
-             return localVarResponse.Data;
+            Org.OpenAPITools.Client.ApiResponse<string> localVarResponse = NotificationWithHttpInfo(X_LETS_DEVICEID, connection, cacheControl, lastEventID);
+            return localVarResponse.Data;
         }
 
         /// <summary>
@@ -233,7 +228,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="cacheControl"></param>
         /// <param name="lastEventID"> (optional)</param>
         /// <returns>ApiResponse of string</returns>
-        public Org.OpenAPITools.Client.ApiResponse< string > NotificationWithHttpInfo (string X_LETS_DEVICEID, string connection, string cacheControl, int? lastEventID = default(int?))
+        public Org.OpenAPITools.Client.ApiResponse<string> NotificationWithHttpInfo(string X_LETS_DEVICEID, string connection, string cacheControl, int? lastEventID = default(int?))
         {
             // verify the required parameter 'X_LETS_DEVICEID' is set
             if (X_LETS_DEVICEID == null)
@@ -280,7 +275,7 @@ namespace Org.OpenAPITools.Api
             }
 
             // make the HTTP request
-            var localVarResponse = this.Client.Get< string >("/notifications", localVarRequestOptions, this.Configuration);
+            var localVarResponse = this.Client.Get<string>("/notifications", localVarRequestOptions, this.Configuration);
 
             if (this.ExceptionFactory != null)
             {
@@ -300,10 +295,10 @@ namespace Org.OpenAPITools.Api
         /// <param name="cacheControl"></param>
         /// <param name="lastEventID"> (optional)</param>
         /// <returns>Task of string</returns>
-        public async System.Threading.Tasks.Task<string> NotificationAsync (string X_LETS_DEVICEID, string connection, string cacheControl, int? lastEventID = default(int?))
+        public async System.Threading.Tasks.Task<string> NotificationAsync(string X_LETS_DEVICEID, string connection, string cacheControl, int? lastEventID = default(int?))
         {
-             Org.OpenAPITools.Client.ApiResponse<string> localVarResponse = await NotificationAsyncWithHttpInfo(X_LETS_DEVICEID, connection, cacheControl, lastEventID);
-             return localVarResponse.Data;
+            Org.OpenAPITools.Client.ApiResponse<string> localVarResponse = await NotificationAsyncWithHttpInfo(X_LETS_DEVICEID, connection, cacheControl, lastEventID);
+            return localVarResponse.Data;
 
         }
 
@@ -316,7 +311,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="cacheControl"></param>
         /// <param name="lastEventID"> (optional)</param>
         /// <returns>Task of ApiResponse (string)</returns>
-        public async System.Threading.Tasks.Task<Org.OpenAPITools.Client.ApiResponse<string>> NotificationAsyncWithHttpInfo (string X_LETS_DEVICEID, string connection, string cacheControl, int? lastEventID = default(int?))
+        public async System.Threading.Tasks.Task<Org.OpenAPITools.Client.ApiResponse<string>> NotificationAsyncWithHttpInfo(string X_LETS_DEVICEID, string connection, string cacheControl, int? lastEventID = default(int?))
         {
             // verify the required parameter 'X_LETS_DEVICEID' is set
             if (X_LETS_DEVICEID == null)
@@ -341,13 +336,13 @@ namespace Org.OpenAPITools.Api
                 "text/event-stream; charset=utf-8",
                 "application/json; charset=utf-8"
             };
-            
+
             foreach (var _contentType in _contentTypes)
                 localVarRequestOptions.HeaderParameters.Add("Content-Type", _contentType);
-            
+
             foreach (var _accept in _accepts)
                 localVarRequestOptions.HeaderParameters.Add("Accept", _accept);
-            
+
             localVarRequestOptions.HeaderParameters.Add("X-LETS-DEVICEID", Org.OpenAPITools.Client.ClientUtils.ParameterToString(X_LETS_DEVICEID)); // header parameter
             localVarRequestOptions.HeaderParameters.Add("Connection", Org.OpenAPITools.Client.ClientUtils.ParameterToString(connection)); // header parameter
             localVarRequestOptions.HeaderParameters.Add("Cache-Control", Org.OpenAPITools.Client.ClientUtils.ParameterToString(cacheControl)); // header parameter

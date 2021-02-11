@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Core.Entities
+﻿namespace Core.Entities
 {
     /// <summary>
     /// 未読お知らせ情報を表すクラス
@@ -12,7 +8,7 @@ namespace Core.Entities
         /// <summary>
         /// 未読お知らせ件数
         /// </summary>
-        public int Toal { get; set; } = -1;
+        public int Total { get; set; } = -1;
 
         /// <summary>
         /// 未読お知らせ有無

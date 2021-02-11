@@ -9,19 +9,12 @@
  */
 
 
-using System;
-using System.Linq;
-using System.IO;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Collections;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Runtime.Serialization;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using OpenAPIDateConverter = Org.OpenAPITools.Client.OpenAPIDateConverter;
+using System.Runtime.Serialization;
+using System.Text;
 
 namespace Org.OpenAPITools.Model
 {
@@ -29,7 +22,7 @@ namespace Org.OpenAPITools.Model
     /// ContractsDataContracts
     /// </summary>
     [DataContract]
-    public partial class ContractsDataContracts :  IEquatable<ContractsDataContracts>, IValidatableObject
+    public partial class ContractsDataContracts : IEquatable<ContractsDataContracts>, IValidatableObject
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ContractsDataContracts" /> class.
@@ -41,17 +34,17 @@ namespace Org.OpenAPITools.Model
             this.ContractId = contractId;
             this.ContractEndDate = contractEndDate;
         }
-        
+
         /// <summary>
         /// Gets or Sets ContractId
         /// </summary>
-        [DataMember(Name="contractId", EmitDefaultValue=false)]
+        [DataMember(Name = "contractId", EmitDefaultValue = false)]
         public string ContractId { get; set; }
 
         /// <summary>
         /// Gets or Sets ContractEndDate
         /// </summary>
-        [DataMember(Name="contractEndDate", EmitDefaultValue=false)]
+        [DataMember(Name = "contractEndDate", EmitDefaultValue = false)]
         public string ContractEndDate { get; set; }
 
         /// <summary>
@@ -67,7 +60,7 @@ namespace Org.OpenAPITools.Model
             sb.Append("}\n");
             return sb.ToString();
         }
-  
+
         /// <summary>
         /// Returns the JSON string presentation of the object
         /// </summary>
@@ -97,12 +90,12 @@ namespace Org.OpenAPITools.Model
             if (input == null)
                 return false;
 
-            return 
+            return
                 (
                     this.ContractId == input.ContractId ||
                     (this.ContractId != null &&
                     this.ContractId.Equals(input.ContractId))
-                ) && 
+                ) &&
                 (
                     this.ContractEndDate == input.ContractEndDate ||
                     (this.ContractEndDate != null &&

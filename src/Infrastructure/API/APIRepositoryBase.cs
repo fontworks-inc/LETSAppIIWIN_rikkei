@@ -1,12 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using System.Net;
-using System.Text.Json;
 using System.Text.RegularExpressions;
 using Core.Entities;
-using Infrastructure.File;
 using Infrastructure.Memory;
 using Newtonsoft.Json;
 using NLog;
@@ -322,9 +318,11 @@ namespace Infrastructure.API
 
             try
             {
+                string objnm = obj.GetType().Name;
+                Logger.Debug("IsAccessTokenExpired:objtype=" + objnm);
+                if (objnm == "FileStream")
                 {
-                    string objnm = obj.GetType().Name;
-                    Logger.Debug("IsAccessTokenExpired:objtype=" + objnm);
+                    return false;
                 }
 
                 if (typeof(AccessTokenRefreshTokenResponse) == obj.GetType())

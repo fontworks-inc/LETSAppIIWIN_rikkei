@@ -9,19 +9,12 @@
  */
 
 
-using System;
-using System.Linq;
-using System.IO;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Collections;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Runtime.Serialization;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using OpenAPIDateConverter = Org.OpenAPITools.Client.OpenAPIDateConverter;
+using System.Runtime.Serialization;
+using System.Text;
 
 namespace Org.OpenAPITools.Model
 {
@@ -29,7 +22,7 @@ namespace Org.OpenAPITools.Model
     /// AccessTokenRefreshTokenData
     /// </summary>
     [DataContract]
-    public partial class AccessTokenRefreshTokenData :  IEquatable<AccessTokenRefreshTokenData>, IValidatableObject
+    public partial class AccessTokenRefreshTokenData : IEquatable<AccessTokenRefreshTokenData>, IValidatableObject
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="AccessTokenRefreshTokenData" /> class.
@@ -41,17 +34,17 @@ namespace Org.OpenAPITools.Model
             this.AccessToken = accessToken;
             this.RefreshToken = refreshToken;
         }
-        
+
         /// <summary>
         /// Gets or Sets AccessToken
         /// </summary>
-        [DataMember(Name="accessToken", EmitDefaultValue=false)]
+        [DataMember(Name = "accessToken", EmitDefaultValue = false)]
         public string AccessToken { get; set; }
 
         /// <summary>
         /// Gets or Sets RefreshToken
         /// </summary>
-        [DataMember(Name="refreshToken", EmitDefaultValue=false)]
+        [DataMember(Name = "refreshToken", EmitDefaultValue = false)]
         public string RefreshToken { get; set; }
 
         /// <summary>
@@ -67,7 +60,7 @@ namespace Org.OpenAPITools.Model
             sb.Append("}\n");
             return sb.ToString();
         }
-  
+
         /// <summary>
         /// Returns the JSON string presentation of the object
         /// </summary>
@@ -97,12 +90,12 @@ namespace Org.OpenAPITools.Model
             if (input == null)
                 return false;
 
-            return 
+            return
                 (
                     this.AccessToken == input.AccessToken ||
                     (this.AccessToken != null &&
                     this.AccessToken.Equals(input.AccessToken))
-                ) && 
+                ) &&
                 (
                     this.RefreshToken == input.RefreshToken ||
                     (this.RefreshToken != null &&

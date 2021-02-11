@@ -60,7 +60,7 @@ namespace Org.OpenAPITools.Client
 
             return parameters;
         }
-        
+
         /// <summary>
         /// If parameter is DateTime, output in a formatted string (default ISO 8601), customizable with Configuration.DateTime.
         /// If parameter is a list, join the list with ",".

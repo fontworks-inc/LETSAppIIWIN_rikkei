@@ -9,28 +9,21 @@
  */
 
 
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using System.IO;
-using System.Web;
-using System.Linq;
-using System.Net;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters;
-using System.Text;
+using Microsoft.Win32;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
+using NLog;
 using RestSharp;
 using RestSharp.Deserializers;
-using ErrorEventArgs = Newtonsoft.Json.Serialization.ErrorEventArgs;
-using RestSharpMethod = RestSharp.Method;
-using Microsoft.Win32;
-using NLog;
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Net;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using RestSharpMethod = RestSharp.Method;
 
 namespace Org.OpenAPITools.Client
 {
@@ -73,7 +66,7 @@ namespace Org.OpenAPITools.Client
 
         public T Deserialize<T>(IRestResponse response)
         {
-            var result = (T) Deserialize(response, typeof(T));
+            var result = (T)Deserialize(response, typeof(T));
             return result;
         }
 
@@ -117,7 +110,7 @@ namespace Org.OpenAPITools.Client
 
             if (type.Name.StartsWith("System.Nullable`1[[System.DateTime")) // return a datetime object
             {
-                return DateTime.Parse(response.Content,  null, System.Globalization.DateTimeStyles.RoundtripKind);
+                return DateTime.Parse(response.Content, null, System.Globalization.DateTimeStyles.RoundtripKind);
             }
 
             if (type == typeof(String) || type.Name.StartsWith("System.Nullable")) // return primitive type
@@ -248,7 +241,7 @@ namespace Org.OpenAPITools.Client
             if (path == null) throw new ArgumentNullException("path");
             if (options == null) throw new ArgumentNullException("options");
             if (configuration == null) throw new ArgumentNullException("configuration");
-            
+
             RestRequest request = new RestRequest(Method(method))
             {
                 Resource = path,
@@ -262,7 +255,7 @@ namespace Org.OpenAPITools.Client
                     request.AddParameter(pathParam.Key, pathParam.Value, ParameterType.UrlSegment);
                 }
             }
-            
+
             if (options.QueryParameters != null)
             {
                 foreach (var queryParam in options.QueryParameters)
@@ -344,7 +337,7 @@ namespace Org.OpenAPITools.Client
                     request.AddCookie(cookie.Name, cookie.Value);
                 }
             }
-            
+
             return request;
         }
 
@@ -358,7 +351,7 @@ namespace Org.OpenAPITools.Client
                 ErrorText = response.ErrorMessage,
                 Cookies = new List<Cookie>()
             };
-            
+
             if (response.Headers != null)
             {
                 foreach (var responseHeader in response.Headers)
@@ -373,9 +366,9 @@ namespace Org.OpenAPITools.Client
                 {
                     transformed.Cookies.Add(
                         new Cookie(
-                            responseCookies.Name, 
-                            responseCookies.Value, 
-                            responseCookies.Path, 
+                            responseCookies.Name,
+                            responseCookies.Value,
+                            responseCookies.Path,
                             responseCookies.Domain)
                         );
                 }
@@ -429,7 +422,7 @@ namespace Org.OpenAPITools.Client
                 client.Proxy = new WebProxy(proxyserver);
                 Logger.Debug("ApiClient:ProxyByRegistry=" + proxyserver);
 
-                if(proxyserver == null || proxyserver == "")
+                if (proxyserver == null || proxyserver == "")
                 {
                     Process p = new Process();
                     // コマンドプロンプトと同じように実行します
@@ -443,13 +436,13 @@ namespace Org.OpenAPITools.Client
                     p.WaitForExit();
 
                     var lines = cmdresult.Replace("\r\n", "\n").Split(new[] { '\n', '\r' });
-                    foreach(string line in lines)
+                    foreach (string line in lines)
                     {
                         var words = line.Replace("  ", " ").Split(' ');
                         string preWord = "";
                         foreach (string w in words)
                         {
-                            if(preWord == "サーバー:")
+                            if (preWord == "サーバー:")
                             {
                                 proxyserver = w;
                                 if (proxyserver != "")
@@ -482,7 +475,7 @@ namespace Org.OpenAPITools.Client
 
             if (response.Cookies != null && response.Cookies.Count > 0)
             {
-                if(result.Cookies == null) result.Cookies = new List<Cookie>();
+                if (result.Cookies == null) result.Cookies = new List<Cookie>();
                 foreach (var restResponseCookie in response.Cookies)
                 {
                     var cookie = new Cookie(
@@ -552,7 +545,7 @@ namespace Org.OpenAPITools.Client
 
             if (response.Cookies != null && response.Cookies.Count > 0)
             {
-                if(result.Cookies == null) result.Cookies = new List<Cookie>();
+                if (result.Cookies == null) result.Cookies = new List<Cookie>();
                 foreach (var restResponseCookie in response.Cookies)
                 {
                     var cookie = new Cookie(

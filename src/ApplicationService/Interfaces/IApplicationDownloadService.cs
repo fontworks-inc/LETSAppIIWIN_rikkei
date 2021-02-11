@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using ApplicationService.Interfaces;
-
-namespace ApplicationService.Interfaces
+﻿namespace ApplicationService.Interfaces
 {
     /// <summary>
     /// ダウンロード完了時に呼び出されるComponent側のイベント

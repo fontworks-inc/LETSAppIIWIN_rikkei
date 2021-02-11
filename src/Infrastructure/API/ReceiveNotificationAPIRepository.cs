@@ -266,6 +266,7 @@ namespace Infrastructure.API
                     try
                     {
                         userStatus.LastEventId = int.Parse(sseMessage.Id);
+                        this.userStatusRepository.SaveStatus(userStatus);
                     }
                     catch (Exception)
                     {

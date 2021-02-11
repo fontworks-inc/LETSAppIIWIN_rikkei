@@ -5051,7 +5051,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:LETS-Ver1.0.0"
         "ProductCode" = "8:{805BF39F-7BBE-445F-B56B-A6FD34C4D817}"
-        "PackageCode" = "8:{34BF4AEB-AEB9-452F-AEB1-F532155AA877}"
+        "PackageCode" = "8:{506342A9-05BF-4224-BBAE-21F707BE10DC}"
         "UpgradeCode" = "8:{D06420E7-C210-4085-A03E-05BA8DF52137}"
         "AspNetVersion" = "8:"
         "RestartWWWService" = "11:FALSE"

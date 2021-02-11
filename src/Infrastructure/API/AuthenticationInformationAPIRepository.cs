@@ -1,8 +1,5 @@
-﻿using System;
-using Core.Entities;
+﻿using Core.Entities;
 using Core.Interfaces;
-using Infrastructure.File;
-using Infrastructure.Memory;
 using NLog;
 using Org.OpenAPITools.Api;
 using Org.OpenAPITools.Client;

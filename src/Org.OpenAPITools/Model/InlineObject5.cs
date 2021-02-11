@@ -9,19 +9,12 @@
  */
 
 
-using System;
-using System.Linq;
-using System.IO;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Collections;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Runtime.Serialization;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using OpenAPIDateConverter = Org.OpenAPITools.Client.OpenAPIDateConverter;
+using System.Runtime.Serialization;
+using System.Text;
 
 namespace Org.OpenAPITools.Model
 {
@@ -29,7 +22,7 @@ namespace Org.OpenAPITools.Model
     /// InlineObject5
     /// </summary>
     [DataContract]
-    public partial class InlineObject5 :  IEquatable<InlineObject5>, IValidatableObject
+    public partial class InlineObject5 : IEquatable<InlineObject5>, IValidatableObject
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="InlineObject5" /> class.
@@ -45,29 +38,29 @@ namespace Org.OpenAPITools.Model
             this.OriginalDeviceId = originalDeviceId;
             this.Detected = detected;
         }
-        
+
         /// <summary>
         /// Gets or Sets FontId
         /// </summary>
-        [DataMember(Name="fontId", EmitDefaultValue=false)]
+        [DataMember(Name = "fontId", EmitDefaultValue = false)]
         public string FontId { get; set; }
 
         /// <summary>
         /// Gets or Sets OriginalUserId
         /// </summary>
-        [DataMember(Name="originalUserId", EmitDefaultValue=false)]
+        [DataMember(Name = "originalUserId", EmitDefaultValue = false)]
         public string OriginalUserId { get; set; }
 
         /// <summary>
         /// Gets or Sets OriginalDeviceId
         /// </summary>
-        [DataMember(Name="originalDeviceId", EmitDefaultValue=false)]
+        [DataMember(Name = "originalDeviceId", EmitDefaultValue = false)]
         public string OriginalDeviceId { get; set; }
 
         /// <summary>
         /// Gets or Sets Detected
         /// </summary>
-        [DataMember(Name="detected", EmitDefaultValue=false)]
+        [DataMember(Name = "detected", EmitDefaultValue = false)]
         public string Detected { get; set; }
 
         /// <summary>
@@ -85,7 +78,7 @@ namespace Org.OpenAPITools.Model
             sb.Append("}\n");
             return sb.ToString();
         }
-  
+
         /// <summary>
         /// Returns the JSON string presentation of the object
         /// </summary>
@@ -115,22 +108,22 @@ namespace Org.OpenAPITools.Model
             if (input == null)
                 return false;
 
-            return 
+            return
                 (
                     this.FontId == input.FontId ||
                     (this.FontId != null &&
                     this.FontId.Equals(input.FontId))
-                ) && 
+                ) &&
                 (
                     this.OriginalUserId == input.OriginalUserId ||
                     (this.OriginalUserId != null &&
                     this.OriginalUserId.Equals(input.OriginalUserId))
-                ) && 
+                ) &&
                 (
                     this.OriginalDeviceId == input.OriginalDeviceId ||
                     (this.OriginalDeviceId != null &&
                     this.OriginalDeviceId.Equals(input.OriginalDeviceId))
-                ) && 
+                ) &&
                 (
                     this.Detected == input.Detected ||
                     (this.Detected != null &&

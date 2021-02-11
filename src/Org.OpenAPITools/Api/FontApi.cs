@@ -9,14 +9,9 @@
  */
 
 
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Net;
-using System.Net.Mime;
 using Org.OpenAPITools.Client;
 using Org.OpenAPITools.Model;
+using System;
 
 namespace Org.OpenAPITools.Api
 {
@@ -38,7 +33,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <param name="fontId"></param>
         /// <returns>System.IO.Stream</returns>
-        System.IO.Stream GetFont (string X_LETS_DEVICEID, string userAgent, string fontId);
+        System.IO.Stream GetFont(string X_LETS_DEVICEID, string userAgent, string fontId);
 
         /// <summary>
         /// フォントダウンロードAPI
@@ -51,7 +46,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <param name="fontId"></param>
         /// <returns>ApiResponse of System.IO.Stream</returns>
-        ApiResponse<System.IO.Stream> GetFontWithHttpInfo (string X_LETS_DEVICEID, string userAgent, string fontId);
+        ApiResponse<System.IO.Stream> GetFontWithHttpInfo(string X_LETS_DEVICEID, string userAgent, string fontId);
         /// <summary>
         /// フォント一覧画面URLの取得API
         /// </summary>
@@ -62,7 +57,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="X_LETS_DEVICEID">デバイス固有のIDを設定する。</param>
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <returns>UrlResponse</returns>
-        UrlResponse GetFontListUrl (string X_LETS_DEVICEID, string userAgent);
+        UrlResponse GetFontListUrl(string X_LETS_DEVICEID, string userAgent);
 
         /// <summary>
         /// フォント一覧画面URLの取得API
@@ -74,7 +69,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="X_LETS_DEVICEID">デバイス固有のIDを設定する。</param>
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <returns>ApiResponse of UrlResponse</returns>
-        ApiResponse<UrlResponse> GetFontListUrlWithHttpInfo (string X_LETS_DEVICEID, string userAgent);
+        ApiResponse<UrlResponse> GetFontListUrlWithHttpInfo(string X_LETS_DEVICEID, string userAgent);
         /// <summary>
         /// インストールフォント情報の取得API
         /// </summary>
@@ -86,7 +81,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <param name="contains"></param>
         /// <returns>InlineResponse200</returns>
-        InlineResponse200 GetInstallFonts (string X_LETS_DEVICEID, string userAgent, string contains);
+        InlineResponse200 GetInstallFonts(string X_LETS_DEVICEID, string userAgent, string contains);
 
         /// <summary>
         /// インストールフォント情報の取得API
@@ -99,7 +94,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <param name="contains"></param>
         /// <returns>ApiResponse of InlineResponse200</returns>
-        ApiResponse<InlineResponse200> GetInstallFontsWithHttpInfo (string X_LETS_DEVICEID, string userAgent, string contains);
+        ApiResponse<InlineResponse200> GetInstallFontsWithHttpInfo(string X_LETS_DEVICEID, string userAgent, string contains);
         #endregion Synchronous Operations
     }
 
@@ -120,7 +115,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <param name="fontId"></param>
         /// <returns>Task of System.IO.Stream</returns>
-        System.Threading.Tasks.Task<System.IO.Stream> GetFontAsync (string X_LETS_DEVICEID, string userAgent, string fontId);
+        System.Threading.Tasks.Task<System.IO.Stream> GetFontAsync(string X_LETS_DEVICEID, string userAgent, string fontId);
 
         /// <summary>
         /// フォントダウンロードAPI
@@ -133,7 +128,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <param name="fontId"></param>
         /// <returns>Task of ApiResponse (System.IO.Stream)</returns>
-        System.Threading.Tasks.Task<ApiResponse<System.IO.Stream>> GetFontAsyncWithHttpInfo (string X_LETS_DEVICEID, string userAgent, string fontId);
+        System.Threading.Tasks.Task<ApiResponse<System.IO.Stream>> GetFontAsyncWithHttpInfo(string X_LETS_DEVICEID, string userAgent, string fontId);
         /// <summary>
         /// フォント一覧画面URLの取得API
         /// </summary>
@@ -144,7 +139,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="X_LETS_DEVICEID">デバイス固有のIDを設定する。</param>
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <returns>Task of UrlResponse</returns>
-        System.Threading.Tasks.Task<UrlResponse> GetFontListUrlAsync (string X_LETS_DEVICEID, string userAgent);
+        System.Threading.Tasks.Task<UrlResponse> GetFontListUrlAsync(string X_LETS_DEVICEID, string userAgent);
 
         /// <summary>
         /// フォント一覧画面URLの取得API
@@ -156,7 +151,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="X_LETS_DEVICEID">デバイス固有のIDを設定する。</param>
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <returns>Task of ApiResponse (UrlResponse)</returns>
-        System.Threading.Tasks.Task<ApiResponse<UrlResponse>> GetFontListUrlAsyncWithHttpInfo (string X_LETS_DEVICEID, string userAgent);
+        System.Threading.Tasks.Task<ApiResponse<UrlResponse>> GetFontListUrlAsyncWithHttpInfo(string X_LETS_DEVICEID, string userAgent);
         /// <summary>
         /// インストールフォント情報の取得API
         /// </summary>
@@ -168,7 +163,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <param name="contains"></param>
         /// <returns>Task of InlineResponse200</returns>
-        System.Threading.Tasks.Task<InlineResponse200> GetInstallFontsAsync (string X_LETS_DEVICEID, string userAgent, string contains);
+        System.Threading.Tasks.Task<InlineResponse200> GetInstallFontsAsync(string X_LETS_DEVICEID, string userAgent, string contains);
 
         /// <summary>
         /// インストールフォント情報の取得API
@@ -181,7 +176,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <param name="contains"></param>
         /// <returns>Task of ApiResponse (InlineResponse200)</returns>
-        System.Threading.Tasks.Task<ApiResponse<InlineResponse200>> GetInstallFontsAsyncWithHttpInfo (string X_LETS_DEVICEID, string userAgent, string contains);
+        System.Threading.Tasks.Task<ApiResponse<InlineResponse200>> GetInstallFontsAsyncWithHttpInfo(string X_LETS_DEVICEID, string userAgent, string contains);
         #endregion Asynchronous Operations
     }
 
@@ -204,7 +199,7 @@ namespace Org.OpenAPITools.Api
         /// Initializes a new instance of the <see cref="FontApi"/> class.
         /// </summary>
         /// <returns></returns>
-        public FontApi() : this((string) null)
+        public FontApi() : this((string)null)
         {
         }
 
@@ -249,11 +244,11 @@ namespace Org.OpenAPITools.Api
         /// <param name="client">The client interface for synchronous API access.</param>
         /// <param name="asyncClient">The client interface for asynchronous API access.</param>
         /// <param name="configuration">The configuration object.</param>
-        public FontApi(Org.OpenAPITools.Client.ISynchronousClient client,Org.OpenAPITools.Client.IAsynchronousClient asyncClient, Org.OpenAPITools.Client.IReadableConfiguration configuration)
+        public FontApi(Org.OpenAPITools.Client.ISynchronousClient client, Org.OpenAPITools.Client.IAsynchronousClient asyncClient, Org.OpenAPITools.Client.IReadableConfiguration configuration)
         {
-            if(client == null) throw new ArgumentNullException("client");
-            if(asyncClient == null) throw new ArgumentNullException("asyncClient");
-            if(configuration == null) throw new ArgumentNullException("configuration");
+            if (client == null) throw new ArgumentNullException("client");
+            if (asyncClient == null) throw new ArgumentNullException("asyncClient");
+            if (configuration == null) throw new ArgumentNullException("configuration");
 
             this.Client = client;
             this.AsynchronousClient = asyncClient;
@@ -284,7 +279,7 @@ namespace Org.OpenAPITools.Api
         /// Gets or sets the configuration object
         /// </summary>
         /// <value>An instance of the Configuration</value>
-        public Org.OpenAPITools.Client.IReadableConfiguration Configuration {get; set;}
+        public Org.OpenAPITools.Client.IReadableConfiguration Configuration { get; set; }
 
         /// <summary>
         /// Provides a factory method hook for the creation of exceptions.
@@ -310,10 +305,10 @@ namespace Org.OpenAPITools.Api
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <param name="fontId"></param>
         /// <returns>System.IO.Stream</returns>
-        public System.IO.Stream GetFont (string X_LETS_DEVICEID, string userAgent, string fontId)
+        public System.IO.Stream GetFont(string X_LETS_DEVICEID, string userAgent, string fontId)
         {
-             Org.OpenAPITools.Client.ApiResponse<System.IO.Stream> localVarResponse = GetFontWithHttpInfo(X_LETS_DEVICEID, userAgent, fontId);
-             return localVarResponse.Data;
+            Org.OpenAPITools.Client.ApiResponse<System.IO.Stream> localVarResponse = GetFontWithHttpInfo(X_LETS_DEVICEID, userAgent, fontId);
+            return localVarResponse.Data;
         }
 
         /// <summary>
@@ -324,7 +319,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <param name="fontId"></param>
         /// <returns>ApiResponse of System.IO.Stream</returns>
-        public Org.OpenAPITools.Client.ApiResponse< System.IO.Stream > GetFontWithHttpInfo (string X_LETS_DEVICEID, string userAgent, string fontId)
+        public Org.OpenAPITools.Client.ApiResponse<System.IO.Stream> GetFontWithHttpInfo(string X_LETS_DEVICEID, string userAgent, string fontId)
         {
             // verify the required parameter 'X_LETS_DEVICEID' is set
             if (X_LETS_DEVICEID == null)
@@ -367,7 +362,7 @@ namespace Org.OpenAPITools.Api
             }
 
             // make the HTTP request
-            var localVarResponse = this.Client.Get< System.IO.Stream >("/api/v1/fonts/{fontId}", localVarRequestOptions, this.Configuration);
+            var localVarResponse = this.Client.Get<System.IO.Stream>("/api/v1/fonts/{fontId}", localVarRequestOptions, this.Configuration);
 
             if (this.ExceptionFactory != null)
             {
@@ -386,10 +381,10 @@ namespace Org.OpenAPITools.Api
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <param name="fontId"></param>
         /// <returns>Task of System.IO.Stream</returns>
-        public async System.Threading.Tasks.Task<System.IO.Stream> GetFontAsync (string X_LETS_DEVICEID, string userAgent, string fontId)
+        public async System.Threading.Tasks.Task<System.IO.Stream> GetFontAsync(string X_LETS_DEVICEID, string userAgent, string fontId)
         {
-             Org.OpenAPITools.Client.ApiResponse<System.IO.Stream> localVarResponse = await GetFontAsyncWithHttpInfo(X_LETS_DEVICEID, userAgent, fontId);
-             return localVarResponse.Data;
+            Org.OpenAPITools.Client.ApiResponse<System.IO.Stream> localVarResponse = await GetFontAsyncWithHttpInfo(X_LETS_DEVICEID, userAgent, fontId);
+            return localVarResponse.Data;
 
         }
 
@@ -401,7 +396,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <param name="fontId"></param>
         /// <returns>Task of ApiResponse (System.IO.Stream)</returns>
-        public async System.Threading.Tasks.Task<Org.OpenAPITools.Client.ApiResponse<System.IO.Stream>> GetFontAsyncWithHttpInfo (string X_LETS_DEVICEID, string userAgent, string fontId)
+        public async System.Threading.Tasks.Task<Org.OpenAPITools.Client.ApiResponse<System.IO.Stream>> GetFontAsyncWithHttpInfo(string X_LETS_DEVICEID, string userAgent, string fontId)
         {
             // verify the required parameter 'X_LETS_DEVICEID' is set
             if (X_LETS_DEVICEID == null)
@@ -426,13 +421,13 @@ namespace Org.OpenAPITools.Api
                 "application/octet-stream",
                 "application/json; charset=utf-8"
             };
-            
+
             foreach (var _contentType in _contentTypes)
                 localVarRequestOptions.HeaderParameters.Add("Content-Type", _contentType);
-            
+
             foreach (var _accept in _accepts)
                 localVarRequestOptions.HeaderParameters.Add("Accept", _accept);
-            
+
             localVarRequestOptions.PathParameters.Add("fontId", Org.OpenAPITools.Client.ClientUtils.ParameterToString(fontId)); // path parameter
             localVarRequestOptions.HeaderParameters.Add("X-LETS-DEVICEID", Org.OpenAPITools.Client.ClientUtils.ParameterToString(X_LETS_DEVICEID)); // header parameter
             localVarRequestOptions.HeaderParameters.Add("User-Agent", Org.OpenAPITools.Client.ClientUtils.ParameterToString(userAgent)); // header parameter
@@ -464,10 +459,10 @@ namespace Org.OpenAPITools.Api
         /// <param name="X_LETS_DEVICEID">デバイス固有のIDを設定する。</param>
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <returns>UrlResponse</returns>
-        public UrlResponse GetFontListUrl (string X_LETS_DEVICEID, string userAgent)
+        public UrlResponse GetFontListUrl(string X_LETS_DEVICEID, string userAgent)
         {
-             Org.OpenAPITools.Client.ApiResponse<UrlResponse> localVarResponse = GetFontListUrlWithHttpInfo(X_LETS_DEVICEID, userAgent);
-             return localVarResponse.Data;
+            Org.OpenAPITools.Client.ApiResponse<UrlResponse> localVarResponse = GetFontListUrlWithHttpInfo(X_LETS_DEVICEID, userAgent);
+            return localVarResponse.Data;
         }
 
         /// <summary>
@@ -477,7 +472,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="X_LETS_DEVICEID">デバイス固有のIDを設定する。</param>
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <returns>ApiResponse of UrlResponse</returns>
-        public Org.OpenAPITools.Client.ApiResponse< UrlResponse > GetFontListUrlWithHttpInfo (string X_LETS_DEVICEID, string userAgent)
+        public Org.OpenAPITools.Client.ApiResponse<UrlResponse> GetFontListUrlWithHttpInfo(string X_LETS_DEVICEID, string userAgent)
         {
             // verify the required parameter 'X_LETS_DEVICEID' is set
             if (X_LETS_DEVICEID == null)
@@ -514,7 +509,7 @@ namespace Org.OpenAPITools.Api
             }
 
             // make the HTTP request
-            var localVarResponse = this.Client.Get< UrlResponse >("/api/v1/screens/font-list/url", localVarRequestOptions, this.Configuration);
+            var localVarResponse = this.Client.Get<UrlResponse>("/api/v1/screens/font-list/url", localVarRequestOptions, this.Configuration);
 
             if (this.ExceptionFactory != null)
             {
@@ -532,10 +527,10 @@ namespace Org.OpenAPITools.Api
         /// <param name="X_LETS_DEVICEID">デバイス固有のIDを設定する。</param>
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <returns>Task of UrlResponse</returns>
-        public async System.Threading.Tasks.Task<UrlResponse> GetFontListUrlAsync (string X_LETS_DEVICEID, string userAgent)
+        public async System.Threading.Tasks.Task<UrlResponse> GetFontListUrlAsync(string X_LETS_DEVICEID, string userAgent)
         {
-             Org.OpenAPITools.Client.ApiResponse<UrlResponse> localVarResponse = await GetFontListUrlAsyncWithHttpInfo(X_LETS_DEVICEID, userAgent);
-             return localVarResponse.Data;
+            Org.OpenAPITools.Client.ApiResponse<UrlResponse> localVarResponse = await GetFontListUrlAsyncWithHttpInfo(X_LETS_DEVICEID, userAgent);
+            return localVarResponse.Data;
 
         }
 
@@ -546,7 +541,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="X_LETS_DEVICEID">デバイス固有のIDを設定する。</param>
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <returns>Task of ApiResponse (UrlResponse)</returns>
-        public async System.Threading.Tasks.Task<Org.OpenAPITools.Client.ApiResponse<UrlResponse>> GetFontListUrlAsyncWithHttpInfo (string X_LETS_DEVICEID, string userAgent)
+        public async System.Threading.Tasks.Task<Org.OpenAPITools.Client.ApiResponse<UrlResponse>> GetFontListUrlAsyncWithHttpInfo(string X_LETS_DEVICEID, string userAgent)
         {
             // verify the required parameter 'X_LETS_DEVICEID' is set
             if (X_LETS_DEVICEID == null)
@@ -566,13 +561,13 @@ namespace Org.OpenAPITools.Api
             String[] _accepts = new String[] {
                 "application/json; charset=utf-8"
             };
-            
+
             foreach (var _contentType in _contentTypes)
                 localVarRequestOptions.HeaderParameters.Add("Content-Type", _contentType);
-            
+
             foreach (var _accept in _accepts)
                 localVarRequestOptions.HeaderParameters.Add("Accept", _accept);
-            
+
             localVarRequestOptions.HeaderParameters.Add("X-LETS-DEVICEID", Org.OpenAPITools.Client.ClientUtils.ParameterToString(X_LETS_DEVICEID)); // header parameter
             localVarRequestOptions.HeaderParameters.Add("User-Agent", Org.OpenAPITools.Client.ClientUtils.ParameterToString(userAgent)); // header parameter
 
@@ -604,10 +599,10 @@ namespace Org.OpenAPITools.Api
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <param name="contains"></param>
         /// <returns>InlineResponse200</returns>
-        public InlineResponse200 GetInstallFonts (string X_LETS_DEVICEID, string userAgent, string contains)
+        public InlineResponse200 GetInstallFonts(string X_LETS_DEVICEID, string userAgent, string contains)
         {
-             Org.OpenAPITools.Client.ApiResponse<InlineResponse200> localVarResponse = GetInstallFontsWithHttpInfo(X_LETS_DEVICEID, userAgent, contains);
-             return localVarResponse.Data;
+            Org.OpenAPITools.Client.ApiResponse<InlineResponse200> localVarResponse = GetInstallFontsWithHttpInfo(X_LETS_DEVICEID, userAgent, contains);
+            return localVarResponse.Data;
         }
 
         /// <summary>
@@ -618,7 +613,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <param name="contains"></param>
         /// <returns>ApiResponse of InlineResponse200</returns>
-        public Org.OpenAPITools.Client.ApiResponse< InlineResponse200 > GetInstallFontsWithHttpInfo (string X_LETS_DEVICEID, string userAgent, string contains)
+        public Org.OpenAPITools.Client.ApiResponse<InlineResponse200> GetInstallFontsWithHttpInfo(string X_LETS_DEVICEID, string userAgent, string contains)
         {
             // verify the required parameter 'X_LETS_DEVICEID' is set
             if (X_LETS_DEVICEID == null)
@@ -660,7 +655,7 @@ namespace Org.OpenAPITools.Api
             }
 
             // make the HTTP request
-            var localVarResponse = this.Client.Get< InlineResponse200 >("/api/v1/install-fonts", localVarRequestOptions, this.Configuration);
+            var localVarResponse = this.Client.Get<InlineResponse200>("/api/v1/install-fonts", localVarRequestOptions, this.Configuration);
 
             if (this.ExceptionFactory != null)
             {
@@ -679,10 +674,10 @@ namespace Org.OpenAPITools.Api
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <param name="contains"></param>
         /// <returns>Task of InlineResponse200</returns>
-        public async System.Threading.Tasks.Task<InlineResponse200> GetInstallFontsAsync (string X_LETS_DEVICEID, string userAgent, string contains)
+        public async System.Threading.Tasks.Task<InlineResponse200> GetInstallFontsAsync(string X_LETS_DEVICEID, string userAgent, string contains)
         {
-             Org.OpenAPITools.Client.ApiResponse<InlineResponse200> localVarResponse = await GetInstallFontsAsyncWithHttpInfo(X_LETS_DEVICEID, userAgent, contains);
-             return localVarResponse.Data;
+            Org.OpenAPITools.Client.ApiResponse<InlineResponse200> localVarResponse = await GetInstallFontsAsyncWithHttpInfo(X_LETS_DEVICEID, userAgent, contains);
+            return localVarResponse.Data;
 
         }
 
@@ -694,7 +689,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <param name="contains"></param>
         /// <returns>Task of ApiResponse (InlineResponse200)</returns>
-        public async System.Threading.Tasks.Task<Org.OpenAPITools.Client.ApiResponse<InlineResponse200>> GetInstallFontsAsyncWithHttpInfo (string X_LETS_DEVICEID, string userAgent, string contains)
+        public async System.Threading.Tasks.Task<Org.OpenAPITools.Client.ApiResponse<InlineResponse200>> GetInstallFontsAsyncWithHttpInfo(string X_LETS_DEVICEID, string userAgent, string contains)
         {
             // verify the required parameter 'X_LETS_DEVICEID' is set
             if (X_LETS_DEVICEID == null)
@@ -718,13 +713,13 @@ namespace Org.OpenAPITools.Api
             String[] _accepts = new String[] {
                 "application/json; charset=utf-8"
             };
-            
+
             foreach (var _contentType in _contentTypes)
                 localVarRequestOptions.HeaderParameters.Add("Content-Type", _contentType);
-            
+
             foreach (var _accept in _accepts)
                 localVarRequestOptions.HeaderParameters.Add("Accept", _accept);
-            
+
             localVarRequestOptions.QueryParameters.Add(Org.OpenAPITools.Client.ClientUtils.ParameterToMultiMap("", "contains", contains));
             localVarRequestOptions.HeaderParameters.Add("X-LETS-DEVICEID", Org.OpenAPITools.Client.ClientUtils.ParameterToString(X_LETS_DEVICEID)); // header parameter
             localVarRequestOptions.HeaderParameters.Add("User-Agent", Org.OpenAPITools.Client.ClientUtils.ParameterToString(userAgent)); // header parameter

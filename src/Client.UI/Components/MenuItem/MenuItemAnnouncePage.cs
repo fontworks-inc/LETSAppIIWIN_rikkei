@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Diagnostics;
 using System.Windows.Forms;
 using Core.Interfaces;
 using NLog;
@@ -138,6 +137,9 @@ namespace Client.UI.Components.MenuItem
             // ブラウザ起動：お知らせ画面を表示する
             var browser = new Client.UI.Entities.WebBrowser();
             browser.Navigate(url);
+
+            // お知らせの件数表示を消す
+            this.SetNumberOfUnreadMessages(0);
         }
     }
 }

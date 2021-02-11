@@ -34,7 +34,7 @@ namespace Core.Entities
         /// <summary>
         /// 通信状態
         /// </summary>
-        /// <remarks>ログイン中の時にtrue, ログアウト時にfalseを返す</remarks>
+        /// <remarks>オンライン中の時にtrue, オフライン時にfalseを返す</remarks>
         public bool IsConnected { get; set; } = false;
 
         /// <summary>

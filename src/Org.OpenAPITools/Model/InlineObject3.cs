@@ -9,19 +9,12 @@
  */
 
 
-using System;
-using System.Linq;
-using System.IO;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Collections;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Runtime.Serialization;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using OpenAPIDateConverter = Org.OpenAPITools.Client.OpenAPIDateConverter;
+using System.Runtime.Serialization;
+using System.Text;
 
 namespace Org.OpenAPITools.Model
 {
@@ -29,7 +22,7 @@ namespace Org.OpenAPITools.Model
     /// InlineObject3
     /// </summary>
     [DataContract]
-    public partial class InlineObject3 :  IEquatable<InlineObject3>, IValidatableObject
+    public partial class InlineObject3 : IEquatable<InlineObject3>, IValidatableObject
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="InlineObject3" /> class.
@@ -39,11 +32,11 @@ namespace Org.OpenAPITools.Model
         {
             this.RefreshToken = refreshToken;
         }
-        
+
         /// <summary>
         /// Gets or Sets RefreshToken
         /// </summary>
-        [DataMember(Name="refreshToken", EmitDefaultValue=false)]
+        [DataMember(Name = "refreshToken", EmitDefaultValue = false)]
         public string RefreshToken { get; set; }
 
         /// <summary>
@@ -58,7 +51,7 @@ namespace Org.OpenAPITools.Model
             sb.Append("}\n");
             return sb.ToString();
         }
-  
+
         /// <summary>
         /// Returns the JSON string presentation of the object
         /// </summary>
@@ -88,7 +81,7 @@ namespace Org.OpenAPITools.Model
             if (input == null)
                 return false;
 
-            return 
+            return
                 (
                     this.RefreshToken == input.RefreshToken ||
                     (this.RefreshToken != null &&

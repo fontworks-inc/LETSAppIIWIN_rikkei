@@ -9,19 +9,12 @@
  */
 
 
-using System;
-using System.Linq;
-using System.IO;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Collections;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Runtime.Serialization;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using OpenAPIDateConverter = Org.OpenAPITools.Client.OpenAPIDateConverter;
+using System.Runtime.Serialization;
+using System.Text;
 
 namespace Org.OpenAPITools.Model
 {
@@ -29,7 +22,7 @@ namespace Org.OpenAPITools.Model
     /// InlineObject4
     /// </summary>
     [DataContract]
-    public partial class InlineObject4 :  IEquatable<InlineObject4>, IValidatableObject
+    public partial class InlineObject4 : IEquatable<InlineObject4>, IValidatableObject
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="InlineObject4" /> class.
@@ -51,19 +44,19 @@ namespace Org.OpenAPITools.Model
         /// <summary>
         /// Gets or Sets MailAddress
         /// </summary>
-        [DataMember(Name="mailAddress", EmitDefaultValue=false)]
+        [DataMember(Name = "mailAddress", EmitDefaultValue = false)]
         public string MailAddress { get; set; }
 
         /// <summary>
         /// Gets or Sets Password
         /// </summary>
-        [DataMember(Name="password", EmitDefaultValue=false)]
+        [DataMember(Name = "password", EmitDefaultValue = false)]
         public string Password { get; set; }
 
         /// <summary>
         /// Gets or Sets Hostname
         /// </summary>
-        [DataMember(Name="hostname", EmitDefaultValue=false)]
+        [DataMember(Name = "hostname", EmitDefaultValue = false)]
         public string Hostname { get; set; }
 
         /// <summary>
@@ -94,7 +87,7 @@ namespace Org.OpenAPITools.Model
             sb.Append("}\n");
             return sb.ToString();
         }
-  
+
         /// <summary>
         /// Returns the JSON string presentation of the object
         /// </summary>
@@ -124,17 +117,17 @@ namespace Org.OpenAPITools.Model
             if (input == null)
                 return false;
 
-            return 
+            return
                 (
                     this.MailAddress == input.MailAddress ||
                     (this.MailAddress != null &&
                     this.MailAddress.Equals(input.MailAddress))
-                ) && 
+                ) &&
                 (
                     this.Password == input.Password ||
                     (this.Password != null &&
                     this.Password.Equals(input.Password))
-                ) && 
+                ) &&
                 (
                     this.Hostname == input.Hostname ||
                     (this.Hostname != null &&

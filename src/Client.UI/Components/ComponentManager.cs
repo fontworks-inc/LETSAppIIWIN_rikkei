@@ -2,14 +2,12 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Windows.Interop;
 using ApplicationService.Interfaces;
 using Client.UI.Interfaces;
 using Client.UI.Views;
@@ -421,7 +419,7 @@ namespace Client.UI.Components
         {
             string title = this.resouceWrapper.GetString("FUNC_01_03_01_NOTIFIED_FailedToDownloadFonts");
             string text = string.Format(this.resouceWrapper.GetString("FUNC_01_03_01_NOTIFIED_FailedToDownloadFonts_Text"), font.DisplayFontName);
-            ToastNotificationWrapper.Show(title, text);
+            Logger.Error(text);
         }
 
         /// <summary>

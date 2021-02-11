@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics;
 using System.IO;
 using ApplicationService.Interfaces;
-using Core.Entities;
 
 namespace ApplicationService.Startup
 {

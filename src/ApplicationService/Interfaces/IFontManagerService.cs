@@ -50,6 +50,11 @@ namespace ApplicationService.Interfaces
         void Synchronize(bool startUp);
 
         /// <summary>
+        /// ダウンロード実行中フラグ取得
+        /// </summary>
+        bool GetIsFirstDownloadCompleted();
+
+        /// <summary>
         /// 契約切れフォントのディアクティベート
         /// </summary>
         /// <param name="contracts">契約情報</param>
@@ -60,6 +65,11 @@ namespace ApplicationService.Interfaces
         /// </summary>
         /// <remarks>保存ファイル内のアクティベートフォントを一括でディアクティベートする</remarks>
         void DeactivateSettingFonts();
+
+        /// <summary>
+        /// ディアクティベートされたフォントの削除
+        /// </summary>
+        void UninstallDeactivatedFonts();
 
         /// <summary>
         /// フォントのディアクティベート

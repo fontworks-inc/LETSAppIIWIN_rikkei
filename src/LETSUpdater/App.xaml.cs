@@ -2,7 +2,6 @@
 using System.IO;
 using System.IO.Compression;
 using System.Windows;
-using IWshRuntimeLibrary;
 
 namespace Updater
 {
@@ -16,12 +15,12 @@ namespace Updater
         {
             //  表示WAIT処理
             App app = new App();
-            if(args.Length > 0)
+            if (args.Length > 0)
             {
                 try
                 {
                     //  プログラムアップデートロジックを実行して終了
-                    if(args.Length < 2)
+                    if (args.Length < 2)
                     {
                         Environment.Exit(0);
                     }
@@ -122,15 +121,16 @@ namespace Updater
         {
             public int Compare(object x, object y)
             {
-                if(x == null && y == null)
+                if (x == null && y == null)
                 {
                     return 0;
                 }
-                if(x == null)
+                if (x == null)
                 {
                     return 1;
                 }
-                if(y == null){
+                if (y == null)
+                {
                     return -1;
                 }
 
@@ -146,7 +146,7 @@ namespace Updater
                 string[] xvers = xver.Split('.');
                 string[] yvers = yver.Split('.');
 
-                for(int i = 0; i < 3; i++)
+                for (int i = 0; i < 3; i++)
                 {
                     int xvernum = 0;
                     int yvernum = 0;
@@ -220,7 +220,8 @@ namespace Updater
             {
                 try
                 {
-                    if (!filePath.EndsWith(".zip", StringComparison.OrdinalIgnoreCase)) {
+                    if (!filePath.EndsWith(".zip", StringComparison.OrdinalIgnoreCase))
+                    {
                         System.IO.File.SetAttributes(filePath, FileAttributes.Normal);
                         System.IO.File.Delete(filePath);
                     }

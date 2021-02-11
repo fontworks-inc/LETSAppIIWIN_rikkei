@@ -9,19 +9,12 @@
  */
 
 
-using System;
-using System.Linq;
-using System.IO;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Collections;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Runtime.Serialization;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using OpenAPIDateConverter = Org.OpenAPITools.Client.OpenAPIDateConverter;
+using System.Runtime.Serialization;
+using System.Text;
 
 namespace Org.OpenAPITools.Model
 {
@@ -29,7 +22,7 @@ namespace Org.OpenAPITools.Model
     /// DevicesData
     /// </summary>
     [DataContract]
-    public partial class DevicesData :  IEquatable<DevicesData>, IValidatableObject
+    public partial class DevicesData : IEquatable<DevicesData>, IValidatableObject
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="DevicesData" /> class.
@@ -49,41 +42,41 @@ namespace Org.OpenAPITools.Model
             this.OsType = osType;
             this.OsVersion = osVersion;
         }
-        
+
         /// <summary>
         /// Gets or Sets UserDeviceId
         /// </summary>
-        [DataMember(Name="userDeviceId", EmitDefaultValue=false)]
+        [DataMember(Name = "userDeviceId", EmitDefaultValue = false)]
         public string UserDeviceId { get; set; }
 
         /// <summary>
         /// Gets or Sets DeviceId
         /// </summary>
-        [DataMember(Name="deviceId", EmitDefaultValue=false)]
+        [DataMember(Name = "deviceId", EmitDefaultValue = false)]
         public string DeviceId { get; set; }
 
         /// <summary>
         /// Gets or Sets Hostname
         /// </summary>
-        [DataMember(Name="hostname", EmitDefaultValue=false)]
+        [DataMember(Name = "hostname", EmitDefaultValue = false)]
         public string Hostname { get; set; }
 
         /// <summary>
         /// Gets or Sets OsUserName
         /// </summary>
-        [DataMember(Name="osUserName", EmitDefaultValue=false)]
+        [DataMember(Name = "osUserName", EmitDefaultValue = false)]
         public string OsUserName { get; set; }
 
         /// <summary>
         /// Gets or Sets OsType
         /// </summary>
-        [DataMember(Name="osType", EmitDefaultValue=false)]
+        [DataMember(Name = "osType", EmitDefaultValue = false)]
         public string OsType { get; set; }
 
         /// <summary>
         /// Gets or Sets OsVersion
         /// </summary>
-        [DataMember(Name="osVersion", EmitDefaultValue=false)]
+        [DataMember(Name = "osVersion", EmitDefaultValue = false)]
         public string OsVersion { get; set; }
 
         /// <summary>
@@ -103,7 +96,7 @@ namespace Org.OpenAPITools.Model
             sb.Append("}\n");
             return sb.ToString();
         }
-  
+
         /// <summary>
         /// Returns the JSON string presentation of the object
         /// </summary>
@@ -133,32 +126,32 @@ namespace Org.OpenAPITools.Model
             if (input == null)
                 return false;
 
-            return 
+            return
                 (
                     this.UserDeviceId == input.UserDeviceId ||
                     (this.UserDeviceId != null &&
                     this.UserDeviceId.Equals(input.UserDeviceId))
-                ) && 
+                ) &&
                 (
                     this.DeviceId == input.DeviceId ||
                     (this.DeviceId != null &&
                     this.DeviceId.Equals(input.DeviceId))
-                ) && 
+                ) &&
                 (
                     this.Hostname == input.Hostname ||
                     (this.Hostname != null &&
                     this.Hostname.Equals(input.Hostname))
-                ) && 
+                ) &&
                 (
                     this.OsUserName == input.OsUserName ||
                     (this.OsUserName != null &&
                     this.OsUserName.Equals(input.OsUserName))
-                ) && 
+                ) &&
                 (
                     this.OsType == input.OsType ||
                     (this.OsType != null &&
                     this.OsType.Equals(input.OsType))
-                ) && 
+                ) &&
                 (
                     this.OsVersion == input.OsVersion ||
                     (this.OsVersion != null &&

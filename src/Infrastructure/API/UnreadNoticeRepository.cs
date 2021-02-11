@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Core.Entities;
+﻿using Core.Entities;
 using Core.Interfaces;
 using Org.OpenAPITools.Api;
 using Org.OpenAPITools.Client;
@@ -48,7 +45,7 @@ namespace Infrastructure.API
                 {
                     response = new UnreadNotice()
                     {
-                        Toal = ret.Data.Total,
+                        Total = ret.Data.Total,
                         ExistsLatestNotice = ret.Data.ExistsLatestNotice,
                     };
                 }

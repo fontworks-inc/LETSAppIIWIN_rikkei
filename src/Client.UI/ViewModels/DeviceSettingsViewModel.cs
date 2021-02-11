@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Media;
-using ApplicationService.Interfaces;
 using Client.UI.Components;
 using Client.UI.Interfaces;
 using Client.UI.Views;

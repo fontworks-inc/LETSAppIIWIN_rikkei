@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using ApplicationService.Interfaces;
-using Core.Interfaces;
 
 namespace ApplicationService.Fonts
 {

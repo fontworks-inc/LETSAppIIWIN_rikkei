@@ -64,7 +64,7 @@ namespace Org.OpenAPITools.Client
     public class ApiResponse<T> : IApiResponse
     {
         #region Properties
-        
+
         /// <summary>
         /// Gets or sets the status code (HTTP status code)
         /// </summary>
@@ -112,12 +112,12 @@ namespace Org.OpenAPITools.Client
         /// <summary>
         /// The raw content
         /// </summary>
-        public string RawContent { get;}
-        
+        public string RawContent { get; }
+
         #endregion Properties
-        
+
         #region Constructors
-        
+
         /// <summary>
         /// Initializes a new instance of the <see cref="ApiResponse{T}" /> class.
         /// </summary>

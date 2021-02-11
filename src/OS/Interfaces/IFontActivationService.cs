@@ -25,6 +25,12 @@ namespace OS.Interfaces
         void Uninstall(Font font);
 
         /// <summary>
+        /// フォントを削除する
+        /// </summary>
+        /// <param name="font">対象フォント</param>
+        void Delete(Font font);
+
+        /// <summary>
         /// フォントをアクティベートする
         /// </summary>
         /// <param name="font">対象フォント</param>

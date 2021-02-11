@@ -1,5 +1,4 @@
-﻿using Core.Interfaces;
-using Prism.Mvvm;
+﻿using Prism.Mvvm;
 
 namespace Client.UI.ViewModels
 {

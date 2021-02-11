@@ -1,5 +1,4 @@
-﻿using System;
-using Core.Entities;
+﻿using Core.Entities;
 using Core.Interfaces;
 using Org.OpenAPITools.Api;
 using Org.OpenAPITools.Client;
@@ -108,7 +107,7 @@ namespace Infrastructure.API
                 }
                 else
                 {
-                   throw new ApiException(ret.Code, ret.Message);
+                    throw new ApiException(ret.Code, ret.Message);
                 }
             }
             catch (ApiException)

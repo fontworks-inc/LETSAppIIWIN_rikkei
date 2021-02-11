@@ -69,7 +69,7 @@ namespace Infrastructure.File
                 this.SaveClientApplicationVersion(clientApplicationVersion);
             }
 
-            return clientApplicationVersion;
+            return this.GetClientApplicationVersion();
         }
 
         /// <summary>

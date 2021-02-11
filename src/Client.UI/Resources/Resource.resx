@@ -225,7 +225,7 @@
   </data>
   <data name="APP_05_01_PROC_DESCRIPTION" xml:space="preserve">
     <value>LETSのフォントは最大２台のデバイスで同時に使用できます。このデバイスで使用したい場合
-は、「デバイス管理」より１台以上のデバイスをログアウトしてください。</value>
+は、「デバイス管理」より１台のデバイスをログアウトしてください。</value>
     <comment>端末設定画面　処理説明</comment>
   </data>
   <data name="APP_05_01_PROC_DESCRIPTION2" xml:space="preserve">

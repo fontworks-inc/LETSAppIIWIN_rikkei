@@ -9,19 +9,13 @@
  */
 
 
-using System;
-using System.Linq;
-using System.IO;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Collections;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Runtime.Serialization;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using OpenAPIDateConverter = Org.OpenAPITools.Client.OpenAPIDateConverter;
+using System.Linq;
+using System.Runtime.Serialization;
+using System.Text;
 
 namespace Org.OpenAPITools.Model
 {
@@ -29,7 +23,7 @@ namespace Org.OpenAPITools.Model
     /// ContractsData
     /// </summary>
     [DataContract]
-    public partial class ContractResponseData :  IEquatable<ContractResponseData>, IValidatableObject
+    public partial class ContractResponseData : IEquatable<ContractResponseData>, IValidatableObject
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ContractResponseData" /> class.
@@ -41,17 +35,17 @@ namespace Org.OpenAPITools.Model
             this.NeedContractRenewal = needContractRenewal;
             this.Contracts = contracts;
         }
-        
+
         /// <summary>
         /// Gets or Sets NeedContractRenewal
         /// </summary>
-        [DataMember(Name="needContractRenewal", EmitDefaultValue=false)]
+        [DataMember(Name = "needContractRenewal", EmitDefaultValue = false)]
         public bool NeedContractRenewal { get; set; }
 
         /// <summary>
         /// Gets or Sets Contracts
         /// </summary>
-        [DataMember(Name="contracts", EmitDefaultValue=false)]
+        [DataMember(Name = "contracts", EmitDefaultValue = false)]
         public List<ContractResponseContract> Contracts { get; set; }
 
         /// <summary>
@@ -67,7 +61,7 @@ namespace Org.OpenAPITools.Model
             sb.Append("}\n");
             return sb.ToString();
         }
-  
+
         /// <summary>
         /// Returns the JSON string presentation of the object
         /// </summary>
@@ -97,11 +91,11 @@ namespace Org.OpenAPITools.Model
             if (input == null)
                 return false;
 
-            return 
+            return
                 (
                     this.NeedContractRenewal == input.NeedContractRenewal ||
                     this.NeedContractRenewal.Equals(input.NeedContractRenewal)
-                ) && 
+                ) &&
                 (
                     this.Contracts == input.Contracts ||
                     this.Contracts != null &&

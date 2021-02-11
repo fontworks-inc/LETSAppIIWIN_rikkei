@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace ApplicationService.Interfaces
+﻿namespace ApplicationService.Interfaces
 {
     /// <summary>
     /// 指定のプロセスを実施するサービスのインターフェース

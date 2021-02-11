@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using Core.Entities;
 using Core.Interfaces;
 using Org.OpenAPITools.Api;

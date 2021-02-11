@@ -46,7 +46,7 @@ namespace ApplicationService.Fonts
         /// </summary>
         public void AllUninstall()
         {
-            this.fontManagerService.DeactivateSettingFonts();
+            this.fontManagerService.UninstallDeactivatedFonts();
         }
     }
 }

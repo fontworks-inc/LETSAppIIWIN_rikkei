@@ -9,19 +9,13 @@
  */
 
 
-using System;
-using System.Linq;
-using System.IO;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Collections;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Runtime.Serialization;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using OpenAPIDateConverter = Org.OpenAPITools.Client.OpenAPIDateConverter;
+using System.Linq;
+using System.Runtime.Serialization;
+using System.Text;
 
 namespace Org.OpenAPITools.Model
 {
@@ -29,7 +23,7 @@ namespace Org.OpenAPITools.Model
     /// InlineResponse200Data
     /// </summary>
     [DataContract]
-    public partial class InlineResponse200Font :  IEquatable<InlineResponse200Font>, IValidatableObject
+    public partial class InlineResponse200Font : IEquatable<InlineResponse200Font>, IValidatableObject
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="InlineResponse200Font" /> class.
@@ -63,13 +57,13 @@ namespace Org.OpenAPITools.Model
         /// <summary>
         /// Gets or Sets UserFontId
         /// </summary>
-        [DataMember(Name="userFontId", EmitDefaultValue=false)]
+        [DataMember(Name = "userFontId", EmitDefaultValue = false)]
         public string UserFontId { get; set; }
 
         /// <summary>
         /// Gets or Sets ActivateFlg
         /// </summary>
-        [DataMember(Name="activateFlg", EmitDefaultValue=false)]
+        [DataMember(Name = "activateFlg", EmitDefaultValue = false)]
         public bool ActivateFlg { get; set; }
 
         /// <summary>
@@ -81,49 +75,49 @@ namespace Org.OpenAPITools.Model
         /// <summary>
         /// Gets or Sets DisplayFontName
         /// </summary>
-        [DataMember(Name="displayFontName", EmitDefaultValue=false)]
+        [DataMember(Name = "displayFontName", EmitDefaultValue = false)]
         public string DisplayFontName { get; set; }
 
         /// <summary>
         /// Gets or Sets FileName
         /// </summary>
-        [DataMember(Name="fileName", EmitDefaultValue=false)]
+        [DataMember(Name = "fileName", EmitDefaultValue = false)]
         public string FileName { get; set; }
 
         /// <summary>
         /// Gets or Sets FileSize
         /// </summary>
-        [DataMember(Name="fileSize", EmitDefaultValue=false)]
+        [DataMember(Name = "fileSize", EmitDefaultValue = false)]
         public int FileSize { get; set; }
 
         /// <summary>
         /// Gets or Sets Version
         /// </summary>
-        [DataMember(Name="version", EmitDefaultValue=false)]
+        [DataMember(Name = "version", EmitDefaultValue = false)]
         public string Version { get; set; }
 
         /// <summary>
         /// Gets or Sets NeedFontVersionUpdate
         /// </summary>
-        [DataMember(Name="needFontVersionUpdate", EmitDefaultValue=false)]
+        [DataMember(Name = "needFontVersionUpdate", EmitDefaultValue = false)]
         public bool NeedFontVersionUpdate { get; set; }
 
         /// <summary>
         /// Gets or Sets IsAvailableFont
         /// </summary>
-        [DataMember(Name="isAvailableFont", EmitDefaultValue=false)]
+        [DataMember(Name = "isAvailableFont", EmitDefaultValue = false)]
         public bool IsAvailableFont { get; set; }
 
         /// <summary>
         /// Gets or Sets IsFreemium
         /// </summary>
-        [DataMember(Name="isFreemium", EmitDefaultValue=false)]
+        [DataMember(Name = "isFreemium", EmitDefaultValue = false)]
         public bool IsFreemium { get; set; }
 
         /// <summary>
         /// Gets or Sets ContractIds
         /// </summary>
-        [DataMember(Name="contractIds", EmitDefaultValue=false)]
+        [DataMember(Name = "contractIds", EmitDefaultValue = false)]
         public List<string> ContractIds { get; set; }
 
         /// <summary>
@@ -148,7 +142,7 @@ namespace Org.OpenAPITools.Model
             sb.Append("}\n");
             return sb.ToString();
         }
-  
+
         /// <summary>
         /// Returns the JSON string presentation of the object
         /// </summary>
@@ -178,12 +172,12 @@ namespace Org.OpenAPITools.Model
             if (input == null)
                 return false;
 
-            return 
+            return
                 (
                     this.UserFontId == input.UserFontId ||
                     (this.UserFontId != null &&
                     this.UserFontId.Equals(input.UserFontId))
-                ) && 
+                ) &&
                 (
                     this.ActivateFlg == input.ActivateFlg ||
                     this.ActivateFlg.Equals(input.ActivateFlg)
@@ -197,33 +191,33 @@ namespace Org.OpenAPITools.Model
                     this.DisplayFontName == input.DisplayFontName ||
                     (this.DisplayFontName != null &&
                     this.DisplayFontName.Equals(input.DisplayFontName))
-                ) && 
+                ) &&
                 (
                     this.FileName == input.FileName ||
                     (this.FileName != null &&
                     this.FileName.Equals(input.FileName))
-                ) && 
+                ) &&
                 (
                     this.FileSize == input.FileSize ||
                     this.FileSize.Equals(input.FileSize)
-                ) && 
+                ) &&
                 (
                     this.Version == input.Version ||
                     (this.Version != null &&
                     this.Version.Equals(input.Version))
-                ) && 
+                ) &&
                 (
                     this.NeedFontVersionUpdate == input.NeedFontVersionUpdate ||
                     this.NeedFontVersionUpdate.Equals(input.NeedFontVersionUpdate)
-                ) && 
+                ) &&
                 (
                     this.IsAvailableFont == input.IsAvailableFont ||
                     this.IsAvailableFont.Equals(input.IsAvailableFont)
-                ) && 
+                ) &&
                 (
                     this.IsFreemium == input.IsFreemium ||
                     this.IsFreemium.Equals(input.IsFreemium)
-                ) && 
+                ) &&
                 (
                     this.ContractIds == input.ContractIds ||
                     this.ContractIds != null &&

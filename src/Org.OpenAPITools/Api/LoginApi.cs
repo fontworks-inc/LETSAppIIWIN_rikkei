@@ -9,14 +9,9 @@
  */
 
 
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Net;
-using System.Net.Mime;
 using Org.OpenAPITools.Client;
 using Org.OpenAPITools.Model;
+using System;
 
 namespace Org.OpenAPITools.Api
 {
@@ -38,7 +33,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <param name="inlineObject1"></param>
         /// <returns>AccessTokenRefreshTokenResponse</returns>
-        AccessTokenRefreshTokenResponse Auth2fact (string X_LETS_DEVICEID, string userAgent, InlineObject1 inlineObject1);
+        AccessTokenRefreshTokenResponse Auth2fact(string X_LETS_DEVICEID, string userAgent, InlineObject1 inlineObject1);
 
         /// <summary>
         /// 2要素認証API
@@ -51,7 +46,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <param name="inlineObject1"></param>
         /// <returns>ApiResponse of AccessTokenRefreshTokenResponse</returns>
-        ApiResponse<AccessTokenRefreshTokenResponse> Auth2factWithHttpInfo (string X_LETS_DEVICEID, string userAgent, InlineObject1 inlineObject1);
+        ApiResponse<AccessTokenRefreshTokenResponse> Auth2factWithHttpInfo(string X_LETS_DEVICEID, string userAgent, InlineObject1 inlineObject1);
         /// <summary>
         /// 端末使用API
         /// </summary>
@@ -63,7 +58,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <param name="body"></param>
         /// <returns>AccessTokenRefreshTokenResponse</returns>
-        AccessTokenRefreshTokenResponse ChangeDeviceInUse (string X_LETS_DEVICEID, string userAgent, Object body);
+        AccessTokenRefreshTokenResponse ChangeDeviceInUse(string X_LETS_DEVICEID, string userAgent, Object body);
 
         /// <summary>
         /// 端末使用API
@@ -76,7 +71,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <param name="body"></param>
         /// <returns>ApiResponse of AccessTokenRefreshTokenResponse</returns>
-        ApiResponse<AccessTokenRefreshTokenResponse> ChangeDeviceInUseWithHttpInfo (string X_LETS_DEVICEID, string userAgent, Object body);
+        ApiResponse<AccessTokenRefreshTokenResponse> ChangeDeviceInUseWithHttpInfo(string X_LETS_DEVICEID, string userAgent, Object body);
         /// <summary>
         /// 端末解除API
         /// </summary>
@@ -88,7 +83,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <param name="inlineObject2"></param>
         /// <returns>Model200</returns>
-        Model200 ChangeDeviceOutOfUse (string X_LETS_DEVICEID, string userAgent, InlineObject2 inlineObject2);
+        Model200 ChangeDeviceOutOfUse(string X_LETS_DEVICEID, string userAgent, InlineObject2 inlineObject2);
 
         /// <summary>
         /// 端末解除API
@@ -101,7 +96,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <param name="inlineObject2"></param>
         /// <returns>ApiResponse of Model200</returns>
-        ApiResponse<Model200> ChangeDeviceOutOfUseWithHttpInfo (string X_LETS_DEVICEID, string userAgent, InlineObject2 inlineObject2);
+        ApiResponse<Model200> ChangeDeviceOutOfUseWithHttpInfo(string X_LETS_DEVICEID, string userAgent, InlineObject2 inlineObject2);
         /// <summary>
         /// 端末情報取得API
         /// </summary>
@@ -112,7 +107,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="X_LETS_DEVICEID">デバイス固有のIDを設定する。</param>
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <returns>DevicesResponse</returns>
-        DevicesResponse GetDevices (string X_LETS_DEVICEID, string userAgent);
+        DevicesResponse GetDevices(string X_LETS_DEVICEID, string userAgent);
 
         /// <summary>
         /// 端末情報取得API
@@ -124,7 +119,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="X_LETS_DEVICEID">デバイス固有のIDを設定する。</param>
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <returns>ApiResponse of DevicesResponse</returns>
-        ApiResponse<DevicesResponse> GetDevicesWithHttpInfo (string X_LETS_DEVICEID, string userAgent);
+        ApiResponse<DevicesResponse> GetDevicesWithHttpInfo(string X_LETS_DEVICEID, string userAgent);
         /// <summary>
         /// 会員登録画面URLの取得API
         /// </summary>
@@ -134,7 +129,7 @@ namespace Org.OpenAPITools.Api
         /// <exception cref="Org.OpenAPITools.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <returns>UrlResponse</returns>
-        UrlResponse GetMemberRegistrationUrl (string userAgent);
+        UrlResponse GetMemberRegistrationUrl(string userAgent);
 
         /// <summary>
         /// 会員登録画面URLの取得API
@@ -145,7 +140,7 @@ namespace Org.OpenAPITools.Api
         /// <exception cref="Org.OpenAPITools.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <returns>ApiResponse of UrlResponse</returns>
-        ApiResponse<UrlResponse> GetMemberRegistrationUrlWithHttpInfo (string userAgent);
+        ApiResponse<UrlResponse> GetMemberRegistrationUrlWithHttpInfo(string userAgent);
         /// <summary>
         /// パスワードを忘れた方_再設定画面URLの取得API
         /// </summary>
@@ -155,7 +150,7 @@ namespace Org.OpenAPITools.Api
         /// <exception cref="Org.OpenAPITools.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <returns>UrlResponse</returns>
-        UrlResponse GetPasswordResetUrl (string userAgent);
+        UrlResponse GetPasswordResetUrl(string userAgent);
 
         /// <summary>
         /// パスワードを忘れた方_再設定画面URLの取得API
@@ -166,7 +161,7 @@ namespace Org.OpenAPITools.Api
         /// <exception cref="Org.OpenAPITools.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <returns>ApiResponse of UrlResponse</returns>
-        ApiResponse<UrlResponse> GetPasswordResetUrlWithHttpInfo (string userAgent);
+        ApiResponse<UrlResponse> GetPasswordResetUrlWithHttpInfo(string userAgent);
         /// <summary>
         /// ログインAPI
         /// </summary>
@@ -178,7 +173,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <param name="inlineObject"></param>
         /// <returns>AccessTokenRefreshTokenResponse</returns>
-        AccessTokenRefreshTokenResponse Login (string X_LETS_DEVICEID, string userAgent, InlineObject inlineObject);
+        AccessTokenRefreshTokenResponse Login(string X_LETS_DEVICEID, string userAgent, InlineObject inlineObject);
 
         /// <summary>
         /// ログインAPI
@@ -191,7 +186,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <param name="inlineObject"></param>
         /// <returns>ApiResponse of AccessTokenRefreshTokenResponse</returns>
-        ApiResponse<AccessTokenRefreshTokenResponse> LoginWithHttpInfo (string X_LETS_DEVICEID, string userAgent, InlineObject inlineObject);
+        ApiResponse<AccessTokenRefreshTokenResponse> LoginWithHttpInfo(string X_LETS_DEVICEID, string userAgent, InlineObject inlineObject);
         /// <summary>
         /// ログアウトAPI
         /// </summary>
@@ -203,7 +198,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <param name="body"></param>
         /// <returns>Model200</returns>
-        Model200 Logout (string X_LETS_DEVICEID, string userAgent, Object body);
+        Model200 Logout(string X_LETS_DEVICEID, string userAgent, Object body);
 
         /// <summary>
         /// ログアウトAPI
@@ -216,7 +211,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <param name="body"></param>
         /// <returns>ApiResponse of Model200</returns>
-        ApiResponse<Model200> LogoutWithHttpInfo (string X_LETS_DEVICEID, string userAgent, Object body);
+        ApiResponse<Model200> LogoutWithHttpInfo(string X_LETS_DEVICEID, string userAgent, Object body);
         /// <summary>
         /// デバイスID発行API
         /// </summary>
@@ -227,7 +222,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <param name="inlineObject4"></param>
         /// <returns>DeviceIdResponse</returns>
-        DeviceIdResponse PostDeviceId (string userAgent, InlineObject4 inlineObject4);
+        DeviceIdResponse PostDeviceId(string userAgent, InlineObject4 inlineObject4);
 
         /// <summary>
         /// デバイスID発行API
@@ -239,7 +234,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <param name="inlineObject4"></param>
         /// <returns>ApiResponse of DeviceIdResponse</returns>
-        ApiResponse<DeviceIdResponse> PostDeviceIdWithHttpInfo (string userAgent, InlineObject4 inlineObject4);
+        ApiResponse<DeviceIdResponse> PostDeviceIdWithHttpInfo(string userAgent, InlineObject4 inlineObject4);
         /// <summary>
         /// アクセストークン更新API
         /// </summary>
@@ -251,7 +246,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <param name="inlineObject3"></param>
         /// <returns>AccessTokenResponse</returns>
-        AccessTokenResponse Token (string X_LETS_DEVICEID, string userAgent, InlineObject3 inlineObject3);
+        AccessTokenResponse Token(string X_LETS_DEVICEID, string userAgent, InlineObject3 inlineObject3);
 
         /// <summary>
         /// アクセストークン更新API
@@ -264,7 +259,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <param name="inlineObject3"></param>
         /// <returns>ApiResponse of AccessTokenResponse</returns>
-        ApiResponse<AccessTokenResponse> TokenWithHttpInfo (string X_LETS_DEVICEID, string userAgent, InlineObject3 inlineObject3);
+        ApiResponse<AccessTokenResponse> TokenWithHttpInfo(string X_LETS_DEVICEID, string userAgent, InlineObject3 inlineObject3);
         #endregion Synchronous Operations
     }
 
@@ -285,7 +280,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <param name="inlineObject1"></param>
         /// <returns>Task of AccessTokenRefreshTokenResponse</returns>
-        System.Threading.Tasks.Task<AccessTokenRefreshTokenResponse> Auth2factAsync (string X_LETS_DEVICEID, string userAgent, InlineObject1 inlineObject1);
+        System.Threading.Tasks.Task<AccessTokenRefreshTokenResponse> Auth2factAsync(string X_LETS_DEVICEID, string userAgent, InlineObject1 inlineObject1);
 
         /// <summary>
         /// 2要素認証API
@@ -298,7 +293,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <param name="inlineObject1"></param>
         /// <returns>Task of ApiResponse (AccessTokenRefreshTokenResponse)</returns>
-        System.Threading.Tasks.Task<ApiResponse<AccessTokenRefreshTokenResponse>> Auth2factAsyncWithHttpInfo (string X_LETS_DEVICEID, string userAgent, InlineObject1 inlineObject1);
+        System.Threading.Tasks.Task<ApiResponse<AccessTokenRefreshTokenResponse>> Auth2factAsyncWithHttpInfo(string X_LETS_DEVICEID, string userAgent, InlineObject1 inlineObject1);
         /// <summary>
         /// 端末使用API
         /// </summary>
@@ -310,7 +305,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <param name="body"></param>
         /// <returns>Task of AccessTokenRefreshTokenResponse</returns>
-        System.Threading.Tasks.Task<AccessTokenRefreshTokenResponse> ChangeDeviceInUseAsync (string X_LETS_DEVICEID, string userAgent, Object body);
+        System.Threading.Tasks.Task<AccessTokenRefreshTokenResponse> ChangeDeviceInUseAsync(string X_LETS_DEVICEID, string userAgent, Object body);
 
         /// <summary>
         /// 端末使用API
@@ -323,7 +318,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <param name="body"></param>
         /// <returns>Task of ApiResponse (AccessTokenRefreshTokenResponse)</returns>
-        System.Threading.Tasks.Task<ApiResponse<AccessTokenRefreshTokenResponse>> ChangeDeviceInUseAsyncWithHttpInfo (string X_LETS_DEVICEID, string userAgent, Object body);
+        System.Threading.Tasks.Task<ApiResponse<AccessTokenRefreshTokenResponse>> ChangeDeviceInUseAsyncWithHttpInfo(string X_LETS_DEVICEID, string userAgent, Object body);
         /// <summary>
         /// 端末解除API
         /// </summary>
@@ -335,7 +330,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <param name="inlineObject2"></param>
         /// <returns>Task of Model200</returns>
-        System.Threading.Tasks.Task<Model200> ChangeDeviceOutOfUseAsync (string X_LETS_DEVICEID, string userAgent, InlineObject2 inlineObject2);
+        System.Threading.Tasks.Task<Model200> ChangeDeviceOutOfUseAsync(string X_LETS_DEVICEID, string userAgent, InlineObject2 inlineObject2);
 
         /// <summary>
         /// 端末解除API
@@ -348,7 +343,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <param name="inlineObject2"></param>
         /// <returns>Task of ApiResponse (Model200)</returns>
-        System.Threading.Tasks.Task<ApiResponse<Model200>> ChangeDeviceOutOfUseAsyncWithHttpInfo (string X_LETS_DEVICEID, string userAgent, InlineObject2 inlineObject2);
+        System.Threading.Tasks.Task<ApiResponse<Model200>> ChangeDeviceOutOfUseAsyncWithHttpInfo(string X_LETS_DEVICEID, string userAgent, InlineObject2 inlineObject2);
         /// <summary>
         /// 端末情報取得API
         /// </summary>
@@ -359,7 +354,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="X_LETS_DEVICEID">デバイス固有のIDを設定する。</param>
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <returns>Task of DevicesResponse</returns>
-        System.Threading.Tasks.Task<DevicesResponse> GetDevicesAsync (string X_LETS_DEVICEID, string userAgent);
+        System.Threading.Tasks.Task<DevicesResponse> GetDevicesAsync(string X_LETS_DEVICEID, string userAgent);
 
         /// <summary>
         /// 端末情報取得API
@@ -371,7 +366,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="X_LETS_DEVICEID">デバイス固有のIDを設定する。</param>
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <returns>Task of ApiResponse (DevicesResponse)</returns>
-        System.Threading.Tasks.Task<ApiResponse<DevicesResponse>> GetDevicesAsyncWithHttpInfo (string X_LETS_DEVICEID, string userAgent);
+        System.Threading.Tasks.Task<ApiResponse<DevicesResponse>> GetDevicesAsyncWithHttpInfo(string X_LETS_DEVICEID, string userAgent);
         /// <summary>
         /// 会員登録画面URLの取得API
         /// </summary>
@@ -381,7 +376,7 @@ namespace Org.OpenAPITools.Api
         /// <exception cref="Org.OpenAPITools.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <returns>Task of UrlResponse</returns>
-        System.Threading.Tasks.Task<UrlResponse> GetMemberRegistrationUrlAsync (string userAgent);
+        System.Threading.Tasks.Task<UrlResponse> GetMemberRegistrationUrlAsync(string userAgent);
 
         /// <summary>
         /// 会員登録画面URLの取得API
@@ -392,7 +387,7 @@ namespace Org.OpenAPITools.Api
         /// <exception cref="Org.OpenAPITools.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <returns>Task of ApiResponse (UrlResponse)</returns>
-        System.Threading.Tasks.Task<ApiResponse<UrlResponse>> GetMemberRegistrationUrlAsyncWithHttpInfo (string userAgent);
+        System.Threading.Tasks.Task<ApiResponse<UrlResponse>> GetMemberRegistrationUrlAsyncWithHttpInfo(string userAgent);
         /// <summary>
         /// パスワードを忘れた方_再設定画面URLの取得API
         /// </summary>
@@ -402,7 +397,7 @@ namespace Org.OpenAPITools.Api
         /// <exception cref="Org.OpenAPITools.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <returns>Task of UrlResponse</returns>
-        System.Threading.Tasks.Task<UrlResponse> GetPasswordResetUrlAsync (string userAgent);
+        System.Threading.Tasks.Task<UrlResponse> GetPasswordResetUrlAsync(string userAgent);
 
         /// <summary>
         /// パスワードを忘れた方_再設定画面URLの取得API
@@ -413,7 +408,7 @@ namespace Org.OpenAPITools.Api
         /// <exception cref="Org.OpenAPITools.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <returns>Task of ApiResponse (UrlResponse)</returns>
-        System.Threading.Tasks.Task<ApiResponse<UrlResponse>> GetPasswordResetUrlAsyncWithHttpInfo (string userAgent);
+        System.Threading.Tasks.Task<ApiResponse<UrlResponse>> GetPasswordResetUrlAsyncWithHttpInfo(string userAgent);
         /// <summary>
         /// ログインAPI
         /// </summary>
@@ -425,7 +420,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <param name="inlineObject"></param>
         /// <returns>Task of AccessTokenRefreshTokenResponse</returns>
-        System.Threading.Tasks.Task<AccessTokenRefreshTokenResponse> LoginAsync (string X_LETS_DEVICEID, string userAgent, InlineObject inlineObject);
+        System.Threading.Tasks.Task<AccessTokenRefreshTokenResponse> LoginAsync(string X_LETS_DEVICEID, string userAgent, InlineObject inlineObject);
 
         /// <summary>
         /// ログインAPI
@@ -438,7 +433,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <param name="inlineObject"></param>
         /// <returns>Task of ApiResponse (AccessTokenRefreshTokenResponse)</returns>
-        System.Threading.Tasks.Task<ApiResponse<AccessTokenRefreshTokenResponse>> LoginAsyncWithHttpInfo (string X_LETS_DEVICEID, string userAgent, InlineObject inlineObject);
+        System.Threading.Tasks.Task<ApiResponse<AccessTokenRefreshTokenResponse>> LoginAsyncWithHttpInfo(string X_LETS_DEVICEID, string userAgent, InlineObject inlineObject);
         /// <summary>
         /// ログアウトAPI
         /// </summary>
@@ -450,7 +445,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <param name="body"></param>
         /// <returns>Task of Model200</returns>
-        System.Threading.Tasks.Task<Model200> LogoutAsync (string X_LETS_DEVICEID, string userAgent, Object body);
+        System.Threading.Tasks.Task<Model200> LogoutAsync(string X_LETS_DEVICEID, string userAgent, Object body);
 
         /// <summary>
         /// ログアウトAPI
@@ -463,7 +458,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <param name="body"></param>
         /// <returns>Task of ApiResponse (Model200)</returns>
-        System.Threading.Tasks.Task<ApiResponse<Model200>> LogoutAsyncWithHttpInfo (string X_LETS_DEVICEID, string userAgent, Object body);
+        System.Threading.Tasks.Task<ApiResponse<Model200>> LogoutAsyncWithHttpInfo(string X_LETS_DEVICEID, string userAgent, Object body);
         /// <summary>
         /// デバイスID発行API
         /// </summary>
@@ -474,7 +469,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <param name="inlineObject4"></param>
         /// <returns>Task of DeviceIdResponse</returns>
-        System.Threading.Tasks.Task<DeviceIdResponse> PostDeviceIdAsync (string userAgent, InlineObject4 inlineObject4);
+        System.Threading.Tasks.Task<DeviceIdResponse> PostDeviceIdAsync(string userAgent, InlineObject4 inlineObject4);
 
         /// <summary>
         /// デバイスID発行API
@@ -486,7 +481,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <param name="inlineObject4"></param>
         /// <returns>Task of ApiResponse (DeviceIdResponse)</returns>
-        System.Threading.Tasks.Task<ApiResponse<DeviceIdResponse>> PostDeviceIdAsyncWithHttpInfo (string userAgent, InlineObject4 inlineObject4);
+        System.Threading.Tasks.Task<ApiResponse<DeviceIdResponse>> PostDeviceIdAsyncWithHttpInfo(string userAgent, InlineObject4 inlineObject4);
         /// <summary>
         /// アクセストークン更新API
         /// </summary>
@@ -498,7 +493,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <param name="inlineObject3"></param>
         /// <returns>Task of AccessTokenResponse</returns>
-        System.Threading.Tasks.Task<AccessTokenResponse> TokenAsync (string X_LETS_DEVICEID, string userAgent, InlineObject3 inlineObject3);
+        System.Threading.Tasks.Task<AccessTokenResponse> TokenAsync(string X_LETS_DEVICEID, string userAgent, InlineObject3 inlineObject3);
 
         /// <summary>
         /// アクセストークン更新API
@@ -511,7 +506,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <param name="inlineObject3"></param>
         /// <returns>Task of ApiResponse (AccessTokenResponse)</returns>
-        System.Threading.Tasks.Task<ApiResponse<AccessTokenResponse>> TokenAsyncWithHttpInfo (string X_LETS_DEVICEID, string userAgent, InlineObject3 inlineObject3);
+        System.Threading.Tasks.Task<ApiResponse<AccessTokenResponse>> TokenAsyncWithHttpInfo(string X_LETS_DEVICEID, string userAgent, InlineObject3 inlineObject3);
         #endregion Asynchronous Operations
     }
 
@@ -534,7 +529,7 @@ namespace Org.OpenAPITools.Api
         /// Initializes a new instance of the <see cref="LoginApi"/> class.
         /// </summary>
         /// <returns></returns>
-        public LoginApi() : this((string) null)
+        public LoginApi() : this((string)null)
         {
         }
 
@@ -579,11 +574,11 @@ namespace Org.OpenAPITools.Api
         /// <param name="client">The client interface for synchronous API access.</param>
         /// <param name="asyncClient">The client interface for asynchronous API access.</param>
         /// <param name="configuration">The configuration object.</param>
-        public LoginApi(Org.OpenAPITools.Client.ISynchronousClient client,Org.OpenAPITools.Client.IAsynchronousClient asyncClient, Org.OpenAPITools.Client.IReadableConfiguration configuration)
+        public LoginApi(Org.OpenAPITools.Client.ISynchronousClient client, Org.OpenAPITools.Client.IAsynchronousClient asyncClient, Org.OpenAPITools.Client.IReadableConfiguration configuration)
         {
-            if(client == null) throw new ArgumentNullException("client");
-            if(asyncClient == null) throw new ArgumentNullException("asyncClient");
-            if(configuration == null) throw new ArgumentNullException("configuration");
+            if (client == null) throw new ArgumentNullException("client");
+            if (asyncClient == null) throw new ArgumentNullException("asyncClient");
+            if (configuration == null) throw new ArgumentNullException("configuration");
 
             this.Client = client;
             this.AsynchronousClient = asyncClient;
@@ -614,7 +609,7 @@ namespace Org.OpenAPITools.Api
         /// Gets or sets the configuration object
         /// </summary>
         /// <value>An instance of the Configuration</value>
-        public Org.OpenAPITools.Client.IReadableConfiguration Configuration {get; set;}
+        public Org.OpenAPITools.Client.IReadableConfiguration Configuration { get; set; }
 
         /// <summary>
         /// Provides a factory method hook for the creation of exceptions.
@@ -640,10 +635,10 @@ namespace Org.OpenAPITools.Api
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <param name="inlineObject1"></param>
         /// <returns>AccessTokenRefreshTokenResponse</returns>
-        public AccessTokenRefreshTokenResponse Auth2fact (string X_LETS_DEVICEID, string userAgent, InlineObject1 inlineObject1)
+        public AccessTokenRefreshTokenResponse Auth2fact(string X_LETS_DEVICEID, string userAgent, InlineObject1 inlineObject1)
         {
-             Org.OpenAPITools.Client.ApiResponse<AccessTokenRefreshTokenResponse> localVarResponse = Auth2factWithHttpInfo(X_LETS_DEVICEID, userAgent, inlineObject1);
-             return localVarResponse.Data;
+            Org.OpenAPITools.Client.ApiResponse<AccessTokenRefreshTokenResponse> localVarResponse = Auth2factWithHttpInfo(X_LETS_DEVICEID, userAgent, inlineObject1);
+            return localVarResponse.Data;
         }
 
         /// <summary>
@@ -654,7 +649,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <param name="inlineObject1"></param>
         /// <returns>ApiResponse of AccessTokenRefreshTokenResponse</returns>
-        public Org.OpenAPITools.Client.ApiResponse< AccessTokenRefreshTokenResponse > Auth2factWithHttpInfo (string X_LETS_DEVICEID, string userAgent, InlineObject1 inlineObject1)
+        public Org.OpenAPITools.Client.ApiResponse<AccessTokenRefreshTokenResponse> Auth2factWithHttpInfo(string X_LETS_DEVICEID, string userAgent, InlineObject1 inlineObject1)
         {
             // verify the required parameter 'X_LETS_DEVICEID' is set
             if (X_LETS_DEVICEID == null)
@@ -691,7 +686,7 @@ namespace Org.OpenAPITools.Api
 
 
             // make the HTTP request
-            var localVarResponse = this.Client.Post< AccessTokenRefreshTokenResponse >("/api/v1/auth2fact", localVarRequestOptions, this.Configuration);
+            var localVarResponse = this.Client.Post<AccessTokenRefreshTokenResponse>("/api/v1/auth2fact", localVarRequestOptions, this.Configuration);
 
             if (this.ExceptionFactory != null)
             {
@@ -710,10 +705,10 @@ namespace Org.OpenAPITools.Api
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <param name="inlineObject1"></param>
         /// <returns>Task of AccessTokenRefreshTokenResponse</returns>
-        public async System.Threading.Tasks.Task<AccessTokenRefreshTokenResponse> Auth2factAsync (string X_LETS_DEVICEID, string userAgent, InlineObject1 inlineObject1)
+        public async System.Threading.Tasks.Task<AccessTokenRefreshTokenResponse> Auth2factAsync(string X_LETS_DEVICEID, string userAgent, InlineObject1 inlineObject1)
         {
-             Org.OpenAPITools.Client.ApiResponse<AccessTokenRefreshTokenResponse> localVarResponse = await Auth2factAsyncWithHttpInfo(X_LETS_DEVICEID, userAgent, inlineObject1);
-             return localVarResponse.Data;
+            Org.OpenAPITools.Client.ApiResponse<AccessTokenRefreshTokenResponse> localVarResponse = await Auth2factAsyncWithHttpInfo(X_LETS_DEVICEID, userAgent, inlineObject1);
+            return localVarResponse.Data;
 
         }
 
@@ -725,7 +720,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <param name="inlineObject1"></param>
         /// <returns>Task of ApiResponse (AccessTokenRefreshTokenResponse)</returns>
-        public async System.Threading.Tasks.Task<Org.OpenAPITools.Client.ApiResponse<AccessTokenRefreshTokenResponse>> Auth2factAsyncWithHttpInfo (string X_LETS_DEVICEID, string userAgent, InlineObject1 inlineObject1)
+        public async System.Threading.Tasks.Task<Org.OpenAPITools.Client.ApiResponse<AccessTokenRefreshTokenResponse>> Auth2factAsyncWithHttpInfo(string X_LETS_DEVICEID, string userAgent, InlineObject1 inlineObject1)
         {
             // verify the required parameter 'X_LETS_DEVICEID' is set
             if (X_LETS_DEVICEID == null)
@@ -750,13 +745,13 @@ namespace Org.OpenAPITools.Api
             String[] _accepts = new String[] {
                 "application/json; charset=utf-8"
             };
-            
+
             foreach (var _contentType in _contentTypes)
                 localVarRequestOptions.HeaderParameters.Add("Content-Type", _contentType);
-            
+
             foreach (var _accept in _accepts)
                 localVarRequestOptions.HeaderParameters.Add("Accept", _accept);
-            
+
             localVarRequestOptions.HeaderParameters.Add("X-LETS-DEVICEID", Org.OpenAPITools.Client.ClientUtils.ParameterToString(X_LETS_DEVICEID)); // header parameter
             localVarRequestOptions.HeaderParameters.Add("User-Agent", Org.OpenAPITools.Client.ClientUtils.ParameterToString(userAgent)); // header parameter
             localVarRequestOptions.Data = inlineObject1;
@@ -783,10 +778,10 @@ namespace Org.OpenAPITools.Api
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <param name="body"></param>
         /// <returns>AccessTokenRefreshTokenResponse</returns>
-        public AccessTokenRefreshTokenResponse ChangeDeviceInUse (string X_LETS_DEVICEID, string userAgent, Object body)
+        public AccessTokenRefreshTokenResponse ChangeDeviceInUse(string X_LETS_DEVICEID, string userAgent, Object body)
         {
-             Org.OpenAPITools.Client.ApiResponse<AccessTokenRefreshTokenResponse> localVarResponse = ChangeDeviceInUseWithHttpInfo(X_LETS_DEVICEID, userAgent, body);
-             return localVarResponse.Data;
+            Org.OpenAPITools.Client.ApiResponse<AccessTokenRefreshTokenResponse> localVarResponse = ChangeDeviceInUseWithHttpInfo(X_LETS_DEVICEID, userAgent, body);
+            return localVarResponse.Data;
         }
 
         /// <summary>
@@ -797,7 +792,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <param name="body"></param>
         /// <returns>ApiResponse of AccessTokenRefreshTokenResponse</returns>
-        public Org.OpenAPITools.Client.ApiResponse< AccessTokenRefreshTokenResponse > ChangeDeviceInUseWithHttpInfo (string X_LETS_DEVICEID, string userAgent, Object body)
+        public Org.OpenAPITools.Client.ApiResponse<AccessTokenRefreshTokenResponse> ChangeDeviceInUseWithHttpInfo(string X_LETS_DEVICEID, string userAgent, Object body)
         {
             // verify the required parameter 'X_LETS_DEVICEID' is set
             if (X_LETS_DEVICEID == null)
@@ -840,7 +835,7 @@ namespace Org.OpenAPITools.Api
             }
 
             // make the HTTP request
-            var localVarResponse = this.Client.Post< AccessTokenRefreshTokenResponse >("/api/v1/device/in-use", localVarRequestOptions, this.Configuration);
+            var localVarResponse = this.Client.Post<AccessTokenRefreshTokenResponse>("/api/v1/device/in-use", localVarRequestOptions, this.Configuration);
 
             if (this.ExceptionFactory != null)
             {
@@ -859,10 +854,10 @@ namespace Org.OpenAPITools.Api
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <param name="body"></param>
         /// <returns>Task of AccessTokenRefreshTokenResponse</returns>
-        public async System.Threading.Tasks.Task<AccessTokenRefreshTokenResponse> ChangeDeviceInUseAsync (string X_LETS_DEVICEID, string userAgent, Object body)
+        public async System.Threading.Tasks.Task<AccessTokenRefreshTokenResponse> ChangeDeviceInUseAsync(string X_LETS_DEVICEID, string userAgent, Object body)
         {
-             Org.OpenAPITools.Client.ApiResponse<AccessTokenRefreshTokenResponse> localVarResponse = await ChangeDeviceInUseAsyncWithHttpInfo(X_LETS_DEVICEID, userAgent, body);
-             return localVarResponse.Data;
+            Org.OpenAPITools.Client.ApiResponse<AccessTokenRefreshTokenResponse> localVarResponse = await ChangeDeviceInUseAsyncWithHttpInfo(X_LETS_DEVICEID, userAgent, body);
+            return localVarResponse.Data;
 
         }
 
@@ -874,7 +869,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <param name="body"></param>
         /// <returns>Task of ApiResponse (AccessTokenRefreshTokenResponse)</returns>
-        public async System.Threading.Tasks.Task<Org.OpenAPITools.Client.ApiResponse<AccessTokenRefreshTokenResponse>> ChangeDeviceInUseAsyncWithHttpInfo (string X_LETS_DEVICEID, string userAgent, Object body)
+        public async System.Threading.Tasks.Task<Org.OpenAPITools.Client.ApiResponse<AccessTokenRefreshTokenResponse>> ChangeDeviceInUseAsyncWithHttpInfo(string X_LETS_DEVICEID, string userAgent, Object body)
         {
             // verify the required parameter 'X_LETS_DEVICEID' is set
             if (X_LETS_DEVICEID == null)
@@ -899,13 +894,13 @@ namespace Org.OpenAPITools.Api
             String[] _accepts = new String[] {
                 "application/json; charset=utf-8"
             };
-            
+
             foreach (var _contentType in _contentTypes)
                 localVarRequestOptions.HeaderParameters.Add("Content-Type", _contentType);
-            
+
             foreach (var _accept in _accepts)
                 localVarRequestOptions.HeaderParameters.Add("Accept", _accept);
-            
+
             localVarRequestOptions.HeaderParameters.Add("X-LETS-DEVICEID", Org.OpenAPITools.Client.ClientUtils.ParameterToString(X_LETS_DEVICEID)); // header parameter
             localVarRequestOptions.HeaderParameters.Add("User-Agent", Org.OpenAPITools.Client.ClientUtils.ParameterToString(userAgent)); // header parameter
             localVarRequestOptions.Data = body;
@@ -938,10 +933,10 @@ namespace Org.OpenAPITools.Api
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <param name="inlineObject2"></param>
         /// <returns>Model200</returns>
-        public Model200 ChangeDeviceOutOfUse (string X_LETS_DEVICEID, string userAgent, InlineObject2 inlineObject2)
+        public Model200 ChangeDeviceOutOfUse(string X_LETS_DEVICEID, string userAgent, InlineObject2 inlineObject2)
         {
-             Org.OpenAPITools.Client.ApiResponse<Model200> localVarResponse = ChangeDeviceOutOfUseWithHttpInfo(X_LETS_DEVICEID, userAgent, inlineObject2);
-             return localVarResponse.Data;
+            Org.OpenAPITools.Client.ApiResponse<Model200> localVarResponse = ChangeDeviceOutOfUseWithHttpInfo(X_LETS_DEVICEID, userAgent, inlineObject2);
+            return localVarResponse.Data;
         }
 
         /// <summary>
@@ -952,7 +947,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <param name="inlineObject2"></param>
         /// <returns>ApiResponse of Model200</returns>
-        public Org.OpenAPITools.Client.ApiResponse< Model200 > ChangeDeviceOutOfUseWithHttpInfo (string X_LETS_DEVICEID, string userAgent, InlineObject2 inlineObject2)
+        public Org.OpenAPITools.Client.ApiResponse<Model200> ChangeDeviceOutOfUseWithHttpInfo(string X_LETS_DEVICEID, string userAgent, InlineObject2 inlineObject2)
         {
             // verify the required parameter 'X_LETS_DEVICEID' is set
             if (X_LETS_DEVICEID == null)
@@ -995,7 +990,7 @@ namespace Org.OpenAPITools.Api
             }
 
             // make the HTTP request
-            var localVarResponse = this.Client.Post< Model200 >("/api/v1/device/out-of-use", localVarRequestOptions, this.Configuration);
+            var localVarResponse = this.Client.Post<Model200>("/api/v1/device/out-of-use", localVarRequestOptions, this.Configuration);
 
             if (this.ExceptionFactory != null)
             {
@@ -1014,10 +1009,10 @@ namespace Org.OpenAPITools.Api
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <param name="inlineObject2"></param>
         /// <returns>Task of Model200</returns>
-        public async System.Threading.Tasks.Task<Model200> ChangeDeviceOutOfUseAsync (string X_LETS_DEVICEID, string userAgent, InlineObject2 inlineObject2)
+        public async System.Threading.Tasks.Task<Model200> ChangeDeviceOutOfUseAsync(string X_LETS_DEVICEID, string userAgent, InlineObject2 inlineObject2)
         {
-             Org.OpenAPITools.Client.ApiResponse<Model200> localVarResponse = await ChangeDeviceOutOfUseAsyncWithHttpInfo(X_LETS_DEVICEID, userAgent, inlineObject2);
-             return localVarResponse.Data;
+            Org.OpenAPITools.Client.ApiResponse<Model200> localVarResponse = await ChangeDeviceOutOfUseAsyncWithHttpInfo(X_LETS_DEVICEID, userAgent, inlineObject2);
+            return localVarResponse.Data;
 
         }
 
@@ -1029,7 +1024,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <param name="inlineObject2"></param>
         /// <returns>Task of ApiResponse (Model200)</returns>
-        public async System.Threading.Tasks.Task<Org.OpenAPITools.Client.ApiResponse<Model200>> ChangeDeviceOutOfUseAsyncWithHttpInfo (string X_LETS_DEVICEID, string userAgent, InlineObject2 inlineObject2)
+        public async System.Threading.Tasks.Task<Org.OpenAPITools.Client.ApiResponse<Model200>> ChangeDeviceOutOfUseAsyncWithHttpInfo(string X_LETS_DEVICEID, string userAgent, InlineObject2 inlineObject2)
         {
             // verify the required parameter 'X_LETS_DEVICEID' is set
             if (X_LETS_DEVICEID == null)
@@ -1054,13 +1049,13 @@ namespace Org.OpenAPITools.Api
             String[] _accepts = new String[] {
                 "application/json; charset=utf-8"
             };
-            
+
             foreach (var _contentType in _contentTypes)
                 localVarRequestOptions.HeaderParameters.Add("Content-Type", _contentType);
-            
+
             foreach (var _accept in _accepts)
                 localVarRequestOptions.HeaderParameters.Add("Accept", _accept);
-            
+
             localVarRequestOptions.HeaderParameters.Add("X-LETS-DEVICEID", Org.OpenAPITools.Client.ClientUtils.ParameterToString(X_LETS_DEVICEID)); // header parameter
             localVarRequestOptions.HeaderParameters.Add("User-Agent", Org.OpenAPITools.Client.ClientUtils.ParameterToString(userAgent)); // header parameter
             localVarRequestOptions.Data = inlineObject2;
@@ -1092,10 +1087,10 @@ namespace Org.OpenAPITools.Api
         /// <param name="X_LETS_DEVICEID">デバイス固有のIDを設定する。</param>
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <returns>DevicesResponse</returns>
-        public DevicesResponse GetDevices (string X_LETS_DEVICEID, string userAgent)
+        public DevicesResponse GetDevices(string X_LETS_DEVICEID, string userAgent)
         {
-             Org.OpenAPITools.Client.ApiResponse<DevicesResponse> localVarResponse = GetDevicesWithHttpInfo(X_LETS_DEVICEID, userAgent);
-             return localVarResponse.Data;
+            Org.OpenAPITools.Client.ApiResponse<DevicesResponse> localVarResponse = GetDevicesWithHttpInfo(X_LETS_DEVICEID, userAgent);
+            return localVarResponse.Data;
         }
 
         /// <summary>
@@ -1105,7 +1100,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="X_LETS_DEVICEID">デバイス固有のIDを設定する。</param>
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <returns>ApiResponse of DevicesResponse</returns>
-        public Org.OpenAPITools.Client.ApiResponse< DevicesResponse > GetDevicesWithHttpInfo (string X_LETS_DEVICEID, string userAgent)
+        public Org.OpenAPITools.Client.ApiResponse<DevicesResponse> GetDevicesWithHttpInfo(string X_LETS_DEVICEID, string userAgent)
         {
             // verify the required parameter 'X_LETS_DEVICEID' is set
             if (X_LETS_DEVICEID == null)
@@ -1142,7 +1137,7 @@ namespace Org.OpenAPITools.Api
             }
 
             // make the HTTP request
-            var localVarResponse = this.Client.Get< DevicesResponse >("/api/v1/devices", localVarRequestOptions, this.Configuration);
+            var localVarResponse = this.Client.Get<DevicesResponse>("/api/v1/devices", localVarRequestOptions, this.Configuration);
 
             if (this.ExceptionFactory != null)
             {
@@ -1160,10 +1155,10 @@ namespace Org.OpenAPITools.Api
         /// <param name="X_LETS_DEVICEID">デバイス固有のIDを設定する。</param>
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <returns>Task of DevicesResponse</returns>
-        public async System.Threading.Tasks.Task<DevicesResponse> GetDevicesAsync (string X_LETS_DEVICEID, string userAgent)
+        public async System.Threading.Tasks.Task<DevicesResponse> GetDevicesAsync(string X_LETS_DEVICEID, string userAgent)
         {
-             Org.OpenAPITools.Client.ApiResponse<DevicesResponse> localVarResponse = await GetDevicesAsyncWithHttpInfo(X_LETS_DEVICEID, userAgent);
-             return localVarResponse.Data;
+            Org.OpenAPITools.Client.ApiResponse<DevicesResponse> localVarResponse = await GetDevicesAsyncWithHttpInfo(X_LETS_DEVICEID, userAgent);
+            return localVarResponse.Data;
 
         }
 
@@ -1174,7 +1169,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="X_LETS_DEVICEID">デバイス固有のIDを設定する。</param>
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <returns>Task of ApiResponse (DevicesResponse)</returns>
-        public async System.Threading.Tasks.Task<Org.OpenAPITools.Client.ApiResponse<DevicesResponse>> GetDevicesAsyncWithHttpInfo (string X_LETS_DEVICEID, string userAgent)
+        public async System.Threading.Tasks.Task<Org.OpenAPITools.Client.ApiResponse<DevicesResponse>> GetDevicesAsyncWithHttpInfo(string X_LETS_DEVICEID, string userAgent)
         {
             // verify the required parameter 'X_LETS_DEVICEID' is set
             if (X_LETS_DEVICEID == null)
@@ -1194,13 +1189,13 @@ namespace Org.OpenAPITools.Api
             String[] _accepts = new String[] {
                 "application/json; charset=utf-8"
             };
-            
+
             foreach (var _contentType in _contentTypes)
                 localVarRequestOptions.HeaderParameters.Add("Content-Type", _contentType);
-            
+
             foreach (var _accept in _accepts)
                 localVarRequestOptions.HeaderParameters.Add("Accept", _accept);
-            
+
             localVarRequestOptions.HeaderParameters.Add("X-LETS-DEVICEID", Org.OpenAPITools.Client.ClientUtils.ParameterToString(X_LETS_DEVICEID)); // header parameter
             localVarRequestOptions.HeaderParameters.Add("User-Agent", Org.OpenAPITools.Client.ClientUtils.ParameterToString(userAgent)); // header parameter
 
@@ -1230,10 +1225,10 @@ namespace Org.OpenAPITools.Api
         /// <exception cref="Org.OpenAPITools.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <returns>UrlResponse</returns>
-        public UrlResponse GetMemberRegistrationUrl (string userAgent)
+        public UrlResponse GetMemberRegistrationUrl(string userAgent)
         {
-             Org.OpenAPITools.Client.ApiResponse<UrlResponse> localVarResponse = GetMemberRegistrationUrlWithHttpInfo(userAgent);
-             return localVarResponse.Data;
+            Org.OpenAPITools.Client.ApiResponse<UrlResponse> localVarResponse = GetMemberRegistrationUrlWithHttpInfo(userAgent);
+            return localVarResponse.Data;
         }
 
         /// <summary>
@@ -1242,7 +1237,7 @@ namespace Org.OpenAPITools.Api
         /// <exception cref="Org.OpenAPITools.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <returns>ApiResponse of UrlResponse</returns>
-        public Org.OpenAPITools.Client.ApiResponse< UrlResponse > GetMemberRegistrationUrlWithHttpInfo (string userAgent)
+        public Org.OpenAPITools.Client.ApiResponse<UrlResponse> GetMemberRegistrationUrlWithHttpInfo(string userAgent)
         {
             // verify the required parameter 'userAgent' is set
             if (userAgent == null)
@@ -1268,7 +1263,7 @@ namespace Org.OpenAPITools.Api
 
 
             // make the HTTP request
-            var localVarResponse = this.Client.Get< UrlResponse >("/api/v1/screens/member-registration/url", localVarRequestOptions, this.Configuration);
+            var localVarResponse = this.Client.Get<UrlResponse>("/api/v1/screens/member-registration/url", localVarRequestOptions, this.Configuration);
 
             if (this.ExceptionFactory != null)
             {
@@ -1285,10 +1280,10 @@ namespace Org.OpenAPITools.Api
         /// <exception cref="Org.OpenAPITools.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <returns>Task of UrlResponse</returns>
-        public async System.Threading.Tasks.Task<UrlResponse> GetMemberRegistrationUrlAsync (string userAgent)
+        public async System.Threading.Tasks.Task<UrlResponse> GetMemberRegistrationUrlAsync(string userAgent)
         {
-             Org.OpenAPITools.Client.ApiResponse<UrlResponse> localVarResponse = await GetMemberRegistrationUrlAsyncWithHttpInfo(userAgent);
-             return localVarResponse.Data;
+            Org.OpenAPITools.Client.ApiResponse<UrlResponse> localVarResponse = await GetMemberRegistrationUrlAsyncWithHttpInfo(userAgent);
+            return localVarResponse.Data;
 
         }
 
@@ -1298,7 +1293,7 @@ namespace Org.OpenAPITools.Api
         /// <exception cref="Org.OpenAPITools.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <returns>Task of ApiResponse (UrlResponse)</returns>
-        public async System.Threading.Tasks.Task<Org.OpenAPITools.Client.ApiResponse<UrlResponse>> GetMemberRegistrationUrlAsyncWithHttpInfo (string userAgent)
+        public async System.Threading.Tasks.Task<Org.OpenAPITools.Client.ApiResponse<UrlResponse>> GetMemberRegistrationUrlAsyncWithHttpInfo(string userAgent)
         {
             // verify the required parameter 'userAgent' is set
             if (userAgent == null)
@@ -1314,13 +1309,13 @@ namespace Org.OpenAPITools.Api
             String[] _accepts = new String[] {
                 "application/json; charset=utf-8"
             };
-            
+
             foreach (var _contentType in _contentTypes)
                 localVarRequestOptions.HeaderParameters.Add("Content-Type", _contentType);
-            
+
             foreach (var _accept in _accepts)
                 localVarRequestOptions.HeaderParameters.Add("Accept", _accept);
-            
+
             localVarRequestOptions.HeaderParameters.Add("User-Agent", Org.OpenAPITools.Client.ClientUtils.ParameterToString(userAgent)); // header parameter
 
 
@@ -1343,10 +1338,10 @@ namespace Org.OpenAPITools.Api
         /// <exception cref="Org.OpenAPITools.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <returns>UrlResponse</returns>
-        public UrlResponse GetPasswordResetUrl (string userAgent)
+        public UrlResponse GetPasswordResetUrl(string userAgent)
         {
-             Org.OpenAPITools.Client.ApiResponse<UrlResponse> localVarResponse = GetPasswordResetUrlWithHttpInfo(userAgent);
-             return localVarResponse.Data;
+            Org.OpenAPITools.Client.ApiResponse<UrlResponse> localVarResponse = GetPasswordResetUrlWithHttpInfo(userAgent);
+            return localVarResponse.Data;
         }
 
         /// <summary>
@@ -1355,7 +1350,7 @@ namespace Org.OpenAPITools.Api
         /// <exception cref="Org.OpenAPITools.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <returns>ApiResponse of UrlResponse</returns>
-        public Org.OpenAPITools.Client.ApiResponse< UrlResponse > GetPasswordResetUrlWithHttpInfo (string userAgent)
+        public Org.OpenAPITools.Client.ApiResponse<UrlResponse> GetPasswordResetUrlWithHttpInfo(string userAgent)
         {
             // verify the required parameter 'userAgent' is set
             if (userAgent == null)
@@ -1381,7 +1376,7 @@ namespace Org.OpenAPITools.Api
 
 
             // make the HTTP request
-            var localVarResponse = this.Client.Get< UrlResponse >("/api/v1/screens/password-reset/url", localVarRequestOptions, this.Configuration);
+            var localVarResponse = this.Client.Get<UrlResponse>("/api/v1/screens/password-reset/url", localVarRequestOptions, this.Configuration);
 
             if (this.ExceptionFactory != null)
             {
@@ -1398,10 +1393,10 @@ namespace Org.OpenAPITools.Api
         /// <exception cref="Org.OpenAPITools.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <returns>Task of UrlResponse</returns>
-        public async System.Threading.Tasks.Task<UrlResponse> GetPasswordResetUrlAsync (string userAgent)
+        public async System.Threading.Tasks.Task<UrlResponse> GetPasswordResetUrlAsync(string userAgent)
         {
-             Org.OpenAPITools.Client.ApiResponse<UrlResponse> localVarResponse = await GetPasswordResetUrlAsyncWithHttpInfo(userAgent);
-             return localVarResponse.Data;
+            Org.OpenAPITools.Client.ApiResponse<UrlResponse> localVarResponse = await GetPasswordResetUrlAsyncWithHttpInfo(userAgent);
+            return localVarResponse.Data;
 
         }
 
@@ -1411,7 +1406,7 @@ namespace Org.OpenAPITools.Api
         /// <exception cref="Org.OpenAPITools.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <returns>Task of ApiResponse (UrlResponse)</returns>
-        public async System.Threading.Tasks.Task<Org.OpenAPITools.Client.ApiResponse<UrlResponse>> GetPasswordResetUrlAsyncWithHttpInfo (string userAgent)
+        public async System.Threading.Tasks.Task<Org.OpenAPITools.Client.ApiResponse<UrlResponse>> GetPasswordResetUrlAsyncWithHttpInfo(string userAgent)
         {
             // verify the required parameter 'userAgent' is set
             if (userAgent == null)
@@ -1427,13 +1422,13 @@ namespace Org.OpenAPITools.Api
             String[] _accepts = new String[] {
                 "application/json; charset=utf-8"
             };
-            
+
             foreach (var _contentType in _contentTypes)
                 localVarRequestOptions.HeaderParameters.Add("Content-Type", _contentType);
-            
+
             foreach (var _accept in _accepts)
                 localVarRequestOptions.HeaderParameters.Add("Accept", _accept);
-            
+
             localVarRequestOptions.HeaderParameters.Add("User-Agent", Org.OpenAPITools.Client.ClientUtils.ParameterToString(userAgent)); // header parameter
 
 
@@ -1458,10 +1453,10 @@ namespace Org.OpenAPITools.Api
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <param name="inlineObject"></param>
         /// <returns>AccessTokenRefreshTokenResponse</returns>
-        public AccessTokenRefreshTokenResponse Login (string X_LETS_DEVICEID, string userAgent, InlineObject inlineObject)
+        public AccessTokenRefreshTokenResponse Login(string X_LETS_DEVICEID, string userAgent, InlineObject inlineObject)
         {
-             Org.OpenAPITools.Client.ApiResponse<AccessTokenRefreshTokenResponse> localVarResponse = LoginWithHttpInfo(X_LETS_DEVICEID, userAgent, inlineObject);
-             return localVarResponse.Data;
+            Org.OpenAPITools.Client.ApiResponse<AccessTokenRefreshTokenResponse> localVarResponse = LoginWithHttpInfo(X_LETS_DEVICEID, userAgent, inlineObject);
+            return localVarResponse.Data;
         }
 
         /// <summary>
@@ -1472,7 +1467,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <param name="inlineObject"></param>
         /// <returns>ApiResponse of AccessTokenRefreshTokenResponse</returns>
-        public Org.OpenAPITools.Client.ApiResponse< AccessTokenRefreshTokenResponse > LoginWithHttpInfo (string X_LETS_DEVICEID, string userAgent, InlineObject inlineObject)
+        public Org.OpenAPITools.Client.ApiResponse<AccessTokenRefreshTokenResponse> LoginWithHttpInfo(string X_LETS_DEVICEID, string userAgent, InlineObject inlineObject)
         {
             // verify the required parameter 'X_LETS_DEVICEID' is set
             if (X_LETS_DEVICEID == null)
@@ -1509,7 +1504,7 @@ namespace Org.OpenAPITools.Api
 
 
             // make the HTTP request
-            var localVarResponse = this.Client.Post< AccessTokenRefreshTokenResponse >("/api/v1/login", localVarRequestOptions, this.Configuration);
+            var localVarResponse = this.Client.Post<AccessTokenRefreshTokenResponse>("/api/v1/login", localVarRequestOptions, this.Configuration);
 
             if (this.ExceptionFactory != null)
             {
@@ -1528,10 +1523,10 @@ namespace Org.OpenAPITools.Api
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <param name="inlineObject"></param>
         /// <returns>Task of AccessTokenRefreshTokenResponse</returns>
-        public async System.Threading.Tasks.Task<AccessTokenRefreshTokenResponse> LoginAsync (string X_LETS_DEVICEID, string userAgent, InlineObject inlineObject)
+        public async System.Threading.Tasks.Task<AccessTokenRefreshTokenResponse> LoginAsync(string X_LETS_DEVICEID, string userAgent, InlineObject inlineObject)
         {
-             Org.OpenAPITools.Client.ApiResponse<AccessTokenRefreshTokenResponse> localVarResponse = await LoginAsyncWithHttpInfo(X_LETS_DEVICEID, userAgent, inlineObject);
-             return localVarResponse.Data;
+            Org.OpenAPITools.Client.ApiResponse<AccessTokenRefreshTokenResponse> localVarResponse = await LoginAsyncWithHttpInfo(X_LETS_DEVICEID, userAgent, inlineObject);
+            return localVarResponse.Data;
 
         }
 
@@ -1543,7 +1538,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <param name="inlineObject"></param>
         /// <returns>Task of ApiResponse (AccessTokenRefreshTokenResponse)</returns>
-        public async System.Threading.Tasks.Task<Org.OpenAPITools.Client.ApiResponse<AccessTokenRefreshTokenResponse>> LoginAsyncWithHttpInfo (string X_LETS_DEVICEID, string userAgent, InlineObject inlineObject)
+        public async System.Threading.Tasks.Task<Org.OpenAPITools.Client.ApiResponse<AccessTokenRefreshTokenResponse>> LoginAsyncWithHttpInfo(string X_LETS_DEVICEID, string userAgent, InlineObject inlineObject)
         {
             // verify the required parameter 'X_LETS_DEVICEID' is set
             if (X_LETS_DEVICEID == null)
@@ -1568,13 +1563,13 @@ namespace Org.OpenAPITools.Api
             String[] _accepts = new String[] {
                 "application/json; charset=utf-8"
             };
-            
+
             foreach (var _contentType in _contentTypes)
                 localVarRequestOptions.HeaderParameters.Add("Content-Type", _contentType);
-            
+
             foreach (var _accept in _accepts)
                 localVarRequestOptions.HeaderParameters.Add("Accept", _accept);
-            
+
             localVarRequestOptions.HeaderParameters.Add("X-LETS-DEVICEID", Org.OpenAPITools.Client.ClientUtils.ParameterToString(X_LETS_DEVICEID)); // header parameter
             localVarRequestOptions.HeaderParameters.Add("User-Agent", Org.OpenAPITools.Client.ClientUtils.ParameterToString(userAgent)); // header parameter
             localVarRequestOptions.Data = inlineObject;
@@ -1601,10 +1596,10 @@ namespace Org.OpenAPITools.Api
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <param name="body"></param>
         /// <returns>Model200</returns>
-        public Model200 Logout (string X_LETS_DEVICEID, string userAgent, Object body)
+        public Model200 Logout(string X_LETS_DEVICEID, string userAgent, Object body)
         {
-             Org.OpenAPITools.Client.ApiResponse<Model200> localVarResponse = LogoutWithHttpInfo(X_LETS_DEVICEID, userAgent, body);
-             return localVarResponse.Data;
+            Org.OpenAPITools.Client.ApiResponse<Model200> localVarResponse = LogoutWithHttpInfo(X_LETS_DEVICEID, userAgent, body);
+            return localVarResponse.Data;
         }
 
         /// <summary>
@@ -1615,7 +1610,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <param name="body"></param>
         /// <returns>ApiResponse of Model200</returns>
-        public Org.OpenAPITools.Client.ApiResponse< Model200 > LogoutWithHttpInfo (string X_LETS_DEVICEID, string userAgent, Object body)
+        public Org.OpenAPITools.Client.ApiResponse<Model200> LogoutWithHttpInfo(string X_LETS_DEVICEID, string userAgent, Object body)
         {
             // verify the required parameter 'X_LETS_DEVICEID' is set
             if (X_LETS_DEVICEID == null)
@@ -1659,7 +1654,7 @@ namespace Org.OpenAPITools.Api
             }
 
             // make the HTTP request
-            var localVarResponse = this.Client.Post< Model200 >("/api/v1/logout", localVarRequestOptions, this.Configuration);
+            var localVarResponse = this.Client.Post<Model200>("/api/v1/logout", localVarRequestOptions, this.Configuration);
 
             if (this.ExceptionFactory != null)
             {
@@ -1678,10 +1673,10 @@ namespace Org.OpenAPITools.Api
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <param name="body"></param>
         /// <returns>Task of Model200</returns>
-        public async System.Threading.Tasks.Task<Model200> LogoutAsync (string X_LETS_DEVICEID, string userAgent, Object body)
+        public async System.Threading.Tasks.Task<Model200> LogoutAsync(string X_LETS_DEVICEID, string userAgent, Object body)
         {
-             Org.OpenAPITools.Client.ApiResponse<Model200> localVarResponse = await LogoutAsyncWithHttpInfo(X_LETS_DEVICEID, userAgent, body);
-             return localVarResponse.Data;
+            Org.OpenAPITools.Client.ApiResponse<Model200> localVarResponse = await LogoutAsyncWithHttpInfo(X_LETS_DEVICEID, userAgent, body);
+            return localVarResponse.Data;
 
         }
 
@@ -1693,7 +1688,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <param name="body"></param>
         /// <returns>Task of ApiResponse (Model200)</returns>
-        public async System.Threading.Tasks.Task<Org.OpenAPITools.Client.ApiResponse<Model200>> LogoutAsyncWithHttpInfo (string X_LETS_DEVICEID, string userAgent, Object body)
+        public async System.Threading.Tasks.Task<Org.OpenAPITools.Client.ApiResponse<Model200>> LogoutAsyncWithHttpInfo(string X_LETS_DEVICEID, string userAgent, Object body)
         {
             // verify the required parameter 'X_LETS_DEVICEID' is set
             if (X_LETS_DEVICEID == null)
@@ -1718,13 +1713,13 @@ namespace Org.OpenAPITools.Api
             String[] _accepts = new String[] {
                 "application/json; charset=utf-8"
             };
-            
+
             foreach (var _contentType in _contentTypes)
                 localVarRequestOptions.HeaderParameters.Add("Content-Type", _contentType);
-            
+
             foreach (var _accept in _accepts)
                 localVarRequestOptions.HeaderParameters.Add("Accept", _accept);
-            
+
             localVarRequestOptions.HeaderParameters.Add("X-LETS-DEVICEID", Org.OpenAPITools.Client.ClientUtils.ParameterToString(X_LETS_DEVICEID)); // header parameter
             localVarRequestOptions.HeaderParameters.Add("User-Agent", Org.OpenAPITools.Client.ClientUtils.ParameterToString(userAgent)); // header parameter
             localVarRequestOptions.Data = body;
@@ -1756,10 +1751,10 @@ namespace Org.OpenAPITools.Api
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <param name="inlineObject4"></param>
         /// <returns>DeviceIdResponse</returns>
-        public DeviceIdResponse PostDeviceId (string userAgent, InlineObject4 inlineObject4)
+        public DeviceIdResponse PostDeviceId(string userAgent, InlineObject4 inlineObject4)
         {
-             Org.OpenAPITools.Client.ApiResponse<DeviceIdResponse> localVarResponse = PostDeviceIdWithHttpInfo(userAgent, inlineObject4);
-             return localVarResponse.Data;
+            Org.OpenAPITools.Client.ApiResponse<DeviceIdResponse> localVarResponse = PostDeviceIdWithHttpInfo(userAgent, inlineObject4);
+            return localVarResponse.Data;
         }
 
         /// <summary>
@@ -1769,7 +1764,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <param name="inlineObject4"></param>
         /// <returns>ApiResponse of DeviceIdResponse</returns>
-        public Org.OpenAPITools.Client.ApiResponse< DeviceIdResponse > PostDeviceIdWithHttpInfo (string userAgent, InlineObject4 inlineObject4)
+        public Org.OpenAPITools.Client.ApiResponse<DeviceIdResponse> PostDeviceIdWithHttpInfo(string userAgent, InlineObject4 inlineObject4)
         {
             // verify the required parameter 'userAgent' is set
             if (userAgent == null)
@@ -1801,7 +1796,7 @@ namespace Org.OpenAPITools.Api
 
 
             // make the HTTP request
-            var localVarResponse = this.Client.Post< DeviceIdResponse >("/api/v1/deviceId", localVarRequestOptions, this.Configuration);
+            var localVarResponse = this.Client.Post<DeviceIdResponse>("/api/v1/deviceId", localVarRequestOptions, this.Configuration);
 
             if (this.ExceptionFactory != null)
             {
@@ -1819,10 +1814,10 @@ namespace Org.OpenAPITools.Api
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <param name="inlineObject4"></param>
         /// <returns>Task of DeviceIdResponse</returns>
-        public async System.Threading.Tasks.Task<DeviceIdResponse> PostDeviceIdAsync (string userAgent, InlineObject4 inlineObject4)
+        public async System.Threading.Tasks.Task<DeviceIdResponse> PostDeviceIdAsync(string userAgent, InlineObject4 inlineObject4)
         {
-             Org.OpenAPITools.Client.ApiResponse<DeviceIdResponse> localVarResponse = await PostDeviceIdAsyncWithHttpInfo(userAgent, inlineObject4);
-             return localVarResponse.Data;
+            Org.OpenAPITools.Client.ApiResponse<DeviceIdResponse> localVarResponse = await PostDeviceIdAsyncWithHttpInfo(userAgent, inlineObject4);
+            return localVarResponse.Data;
 
         }
 
@@ -1833,7 +1828,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <param name="inlineObject4"></param>
         /// <returns>Task of ApiResponse (DeviceIdResponse)</returns>
-        public async System.Threading.Tasks.Task<Org.OpenAPITools.Client.ApiResponse<DeviceIdResponse>> PostDeviceIdAsyncWithHttpInfo (string userAgent, InlineObject4 inlineObject4)
+        public async System.Threading.Tasks.Task<Org.OpenAPITools.Client.ApiResponse<DeviceIdResponse>> PostDeviceIdAsyncWithHttpInfo(string userAgent, InlineObject4 inlineObject4)
         {
             // verify the required parameter 'userAgent' is set
             if (userAgent == null)
@@ -1854,13 +1849,13 @@ namespace Org.OpenAPITools.Api
             String[] _accepts = new String[] {
                 "application/json; charset=utf-8"
             };
-            
+
             foreach (var _contentType in _contentTypes)
                 localVarRequestOptions.HeaderParameters.Add("Content-Type", _contentType);
-            
+
             foreach (var _accept in _accepts)
                 localVarRequestOptions.HeaderParameters.Add("Accept", _accept);
-            
+
             localVarRequestOptions.HeaderParameters.Add("User-Agent", Org.OpenAPITools.Client.ClientUtils.ParameterToString(userAgent)); // header parameter
             localVarRequestOptions.Data = inlineObject4;
 
@@ -1886,10 +1881,10 @@ namespace Org.OpenAPITools.Api
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <param name="inlineObject3"></param>
         /// <returns>AccessTokenResponse</returns>
-        public AccessTokenResponse Token (string X_LETS_DEVICEID, string userAgent, InlineObject3 inlineObject3)
+        public AccessTokenResponse Token(string X_LETS_DEVICEID, string userAgent, InlineObject3 inlineObject3)
         {
-             Org.OpenAPITools.Client.ApiResponse<AccessTokenResponse> localVarResponse = TokenWithHttpInfo(X_LETS_DEVICEID, userAgent, inlineObject3);
-             return localVarResponse.Data;
+            Org.OpenAPITools.Client.ApiResponse<AccessTokenResponse> localVarResponse = TokenWithHttpInfo(X_LETS_DEVICEID, userAgent, inlineObject3);
+            return localVarResponse.Data;
         }
 
         /// <summary>
@@ -1900,7 +1895,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <param name="inlineObject3"></param>
         /// <returns>ApiResponse of AccessTokenResponse</returns>
-        public Org.OpenAPITools.Client.ApiResponse< AccessTokenResponse > TokenWithHttpInfo (string X_LETS_DEVICEID, string userAgent, InlineObject3 inlineObject3)
+        public Org.OpenAPITools.Client.ApiResponse<AccessTokenResponse> TokenWithHttpInfo(string X_LETS_DEVICEID, string userAgent, InlineObject3 inlineObject3)
         {
             // verify the required parameter 'X_LETS_DEVICEID' is set
             if (X_LETS_DEVICEID == null)
@@ -1937,7 +1932,7 @@ namespace Org.OpenAPITools.Api
 
 
             // make the HTTP request
-            var localVarResponse = this.Client.Post< AccessTokenResponse >("/api/v1/token", localVarRequestOptions, this.Configuration);
+            var localVarResponse = this.Client.Post<AccessTokenResponse>("/api/v1/token", localVarRequestOptions, this.Configuration);
 
             if (this.ExceptionFactory != null)
             {
@@ -1956,10 +1951,10 @@ namespace Org.OpenAPITools.Api
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <param name="inlineObject3"></param>
         /// <returns>Task of AccessTokenResponse</returns>
-        public async System.Threading.Tasks.Task<AccessTokenResponse> TokenAsync (string X_LETS_DEVICEID, string userAgent, InlineObject3 inlineObject3)
+        public async System.Threading.Tasks.Task<AccessTokenResponse> TokenAsync(string X_LETS_DEVICEID, string userAgent, InlineObject3 inlineObject3)
         {
-             Org.OpenAPITools.Client.ApiResponse<AccessTokenResponse> localVarResponse = await TokenAsyncWithHttpInfo(X_LETS_DEVICEID, userAgent, inlineObject3);
-             return localVarResponse.Data;
+            Org.OpenAPITools.Client.ApiResponse<AccessTokenResponse> localVarResponse = await TokenAsyncWithHttpInfo(X_LETS_DEVICEID, userAgent, inlineObject3);
+            return localVarResponse.Data;
 
         }
 
@@ -1971,7 +1966,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <param name="inlineObject3"></param>
         /// <returns>Task of ApiResponse (AccessTokenResponse)</returns>
-        public async System.Threading.Tasks.Task<Org.OpenAPITools.Client.ApiResponse<AccessTokenResponse>> TokenAsyncWithHttpInfo (string X_LETS_DEVICEID, string userAgent, InlineObject3 inlineObject3)
+        public async System.Threading.Tasks.Task<Org.OpenAPITools.Client.ApiResponse<AccessTokenResponse>> TokenAsyncWithHttpInfo(string X_LETS_DEVICEID, string userAgent, InlineObject3 inlineObject3)
         {
             // verify the required parameter 'X_LETS_DEVICEID' is set
             if (X_LETS_DEVICEID == null)
@@ -1996,13 +1991,13 @@ namespace Org.OpenAPITools.Api
             String[] _accepts = new String[] {
                 "application/json; charset=utf-8"
             };
-            
+
             foreach (var _contentType in _contentTypes)
                 localVarRequestOptions.HeaderParameters.Add("Content-Type", _contentType);
-            
+
             foreach (var _accept in _accepts)
                 localVarRequestOptions.HeaderParameters.Add("Accept", _accept);
-            
+
             localVarRequestOptions.HeaderParameters.Add("X-LETS-DEVICEID", Org.OpenAPITools.Client.ClientUtils.ParameterToString(X_LETS_DEVICEID)); // header parameter
             localVarRequestOptions.HeaderParameters.Add("User-Agent", Org.OpenAPITools.Client.ClientUtils.ParameterToString(userAgent)); // header parameter
             localVarRequestOptions.Data = inlineObject3;

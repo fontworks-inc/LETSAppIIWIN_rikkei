@@ -9,19 +9,13 @@
  */
 
 
-using System;
-using System.Linq;
-using System.IO;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Collections;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Runtime.Serialization;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using OpenAPIDateConverter = Org.OpenAPITools.Client.OpenAPIDateConverter;
+using System.Linq;
+using System.Runtime.Serialization;
+using System.Text;
 
 namespace Org.OpenAPITools.Model
 {
@@ -29,7 +23,7 @@ namespace Org.OpenAPITools.Model
     /// InlineResponse200Data
     /// </summary>
     [DataContract]
-    public partial class InlineResponse200Data :  IEquatable<InlineResponse200Data>, IValidatableObject
+    public partial class InlineResponse200Data : IEquatable<InlineResponse200Data>, IValidatableObject
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="InlineResponse200Data" /> class.
@@ -45,13 +39,13 @@ namespace Org.OpenAPITools.Model
         /// <summary>
         /// Gets or Sets fonts
         /// </summary>
-        [DataMember(Name= "fonts", EmitDefaultValue=false)]
+        [DataMember(Name = "fonts", EmitDefaultValue = false)]
         public List<InlineResponse200Font> Fonts { get; set; }
 
         /// <summary>
         /// Gets or Sets HasNext
         /// </summary>
-        [DataMember(Name= "hasNext", EmitDefaultValue=false)]
+        [DataMember(Name = "hasNext", EmitDefaultValue = false)]
         public bool HasNext { get; set; }
 
         /// <summary>
@@ -67,7 +61,7 @@ namespace Org.OpenAPITools.Model
             sb.Append("}\n");
             return sb.ToString();
         }
-  
+
         /// <summary>
         /// Returns the JSON string presentation of the object
         /// </summary>
@@ -103,7 +97,7 @@ namespace Org.OpenAPITools.Model
                     this.Fonts != null &&
                     input.Fonts != null &&
                     this.Fonts.SequenceEqual(input.Fonts)
-                ) && 
+                ) &&
                 (
                     this.HasNext == input.HasNext ||
                     this.HasNext.Equals(input.HasNext)

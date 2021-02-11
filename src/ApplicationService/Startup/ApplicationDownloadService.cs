@@ -142,7 +142,7 @@ namespace ApplicationService.Startup
             if (this.applicationRuntimeRepository.GetApplicationRuntime().NextVersionInstaller.ApplicationUpdateType)
             {
                 // 「強制」の場合、「強制アップデートチェック」の処理を行う
-                StartupService startupService = new StartupService(null, null, null, null, this.volatileSettingRepository, this.applicationRuntimeRepository, null, null, null, null,  null, null, null, null);
+                StartupService startupService = new StartupService(null, null, null, null, this.volatileSettingRepository, this.applicationRuntimeRepository, null, null, null, null, null, null, null, null);
                 startupService.ForceUpdateCheck(this.forceUpdateEvent, () => { });
             }
             else

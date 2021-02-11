@@ -173,6 +173,8 @@ namespace ApplicationService.Schedulers
         {
             Logger.Info(this.ResourceWrapper.GetString("LOG_INFO_FixedTermScheduler_ScheduledEvent_Start"));
 
+            bool changeToOnline = false;
+
             // 特定の条件を満たさない限りはフォントの同期処理を実行しないよう設定する
             this.shouldSynchronize = false;
 
@@ -190,7 +192,19 @@ namespace ApplicationService.Schedulers
                     {
                         Logger.Info(this.ResourceWrapper.GetString("LOG_INFO_FixedTermScheduler_ScheduledEvent_ReceiveNotificationStart"));
                         this.receiveNotificationRepository.Start(volatileSetting.AccessToken, this.userStatusRepository.GetStatus().DeviceId);
+
+                        if (this.receiveNotificationRepository.IsConnected())
+                        {
+                            changeToOnline = true;
+                        }
                     }
+                }
+
+                if (!volatileSetting.IsConnected && changeToOnline)
+                {
+                    this.shouldSynchronize = true;
+                    volatileSetting.IsConnected = true;
+                    this.FontSynchronize();
                 }
 
                 // 前回実行時間から、interval秒過ぎていなければ抜ける
@@ -202,16 +216,9 @@ namespace ApplicationService.Schedulers
             }
 
             // [起動チェック処理]が「未処理」のとき、または[起動時チェック日時]からn時間以上経過しているときのみ処理を行う
-            if (!volatileSetting.IsCheckedStartup || ((DateTime)volatileSetting.CheckedStartupAt)
-                .AddHours(ElapsedHours).CompareTo(DateTime.Now) >= 0)
+            if (!volatileSetting.IsCheckedStartup
+                || ((DateTime)volatileSetting.CheckedStartupAt).AddHours(ElapsedHours).CompareTo(DateTime.Now) <= 0)
             {
-                // ユーザー配下のフォントフォルダ
-                var local = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-                var userFontsDir = @$"{local}\Microsoft\Windows\Fonts";
-
-                // フォント一覧の更新
-                this.fontManagerService.UpdateFontsList(userFontsDir);
-
                 // 起動時チェック処理を実行する
                 if (this.startupService.IsCheckedStartup(
                     this.shutdownClientApplicationRequiredEvent,
@@ -241,9 +248,13 @@ namespace ApplicationService.Schedulers
                 }
             }
 
-            // [ユーザー別保存：ログイン状態]が「ログイン中」かつ[メモリ：通信状態]が「オフライン中」で、[メモリ：起動チェック処理]が「処理済み」のとき
+            // [ユーザー別保存：ログイン状態]が「ログイン中」かつ[メモリ：起動チェック処理]が「処理済み」
+            // かつ(前回チェック時から30分以上経過または[メモリ：通信状態]が「オフライン中」)のとき
             UserStatus userStatus = this.userStatusRepository.GetStatus();
-            if (userStatus.IsLoggingIn && !volatileSetting.IsConnected && volatileSetting.IsCheckedStartup)
+            bool preOnline = volatileSetting.IsConnected;
+            if (userStatus.IsLoggingIn && volatileSetting.IsCheckedStartup
+                && (DateTime.Now >= this.lastScheduledEvent.AddMilliseconds(this.originalInterval * MillisecondMultiplier)
+                    || !volatileSetting.IsConnected))
             {
                 // ログイン状態確認処理を実行する
                 if (this.startupService.ConfirmLoginStatus(userStatus.DeviceId, this.notContainsDeviceEvent))
@@ -251,8 +262,12 @@ namespace ApplicationService.Schedulers
                     Logger.Info(this.ResourceWrapper.GetString("LOG_INFO_FixedTermScheduler_ScheduledEvent_ShouldSynchronize"));
 
                     // 結果が正常かつ「ログイン中」時
-                    // オフライン→オンラインに変わったときにフォントの同期処理を実行するよう設定する
-                    this.shouldSynchronize = true;
+                    // オフライン→オンラインに変わったと判断してフォントの同期処理を実行
+                    if (!preOnline)
+                    {
+                        this.shouldSynchronize = true;
+                        this.FontSynchronize();
+                    }
                 }
             }
 
@@ -274,6 +289,18 @@ namespace ApplicationService.Schedulers
                 Logger.Info(this.ResourceWrapper.GetString("LOG_INFO_FixedTermScheduler_NetworkChange_NetworkAvailabilityChanged_ShouldSynchronize"));
 
                 // オフライン→オンラインに変わったとき かつ 定期間隔で実行されるイベントで実行すべきと判断されている場合
+                // フォントの同期処理を行う
+                this.FontSynchronize();
+            }
+        }
+
+        /// <summary>
+        /// フォント同期処理実行
+        /// </summary>
+        private void FontSynchronize()
+        {
+            if (this.shouldSynchronize)
+            {
                 // フォントの同期処理を行う
                 this.fontManagerService.Synchronize(false);
 

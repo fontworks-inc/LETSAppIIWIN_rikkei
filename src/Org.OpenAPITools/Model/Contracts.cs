@@ -9,19 +9,13 @@
  */
 
 
-using System;
-using System.Linq;
-using System.IO;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Collections;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Runtime.Serialization;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using OpenAPIDateConverter = Org.OpenAPITools.Client.OpenAPIDateConverter;
+using System.Linq;
+using System.Runtime.Serialization;
+using System.Text;
 
 namespace Org.OpenAPITools.Model
 {
@@ -29,7 +23,7 @@ namespace Org.OpenAPITools.Model
     /// Contracts
     /// </summary>
     [DataContract]
-    public partial class Contracts :  IEquatable<Contracts>, IValidatableObject
+    public partial class Contracts : IEquatable<Contracts>, IValidatableObject
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Contracts" /> class.
@@ -39,11 +33,11 @@ namespace Org.OpenAPITools.Model
         {
             this.Data = data;
         }
-        
+
         /// <summary>
         /// Gets or Sets Data
         /// </summary>
-        [DataMember(Name="data", EmitDefaultValue=false)]
+        [DataMember(Name = "data", EmitDefaultValue = false)]
         public List<ContractResponseData> Data { get; set; }
 
         /// <summary>
@@ -58,7 +52,7 @@ namespace Org.OpenAPITools.Model
             sb.Append("}\n");
             return sb.ToString();
         }
-  
+
         /// <summary>
         /// Returns the JSON string presentation of the object
         /// </summary>
@@ -88,7 +82,7 @@ namespace Org.OpenAPITools.Model
             if (input == null)
                 return false;
 
-            return 
+            return
                 (
                     this.Data == input.Data ||
                     this.Data != null &&

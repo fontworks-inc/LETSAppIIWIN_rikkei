@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
 using System.Security.AccessControl;
 using System.Security.Principal;
 using System.Threading;
@@ -227,11 +226,11 @@ namespace Client.UI
             };
             fontManagerService.FontDownloadCompletedEvent = (IList<InstallFont> fontList) =>
              {
-                Current.Dispatcher.Invoke(() =>
-                {
-                    this.componentManager.FontDownloadCompleted(fontList);
-                });
-            };
+                 Current.Dispatcher.Invoke(() =>
+                 {
+                     this.componentManager.FontDownloadCompleted(fontList);
+                 });
+             };
 
             fontManagerService.FontDownloadFailedEvent = (InstallFont font) =>
             {
@@ -430,6 +429,7 @@ namespace Client.UI
         /// <summary>
         /// グローバル例外への対応確認
         /// 未処理例外を処理する（Windowsフォーム用）
+        /// </summary>
         private static void Application_ThreadException(object sender, ThreadExceptionEventArgs e)
         {
             // 例外発生時、エラーを通知する
@@ -440,34 +440,46 @@ namespace Client.UI
             shell.Shutdown();
         }
 
+        /// <summary>
+        /// ログファイルアクセス権の設定
+        /// </summary>
         private void SetLogAccessEveryone()
         {
-            // ホームドライブの取得
-            string homedrive = Environment.GetEnvironmentVariable("HOMEDRIVE");
-
-            // ログフォルダ
-            string letsfolder = $@"{homedrive}\ProgramData\Fontworks\LETS\config";
-
-            // ログファイル名
-            string normallog = Path.Combine(letsfolder, "LETS.log");
-            string debuglog = Path.Combine(letsfolder, "LETS-debug.log");
-
-            FileSystemAccessRule rule = new FileSystemAccessRule(
-                new NTAccount("everyone"),
-                FileSystemRights.FullControl,
-                AccessControlType.Allow);
-
-            var sec = new FileSecurity();
-            sec.AddAccessRule(rule);
-
-            if (File.Exists(normallog))
+            try
             {
+                // ホームドライブの取得
+                string homedrive = Environment.GetEnvironmentVariable("HOMEDRIVE");
+
+                // ログフォルダ
+                string letsfolder = $@"{homedrive}\ProgramData\Fontworks\LETS\config";
+
+                // ログファイル名
+                string normallog = Path.Combine(letsfolder, "LETS.log");
+                string debuglog = Path.Combine(letsfolder, "LETS-debug.log");
+
+                FileSystemAccessRule rule = new FileSystemAccessRule(
+                    new NTAccount("everyone"),
+                    FileSystemRights.FullControl,
+                    AccessControlType.Allow);
+
+                var sec = new FileSecurity();
+                sec.AddAccessRule(rule);
+
+                if (!File.Exists(normallog))
+                {
+                    File.Create(normallog);
+                }
+
                 System.IO.FileSystemAclExtensions.SetAccessControl(new FileInfo(normallog), sec);
-            }
 
-            if (File.Exists(debuglog))
+                if (File.Exists(debuglog))
+                {
+                    System.IO.FileSystemAclExtensions.SetAccessControl(new FileInfo(debuglog), sec);
+                }
+            }
+            catch (Exception)
             {
-                System.IO.FileSystemAclExtensions.SetAccessControl(new FileInfo(debuglog), sec);
+                // NOP
             }
         }
     }

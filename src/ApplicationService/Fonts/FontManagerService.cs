@@ -69,10 +69,14 @@ namespace ApplicationService.Fonts
         private readonly IFontFileRepository fontInfoRepository = null;
 
         /// <summary>
-        /// ダウンロード処理が実行中かどうか
+        /// ダウンロード実行中フラグ
         /// </summary>
-        /// <remarks>実行中の場合true, そうでない場合はfalse</remarks>
-        private bool isExecuting;
+        private bool isExecutingDownload = false;
+
+        /// <summary>
+        /// 起動時ダウンロード実行終了フラグ
+        /// </summary>
+        private bool isFirstDownloadCompleted = false;
 
         /// <summary>
         /// インスタンスを初期化する
@@ -133,73 +137,73 @@ namespace ApplicationService.Fonts
         /// <remarks>アクティベート通知からの同期処理</remarks>
         public void Synchronize(ActivateFont font)
         {
-                InstallFont installFont = null;
+            InstallFont installFont = null;
 
-                // 保持しているフォントからアクティベート対象フォントとIDが一致するフォントを取得する
-                IList<Font> userFonts = this.userFontsSettingRepository.GetUserFontsSetting().Fonts;
-                Font userFont = userFonts.Where(userFont => this.FormatFontID(userFont.Id).Equals(this.FormatFontID(font.FontId))).FirstOrDefault();
-                if (userFont == null)
+            // 保持しているフォントからアクティベート対象フォントとIDが一致するフォントを取得する
+            IList<Font> userFonts = this.userFontsSettingRepository.GetUserFontsSetting().Fonts;
+            Font userFont = userFonts.Where(userFont => this.FormatFontID(userFont.Id).Equals(this.FormatFontID(font.FontId))).FirstOrDefault();
+            if (userFont == null)
+            {
+                // ID一致のフォントが無い場合、インストール対象フォントに加える
+                installFont = new InstallFont(string.Empty, true, font.FontId, font.DisplayFontName, string.Empty, font.FileSize, font.Version, false, true, font.IsFreemium, font.ContractIds);
+            }
+            else
+            {
+                // ID一致のフォントがある場合、バージョンを比較する
+                if (font.Version.CompareTo(userFont.Version) != 0)
                 {
-                    // ID一致のフォントが無い場合、インストール対象フォントに加える
-                    installFont = new InstallFont(string.Empty, true, font.FontId, font.DisplayFontName, string.Empty, font.FileSize, font.Version, false, true, font.IsFreemium, font.ContractIds);
+                    // バージョンによる更新ができないので、無効とする
+                    //// アクティベート対象フォントのバージョンが新しい場合、インストール対象フォントに加える
+                    // installFont = new InstallFont(string.Empty, true, font.FontId, font.DisplayFontName, string.Empty, font.FileSize, font.Version, false, true, font.IsFreemium, font.ContractIds);
                 }
-                else
+
+                // Activateのみ実行する
+                this.fontActivationService.Activate(userFont);
+            }
+
+            if (installFont == null)
+            {
+                return;
+            }
+
+            // フォントをダウンロードする
+            try
+            {
+                Task.Run(() =>
                 {
-                    // ID一致のフォントがある場合、バージョンを比較する
-                    if (font.Version.CompareTo(userFont.Version) != 0)
+                    Task.Delay(10);
+
+                    if (this.isExecutingDownload)
                     {
-                        // バージョンによる更新ができないので、無効とする
-                        //// アクティベート対象フォントのバージョンが新しい場合、インストール対象フォントに加える
-                        // installFont = new InstallFont(string.Empty, true, font.FontId, font.DisplayFontName, string.Empty, font.FileSize, font.Version, false, true, font.IsFreemium, font.ContractIds);
+                        Logger.Info("ダウンロード中なのでスキップ");
+
+                        this.volatileSettingRepository.GetVolatileSetting().InstallTargetFonts.Add(installFont);
+                        return;
                     }
 
-                    // Activateのみ実行する
-                    this.fontActivationService.Activate(userFont);
-                }
-
-                if (installFont == null)
-                {
-                    return;
-                }
-
-                // フォントをダウンロードする
-                try
-                {
-                    Task.Run(() =>
+                    try
                     {
-                        Task.Delay(10);
-
-                        if (this.isExecuting)
+                        Logger.Info("ダウンロード開始");
+                        this.isExecutingDownload = true;
+                        List<InstallFont> installFontList = new List<InstallFont>();
+                        installFontList = new List<InstallFont>(this.volatileSettingRepository.GetVolatileSetting().InstallTargetFonts);
+                        installFontList.Add(installFont);
+                        while (installFontList.Count > 0)
                         {
-                            Logger.Info("ダウンロード中なのでスキップ");
-
-                            this.volatileSettingRepository.GetVolatileSetting().InstallTargetFonts.Add(installFont);
-                            return;
-                        }
-
-                        try
-                        {
-                            Logger.Info("ダウンロード開始");
-                            this.isExecuting = true;
-                            List<InstallFont> installFontList = new List<InstallFont>();
+                            this.DownloadFontFile(installFontList);
                             installFontList = new List<InstallFont>(this.volatileSettingRepository.GetVolatileSetting().InstallTargetFonts);
-                            installFontList.Add(installFont);
-                            while (installFontList.Count > 0)
-                            {
-                                this.DownloadFontFile(installFontList);
-                                installFontList = new List<InstallFont>(this.volatileSettingRepository.GetVolatileSetting().InstallTargetFonts);
-                            }
                         }
-                        finally
-                        {
-                            Logger.Info("ダウンロード終了");
-                            this.isExecuting = false;
-                        }
-                    });
-                }
-                catch (Exception)
-                {
-                }
+                    }
+                    finally
+                    {
+                        Logger.Info("ダウンロード終了");
+                        this.isExecutingDownload = false;
+                    }
+                });
+            }
+            catch (Exception)
+            {
+            }
         }
 
         /// <summary>
@@ -212,11 +216,13 @@ namespace ApplicationService.Fonts
             // 起動時のみ下記処理を実施
             if (startUp)
             {
+                this.isFirstDownloadCompleted = false;
+
                 // 「削除対象フォント」=TRUEのフォント削除を行う
                 UserFontsSetting userFontsSetting = this.userFontsSettingRepository.GetUserFontsSetting();
                 foreach (Font font in userFontsSetting.Fonts.Where(font => font.IsRemove == true))
                 {
-                    this.DeleteFontFile(font.Path);
+                    this.fontActivationService.Delete(font);
                 }
             }
 
@@ -256,7 +262,7 @@ namespace ApplicationService.Fonts
             {
                 Task.Run(() =>
                 {
-                    if (this.isExecuting)
+                    if (this.isExecutingDownload)
                     {
                         Logger.Info("ダウンロード中なのでスキップ");
                         return;
@@ -265,7 +271,7 @@ namespace ApplicationService.Fonts
                     try
                     {
                         Logger.Info("ダウンロード開始");
-                        this.isExecuting = true;
+                        this.isExecutingDownload = true;
                         while (targetFontList.Count > 0)
                         {
                             this.DownloadFontFile(targetFontList);
@@ -275,7 +281,8 @@ namespace ApplicationService.Fonts
                     finally
                     {
                         Logger.Info("ダウンロード終了");
-                        this.isExecuting = false;
+                        this.isExecutingDownload = false;
+                        this.isFirstDownloadCompleted = true;
                     }
                 });
             }
@@ -285,39 +292,10 @@ namespace ApplicationService.Fonts
             }
         }
 
-        /// <summary>
-        /// 契約切れフォントのディアクティベート
-        /// </summary>
-        /// <param name="contracts">契約情報の集合体</param>
-        public void DeactivateExpiredFonts(IList<Contract> contracts)
+        /// <inheritdoc/>
+        public bool GetIsFirstDownloadCompleted()
         {
-            // 有効な契約終了日の契約情報(「契約終了日」が過ぎていない契約情報)を取得する
-            var now = DateTime.Now;
-            var today = new DateTime(now.Year, now.Month, now.Day);
-            IEnumerable<Contract> validContracts = contracts.Where(contract => today.CompareTo(contract.ContractEndDate) <= 0);
-
-            // 有効な契約終了日の契約情報を持っていないLETSフォントの情報を取得し、ディアクティベートする
-            UserFontsSetting userFontsSetting = this.userFontsSettingRepository.GetUserFontsSetting();
-            var invalidFontList = userFontsSetting.Fonts
-                .Where(font => (font.IsLETS && !font.IsFreemium) && !font.ContractIds
-                    .Any(contractId => validContracts.Select(contract => contract.ContractId).Contains(contractId)))
-                        .Select(font =>
-                        {
-                            this.fontActivationService.Deactivate(font);
-                            Logger.Debug("DeactivateExpiredFonts:" + font.Path);
-                            font.IsActivated = false;
-                            return font;
-                        }).ToList();
-
-            // 最後の期限から１ヶ月以上経過しているとき、[フォント：フォント一覧.削除対象]をTRUEに設定する
-            IEnumerable<Contract> invalidContracts = contracts.Where(contract => today.AddMonths(-1).CompareTo(contract.ContractEndDate) >= 0);
-            invalidFontList.Where(font => font.ContractIds
-                   .Any(contractId => invalidContracts.Select(contract => contract.ContractId).Contains(contractId)))
-                       .Select(font =>
-                       {
-                           font.IsRemove = true;
-                           return font;
-                       }).ToList();
+            return this.isFirstDownloadCompleted;
         }
 
         /// <summary>
@@ -334,6 +312,26 @@ namespace ApplicationService.Fonts
                     if (font.IsLETS && font.IsActivated == true)
                     {
                         this.fontActivationService.Deactivate(font);
+                    }
+
+                    return font;
+                }).ToList();
+
+            // 保存処理
+            this.userFontsSettingRepository.SaveUserFontsSetting(setting);
+        }
+
+        /// <inheritdoc/>
+        public void UninstallDeactivatedFonts()
+        {
+            // [フォント：フォント情報]でディアクティベートされているLETSフォントを削除
+            var setting = this.userFontsSettingRepository.GetUserFontsSetting();
+            setting.Fonts = setting.Fonts
+                .Select(font =>
+                {
+                    if (font.IsLETS && font.IsActivated != true)
+                    {
+                        this.fontActivationService.Delete(font);
                     }
 
                     return font;
@@ -415,7 +413,7 @@ namespace ApplicationService.Fonts
         /// <returns>サーバより削除されたフォント情報の一覧</returns>
         public IList<InstallFont> GetDeletedFontInformations()
         {
-           return this.fontsRepository.GetInstallFontInformations(this.userStatusRepository.GetStatus().DeviceId, VaildFontType.DeletedFonts);
+            return this.fontsRepository.GetInstallFontInformations(this.userStatusRepository.GetStatus().DeviceId, VaildFontType.DeletedFonts);
         }
 
         /// <summary>
@@ -429,28 +427,39 @@ namespace ApplicationService.Fonts
         }
 
         /// <summary>
-        /// フォントファイルを削除する
+        /// 契約切れフォントのディアクティベート
         /// </summary>
-        /// <param name="filePath">削除対象ファイルのパス</param>
-        /// <returns>正常に削除できれば0、失敗すれば-1</returns>
-        private int DeleteFontFile(string filePath)
+        /// <param name="contracts">契約情報の集合体</param>
+        public void DeactivateExpiredFonts(IList<Contract> contracts)
         {
-            try
-            {
-                if (File.Exists(filePath))
-                {
-                    File.Delete(filePath);
-                }
+            // 有効な契約終了日の契約情報(「契約終了日」が過ぎていない契約情報)を取得する
+            var now = DateTime.Now;
+            var today = new DateTime(now.Year, now.Month, now.Day);
+            IEnumerable<Contract> validContracts = contracts.Where(contract => today.CompareTo(contract.ContractEndDate) <= 0);
 
-                return 0;
-            }
-            catch (Exception e)
-            {
-                // ファイル削除失敗時のメッセージ
-                string message = string.Format(this.resourceWrapper.GetString("LOG_ERR_FontManagerService_DeleteFontFile"), filePath);
-                Logger.Error(e, message);
-                return -1;
-            }
+            // 有効な契約終了日の契約情報を持っていないLETSフォントの情報を取得し、ディアクティベートする
+            UserFontsSetting userFontsSetting = this.userFontsSettingRepository.GetUserFontsSetting();
+            var invalidFontList = userFontsSetting.Fonts
+                .Where(font => (font.IsLETS && (font.IsActivated == true) && !font.IsFreemium) && !font.ContractIds
+                    .Any(contractId => validContracts.Select(contract => contract.ContractId).Contains(contractId)))
+                        .Select(font =>
+                        {
+                            this.fontActivationService.Deactivate(font);
+                            Logger.Debug("DeactivateExpiredFonts:" + font.Path);
+                            font.IsActivated = false;
+                            return font;
+                        }).ToList();
+
+            // 最後の期限から１ヶ月以上経過しているとき、[フォント：フォント一覧.削除対象]をTRUEに設定する
+            IEnumerable<Contract> invalidContracts = contracts.Where(contract => today.AddMonths(-1).CompareTo(contract.ContractEndDate) >= 0);
+            invalidFontList.Where(font => font.ContractIds
+                    .Any(contractId => invalidContracts.Select(contract => contract.ContractId).Contains(contractId)))
+                        .Select(font =>
+                        {
+                            this.fontActivationService.Uninstall(font);
+                            font.IsRemove = true;
+                            return font;
+                        }).ToList();
         }
 
         /// <summary>
@@ -493,8 +502,11 @@ namespace ApplicationService.Fonts
                          *
                          */
                         // 契約IDを更新する
-                        userFont.ContractIds = installFont.ContractIds;
-                        this.userFontsSettingRepository.SaveUserFontsSetting(settings);
+                        if (installFont.ContractIds.Count > 0)
+                        {
+                            userFont.ContractIds = installFont.ContractIds;
+                            this.userFontsSettingRepository.SaveUserFontsSetting(settings);
+                        }
 
                         if (!installFont.IsFreemium && installFont.ContractIds.Count == 0 && userFont.IsFreemium)
                         {
@@ -515,7 +527,7 @@ namespace ApplicationService.Fonts
                         {
                             this.fontActivationService.Deactivate(userFont); // ディアクティベート実行
                         }
-                        else if (installFont.ContractIds.Count <= 0 && !installFont.IsFreemium && userFont.IsActivated.GetValueOrDefault())
+                        else if (installFont.ContractIds.Count == 0 && !installFont.IsFreemium && userFont.IsActivated.GetValueOrDefault())
                         {
                             this.fontActivationService.Deactivate(userFont); // ディアクティベート実行
                         }
@@ -538,8 +550,8 @@ namespace ApplicationService.Fonts
                 else
                 {
                     // インストール対象フォントと保持しているフォントのIDが一致しない場合
-                    // 「アクティベート状態」がTrueであればインストール対象フォントに追加
-                    if (installFont.ActivateFlg)
+                    // 「アクティベート状態」がTrueかつ(有効な契約ありまたはフリーミアム)であればインストール対象フォントに追加
+                    if (installFont.ActivateFlg && (installFont.ContractIds.Count > 0 || installFont.IsFreemium))
                     {
                         if (!this.volatileSettingRepository.GetVolatileSetting().InstallTargetFonts.Contains(installFont))
                         {

@@ -9,14 +9,9 @@
  */
 
 
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Net;
-using System.Net.Mime;
 using Org.OpenAPITools.Client;
 using Org.OpenAPITools.Model;
+using System;
 
 namespace Org.OpenAPITools.Api
 {
@@ -37,7 +32,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="X_LETS_DEVICEID">デバイス固有のIDを設定する。</param>
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <returns>Object</returns>
-        Object GetNotice (string X_LETS_DEVICEID, string userAgent);
+        Object GetNotice(string X_LETS_DEVICEID, string userAgent);
 
         /// <summary>
         /// お知らせ情報取得API
@@ -49,7 +44,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="X_LETS_DEVICEID">デバイス固有のIDを設定する。</param>
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <returns>ApiResponse of Object</returns>
-        ApiResponse<Object> GetNoticeWithHttpInfo (string X_LETS_DEVICEID, string userAgent);
+        ApiResponse<Object> GetNoticeWithHttpInfo(string X_LETS_DEVICEID, string userAgent);
         /// <summary>
         /// お知らせ画面URLの取得API
         /// </summary>
@@ -60,7 +55,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="X_LETS_DEVICEID">デバイス固有のIDを設定する。</param>
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <returns>UrlResponse</returns>
-        UrlResponse GetNoticeUrl (string X_LETS_DEVICEID, string userAgent);
+        UrlResponse GetNoticeUrl(string X_LETS_DEVICEID, string userAgent);
 
         /// <summary>
         /// お知らせ画面URLの取得API
@@ -72,7 +67,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="X_LETS_DEVICEID">デバイス固有のIDを設定する。</param>
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <returns>ApiResponse of UrlResponse</returns>
-        ApiResponse<UrlResponse> GetNoticeUrlWithHttpInfo (string X_LETS_DEVICEID, string userAgent);
+        ApiResponse<UrlResponse> GetNoticeUrlWithHttpInfo(string X_LETS_DEVICEID, string userAgent);
         #endregion Synchronous Operations
     }
 
@@ -92,7 +87,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="X_LETS_DEVICEID">デバイス固有のIDを設定する。</param>
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <returns>Task of Object</returns>
-        System.Threading.Tasks.Task<Object> GetNoticeAsync (string X_LETS_DEVICEID, string userAgent);
+        System.Threading.Tasks.Task<Object> GetNoticeAsync(string X_LETS_DEVICEID, string userAgent);
 
         /// <summary>
         /// お知らせ情報取得API
@@ -104,7 +99,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="X_LETS_DEVICEID">デバイス固有のIDを設定する。</param>
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <returns>Task of ApiResponse (Object)</returns>
-        System.Threading.Tasks.Task<ApiResponse<Object>> GetNoticeAsyncWithHttpInfo (string X_LETS_DEVICEID, string userAgent);
+        System.Threading.Tasks.Task<ApiResponse<Object>> GetNoticeAsyncWithHttpInfo(string X_LETS_DEVICEID, string userAgent);
         /// <summary>
         /// お知らせ画面URLの取得API
         /// </summary>
@@ -115,7 +110,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="X_LETS_DEVICEID">デバイス固有のIDを設定する。</param>
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <returns>Task of UrlResponse</returns>
-        System.Threading.Tasks.Task<UrlResponse> GetNoticeUrlAsync (string X_LETS_DEVICEID, string userAgent);
+        System.Threading.Tasks.Task<UrlResponse> GetNoticeUrlAsync(string X_LETS_DEVICEID, string userAgent);
 
         /// <summary>
         /// お知らせ画面URLの取得API
@@ -127,7 +122,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="X_LETS_DEVICEID">デバイス固有のIDを設定する。</param>
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <returns>Task of ApiResponse (UrlResponse)</returns>
-        System.Threading.Tasks.Task<ApiResponse<UrlResponse>> GetNoticeUrlAsyncWithHttpInfo (string X_LETS_DEVICEID, string userAgent);
+        System.Threading.Tasks.Task<ApiResponse<UrlResponse>> GetNoticeUrlAsyncWithHttpInfo(string X_LETS_DEVICEID, string userAgent);
         #endregion Asynchronous Operations
     }
 
@@ -150,7 +145,7 @@ namespace Org.OpenAPITools.Api
         /// Initializes a new instance of the <see cref="NoticeApi"/> class.
         /// </summary>
         /// <returns></returns>
-        public NoticeApi() : this((string) null)
+        public NoticeApi() : this((string)null)
         {
         }
 
@@ -195,11 +190,11 @@ namespace Org.OpenAPITools.Api
         /// <param name="client">The client interface for synchronous API access.</param>
         /// <param name="asyncClient">The client interface for asynchronous API access.</param>
         /// <param name="configuration">The configuration object.</param>
-        public NoticeApi(Org.OpenAPITools.Client.ISynchronousClient client,Org.OpenAPITools.Client.IAsynchronousClient asyncClient, Org.OpenAPITools.Client.IReadableConfiguration configuration)
+        public NoticeApi(Org.OpenAPITools.Client.ISynchronousClient client, Org.OpenAPITools.Client.IAsynchronousClient asyncClient, Org.OpenAPITools.Client.IReadableConfiguration configuration)
         {
-            if(client == null) throw new ArgumentNullException("client");
-            if(asyncClient == null) throw new ArgumentNullException("asyncClient");
-            if(configuration == null) throw new ArgumentNullException("configuration");
+            if (client == null) throw new ArgumentNullException("client");
+            if (asyncClient == null) throw new ArgumentNullException("asyncClient");
+            if (configuration == null) throw new ArgumentNullException("configuration");
 
             this.Client = client;
             this.AsynchronousClient = asyncClient;
@@ -230,7 +225,7 @@ namespace Org.OpenAPITools.Api
         /// Gets or sets the configuration object
         /// </summary>
         /// <value>An instance of the Configuration</value>
-        public Org.OpenAPITools.Client.IReadableConfiguration Configuration {get; set;}
+        public Org.OpenAPITools.Client.IReadableConfiguration Configuration { get; set; }
 
         /// <summary>
         /// Provides a factory method hook for the creation of exceptions.
@@ -255,10 +250,10 @@ namespace Org.OpenAPITools.Api
         /// <param name="X_LETS_DEVICEID">デバイス固有のIDを設定する。</param>
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <returns>Object</returns>
-        public Object GetNotice (string X_LETS_DEVICEID, string userAgent)
+        public Object GetNotice(string X_LETS_DEVICEID, string userAgent)
         {
-             Org.OpenAPITools.Client.ApiResponse<Object> localVarResponse = GetNoticeWithHttpInfo(X_LETS_DEVICEID, userAgent);
-             return localVarResponse.Data;
+            Org.OpenAPITools.Client.ApiResponse<Object> localVarResponse = GetNoticeWithHttpInfo(X_LETS_DEVICEID, userAgent);
+            return localVarResponse.Data;
         }
 
         /// <summary>
@@ -268,7 +263,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="X_LETS_DEVICEID">デバイス固有のIDを設定する。</param>
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <returns>ApiResponse of Object</returns>
-        public Org.OpenAPITools.Client.ApiResponse< Object > GetNoticeWithHttpInfo (string X_LETS_DEVICEID, string userAgent)
+        public Org.OpenAPITools.Client.ApiResponse<Object> GetNoticeWithHttpInfo(string X_LETS_DEVICEID, string userAgent)
         {
             // verify the required parameter 'X_LETS_DEVICEID' is set
             if (X_LETS_DEVICEID == null)
@@ -305,7 +300,7 @@ namespace Org.OpenAPITools.Api
             }
 
             // make the HTTP request
-            var localVarResponse = this.Client.Get< Object >("/api/v1/notice", localVarRequestOptions, this.Configuration);
+            var localVarResponse = this.Client.Get<Object>("/api/v1/notice", localVarRequestOptions, this.Configuration);
 
             if (this.ExceptionFactory != null)
             {
@@ -323,10 +318,10 @@ namespace Org.OpenAPITools.Api
         /// <param name="X_LETS_DEVICEID">デバイス固有のIDを設定する。</param>
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <returns>Task of Object</returns>
-        public async System.Threading.Tasks.Task<Object> GetNoticeAsync (string X_LETS_DEVICEID, string userAgent)
+        public async System.Threading.Tasks.Task<Object> GetNoticeAsync(string X_LETS_DEVICEID, string userAgent)
         {
-             Org.OpenAPITools.Client.ApiResponse<Object> localVarResponse = await GetNoticeAsyncWithHttpInfo(X_LETS_DEVICEID, userAgent);
-             return localVarResponse.Data;
+            Org.OpenAPITools.Client.ApiResponse<Object> localVarResponse = await GetNoticeAsyncWithHttpInfo(X_LETS_DEVICEID, userAgent);
+            return localVarResponse.Data;
 
         }
 
@@ -337,7 +332,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="X_LETS_DEVICEID">デバイス固有のIDを設定する。</param>
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <returns>Task of ApiResponse (Object)</returns>
-        public async System.Threading.Tasks.Task<Org.OpenAPITools.Client.ApiResponse<Object>> GetNoticeAsyncWithHttpInfo (string X_LETS_DEVICEID, string userAgent)
+        public async System.Threading.Tasks.Task<Org.OpenAPITools.Client.ApiResponse<Object>> GetNoticeAsyncWithHttpInfo(string X_LETS_DEVICEID, string userAgent)
         {
             // verify the required parameter 'X_LETS_DEVICEID' is set
             if (X_LETS_DEVICEID == null)
@@ -357,13 +352,13 @@ namespace Org.OpenAPITools.Api
             String[] _accepts = new String[] {
                 "application/json; charset=utf-8"
             };
-            
+
             foreach (var _contentType in _contentTypes)
                 localVarRequestOptions.HeaderParameters.Add("Content-Type", _contentType);
-            
+
             foreach (var _accept in _accepts)
                 localVarRequestOptions.HeaderParameters.Add("Accept", _accept);
-            
+
             localVarRequestOptions.HeaderParameters.Add("X-LETS-DEVICEID", Org.OpenAPITools.Client.ClientUtils.ParameterToString(X_LETS_DEVICEID)); // header parameter
             localVarRequestOptions.HeaderParameters.Add("User-Agent", Org.OpenAPITools.Client.ClientUtils.ParameterToString(userAgent)); // header parameter
 
@@ -394,10 +389,10 @@ namespace Org.OpenAPITools.Api
         /// <param name="X_LETS_DEVICEID">デバイス固有のIDを設定する。</param>
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <returns>UrlResponse</returns>
-        public UrlResponse GetNoticeUrl (string X_LETS_DEVICEID, string userAgent)
+        public UrlResponse GetNoticeUrl(string X_LETS_DEVICEID, string userAgent)
         {
-             Org.OpenAPITools.Client.ApiResponse<UrlResponse> localVarResponse = GetNoticeUrlWithHttpInfo(X_LETS_DEVICEID, userAgent);
-             return localVarResponse.Data;
+            Org.OpenAPITools.Client.ApiResponse<UrlResponse> localVarResponse = GetNoticeUrlWithHttpInfo(X_LETS_DEVICEID, userAgent);
+            return localVarResponse.Data;
         }
 
         /// <summary>
@@ -407,7 +402,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="X_LETS_DEVICEID">デバイス固有のIDを設定する。</param>
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <returns>ApiResponse of UrlResponse</returns>
-        public Org.OpenAPITools.Client.ApiResponse< UrlResponse > GetNoticeUrlWithHttpInfo (string X_LETS_DEVICEID, string userAgent)
+        public Org.OpenAPITools.Client.ApiResponse<UrlResponse> GetNoticeUrlWithHttpInfo(string X_LETS_DEVICEID, string userAgent)
         {
             // verify the required parameter 'X_LETS_DEVICEID' is set
             if (X_LETS_DEVICEID == null)
@@ -444,7 +439,7 @@ namespace Org.OpenAPITools.Api
             }
 
             // make the HTTP request
-            var localVarResponse = this.Client.Get< UrlResponse >("/api/v1/screens/notice/url", localVarRequestOptions, this.Configuration);
+            var localVarResponse = this.Client.Get<UrlResponse>("/api/v1/screens/notice/url", localVarRequestOptions, this.Configuration);
 
             if (this.ExceptionFactory != null)
             {
@@ -462,10 +457,10 @@ namespace Org.OpenAPITools.Api
         /// <param name="X_LETS_DEVICEID">デバイス固有のIDを設定する。</param>
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <returns>Task of UrlResponse</returns>
-        public async System.Threading.Tasks.Task<UrlResponse> GetNoticeUrlAsync (string X_LETS_DEVICEID, string userAgent)
+        public async System.Threading.Tasks.Task<UrlResponse> GetNoticeUrlAsync(string X_LETS_DEVICEID, string userAgent)
         {
-             Org.OpenAPITools.Client.ApiResponse<UrlResponse> localVarResponse = await GetNoticeUrlAsyncWithHttpInfo(X_LETS_DEVICEID, userAgent);
-             return localVarResponse.Data;
+            Org.OpenAPITools.Client.ApiResponse<UrlResponse> localVarResponse = await GetNoticeUrlAsyncWithHttpInfo(X_LETS_DEVICEID, userAgent);
+            return localVarResponse.Data;
 
         }
 
@@ -476,7 +471,7 @@ namespace Org.OpenAPITools.Api
         /// <param name="X_LETS_DEVICEID">デバイス固有のIDを設定する。</param>
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <returns>Task of ApiResponse (UrlResponse)</returns>
-        public async System.Threading.Tasks.Task<Org.OpenAPITools.Client.ApiResponse<UrlResponse>> GetNoticeUrlAsyncWithHttpInfo (string X_LETS_DEVICEID, string userAgent)
+        public async System.Threading.Tasks.Task<Org.OpenAPITools.Client.ApiResponse<UrlResponse>> GetNoticeUrlAsyncWithHttpInfo(string X_LETS_DEVICEID, string userAgent)
         {
             // verify the required parameter 'X_LETS_DEVICEID' is set
             if (X_LETS_DEVICEID == null)
@@ -496,13 +491,13 @@ namespace Org.OpenAPITools.Api
             String[] _accepts = new String[] {
                 "application/json; charset=utf-8"
             };
-            
+
             foreach (var _contentType in _contentTypes)
                 localVarRequestOptions.HeaderParameters.Add("Content-Type", _contentType);
-            
+
             foreach (var _accept in _accepts)
                 localVarRequestOptions.HeaderParameters.Add("Accept", _accept);
-            
+
             localVarRequestOptions.HeaderParameters.Add("X-LETS-DEVICEID", Org.OpenAPITools.Client.ClientUtils.ParameterToString(X_LETS_DEVICEID)); // header parameter
             localVarRequestOptions.HeaderParameters.Add("User-Agent", Org.OpenAPITools.Client.ClientUtils.ParameterToString(userAgent)); // header parameter
 

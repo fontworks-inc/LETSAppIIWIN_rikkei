@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using ApplicationService.Entities;
 using ApplicationService.Exceptions;
 using ApplicationService.Interfaces;
@@ -235,29 +236,13 @@ namespace ApplicationService.Startup
                     detectionFontCopyEvent();
                 }
 
-                // 契約切れフォントのディアクティベート
-                this.fontManagerService.DeactivateExpiredFonts(contractsResult.ContractsAggregate.Contracts);
-
-                // フォントアクティブ/ディアクティブ情報の同期
-                this.fontManagerService.Synchronize(true);
-
                 // お知らせ有無チェック
                 if (!this.ExistsNotificationCheck(existsUnreadNotificationEvent))
                 {
                     return false;
                 }
 
-                // 他端末コピーチェック
-                if (!this.FontCopyCheck(detectionFontCopyEvent))
-                {
-                    return false;
-                }
-
-                // サーバから削除されたフォントの削除チェック
-                if (!this.DeletedFontCheck())
-                {
-                    return false;
-                }
+                this.StartupFontCheck(contractsResult.ContractsAggregate.Contracts, detectionFontCopyEvent);
 
                 // 起動時チェック状態の保存(チェックした日時と「処理済みである」という情報)
                 VolatileSetting volatileSetting = this.volatileSettingRepository.GetVolatileSetting();
@@ -484,7 +469,7 @@ namespace ApplicationService.Startup
                 if (unreadNotice.ExistsLatestNotice)
                 {
                     // 「未読お知らせ有り」の場合の処理
-                    existsUnreadNotificationEvent(unreadNotice.Toal);
+                    existsUnreadNotificationEvent(unreadNotice.Total);
                 }
             }
             catch (Exception e)
@@ -619,12 +604,76 @@ namespace ApplicationService.Startup
 
                 // フォントをアンインストールする
                 this.fontManagerService.Uninstall(userFont);
-                this.fontManagerService.BroadcastFontChange();
             }
 
             return true;
         }
 
+        /// <summary>
+        /// 起動時フォントチェック
+        /// </summary>
+        /// <param name="contracts">契約情報</param>
+        /// <param name="detectionFontCopyEvent">コピーされたフォント発見時の処理</param>
+        private void StartupFontCheck(IList<Contract> contracts, DetectionFontCopyEvent detectionFontCopyEvent)
+        {
+            Task.Run(() =>
+            {
+                Logger.Debug("StartupFontCheck:Start");
+
+                // フォント一覧の更新
+                Logger.Debug("StartupFontCheck:UpdateFontsList:Start");
+                var local = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+                var userFontsDir = @$"{local}\Microsoft\Windows\Fonts";
+                this.fontManagerService.UpdateFontsList(userFontsDir);
+
+                // フォントアクティブ/ディアクティブ情報の同期
+                Logger.Debug("StartupFontCheck:Synchronize:Start");
+                this.fontManagerService.Synchronize(true);
+
+                // 契約切れフォントのディアクティベート
+                Logger.Debug("StartupFontCheck:DeactivateExpiredFonts:Start");
+                this.fontManagerService.DeactivateExpiredFonts(contracts);
+
+                // サーバから削除されたフォントの削除チェック
+                Logger.Debug("StartupFontCheck:DeletedFontCheck:Start");
+                this.DeletedFontCheck();
+
+                //// 他端末コピーチェック
+                // Logger.Debug("StartupFontCheck:FontCopyCheck:Start");
+                // this.FontCopyCheck(detectionFontCopyEvent);
+
+                // wait download
+                bool doSecondCheck = false;
+                while (!doSecondCheck)
+                {
+                    if (this.fontManagerService.GetIsFirstDownloadCompleted())
+                    {
+                        // 契約切れフォントのディアクティベート
+                        Logger.Debug("StartupFontCheck:2nd:DeactivateExpiredFonts:Start");
+                        this.fontManagerService.DeactivateExpiredFonts(contracts);
+
+                        // サーバから削除されたフォントの削除チェック
+                        Logger.Debug("StartupFontCheck:2nd:DeletedFontCheck:Start");
+                        this.DeletedFontCheck();
+
+                        // 他端末コピーチェック
+                        Logger.Debug("StartupFontCheck:2nd:FontCopyCheck:Start");
+                        this.FontCopyCheck(detectionFontCopyEvent);
+
+                        doSecondCheck = true;
+                        break;
+                    }
+
+                    System.Threading.Thread.Sleep(1000);
+                }
+
+                Logger.Debug("StartupFontCheck:End");
+            });
+        }
+
+        /// <summary>
+        /// 起草指定されているバージョンのプログラムがインストールされているか
+        /// </summary>
         private bool CheckVersionInstalled(string version)
         {
             // 起動指定バージョンのプログラムフォルダが存在する場合、そちらのクライアントアプリケーションで再起動する

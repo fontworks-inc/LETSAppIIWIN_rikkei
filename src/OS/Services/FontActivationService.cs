@@ -4,7 +4,6 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using Core.Entities;
 using Core.Interfaces;
-using Microsoft.Win32;
 using NLog;
 using OS.Interfaces;
 
@@ -101,8 +100,29 @@ namespace OS.Services
             // ディアクティベート実施
             this.Deactivate(font);
 
-            // フォント一覧の削除対象をTRUEに設定
-            this.RemoveTargetSettings(font);
+            this.Delete(font);
+        }
+
+        /// <inheritdoc/>
+        public void Delete(Font font)
+        {
+            // フォントファイルの削除を試みる
+            try
+            {
+                if (File.Exists(font.Path))
+                {
+                    File.Delete(font.Path);
+                }
+            }
+            catch (UnauthorizedAccessException)
+            {
+                // フォント一覧の削除対象をTRUEに設定
+                this.RemoveTargetSettings(font);
+            }
+            catch (Exception ex)
+            {
+                Logger.Debug("FontActivationService:Uninstall:" + ex.StackTrace);
+            }
         }
 
         /// <summary>
@@ -263,11 +283,8 @@ namespace OS.Services
         /// <param name="value">値：フォントファイルパス</param>
         private void AddRegistry(string key, string value)
         {
-            Logger.Debug("AddRegistry(Before):key=" + this.registryFontsPath + ":" + key + " value=" + value);
             var regkey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(this.registryFontsPath, true);
-            Logger.Debug("AddRegistry(Before):regkey=" + regkey.ToString());
             regkey.SetValue(key, value);
-            Logger.Debug("AddRegistry(After):key=" + key + " value=" + value);
             regkey.Close();
         }
 
