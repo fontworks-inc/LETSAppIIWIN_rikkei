@@ -149,7 +149,7 @@ namespace Infrastructure.File
             {
                 if (!string.IsNullOrEmpty(f))
                 {
-                    System.IO.File.AppendAllText(uninstfontsPath, $@"DEL {f}" + Environment.NewLine, System.Text.Encoding.GetEncoding("shift_jis"));
+                    System.IO.File.AppendAllText(uninstfontsPath, $@"DEL ""{f}""" + Environment.NewLine, System.Text.Encoding.GetEncoding("shift_jis"));
                 }
             }
 
@@ -164,16 +164,30 @@ namespace Infrastructure.File
             }
 
             System.IO.File.WriteAllText(regfilePath, "REM レジストリ削除" + Environment.NewLine, System.Text.Encoding.GetEncoding("shift_jis"));
-            System.IO.File.AppendAllText(regfilePath, $@"reg load HKU\{userRegID} {userProfileImagePath}\NTUSER.DAT" + Environment.NewLine, System.Text.Encoding.GetEncoding("shift_jis"));
-            foreach (string r in letsFontReg)
+            if (string.IsNullOrEmpty(userProfileImagePath))
             {
-                if (!string.IsNullOrEmpty(r))
+                foreach (string r in letsFontReg)
                 {
-                    System.IO.File.AppendAllText(regfilePath, $@"reg delete ""HKU\{userregid}\Software\Microsoft\Windows NT\CurrentVersion\Fonts"" /v ""{r}"" /f" + Environment.NewLine, System.Text.Encoding.GetEncoding("shift_jis"));
+                    if (!string.IsNullOrEmpty(r))
+                    {
+                        System.IO.File.AppendAllText(regfilePath, $@"reg delete ""HKCU\Software\Microsoft\Windows NT\CurrentVersion\Fonts"" /v ""{r}"" /f" + Environment.NewLine, System.Text.Encoding.GetEncoding("shift_jis"));
+                    }
                 }
             }
+            else
+            {
+                System.IO.File.AppendAllText(regfilePath, $@"reg load HKU\{userRegID} {userProfileImagePath}\NTUSER.DAT" + Environment.NewLine, System.Text.Encoding.GetEncoding("shift_jis"));
+                foreach (string r in letsFontReg)
+                {
+                    if (!string.IsNullOrEmpty(r))
+                    {
+                        System.IO.File.AppendAllText(regfilePath, $@"reg delete ""HKU\{userregid}\Software\Microsoft\Windows NT\CurrentVersion\Fonts"" /v ""{r}"" /f" + Environment.NewLine, System.Text.Encoding.GetEncoding("shift_jis"));
+                    }
+                }
 
-            System.IO.File.AppendAllText(regfilePath, $@"reg unload HKU\{userRegID}" + Environment.NewLine, System.Text.Encoding.GetEncoding("shift_jis"));
+                System.IO.File.AppendAllText(regfilePath, $@"reg unload HKU\{userRegID}" + Environment.NewLine, System.Text.Encoding.GetEncoding("shift_jis"));
+            }
+
             System.IO.File.AppendAllText(regfilePath, @"Del /F ""%~dp0%~nx0""" + "\n");
             this.SetFileAccessEveryone(regfilePath);
             this.SetHidden(regfilePath, true);
@@ -247,11 +261,12 @@ namespace Infrastructure.File
         /// </summary>
         private string GetUserRegID()
         {
+            string username = Environment.UserName;
+
             if (string.IsNullOrEmpty(userRegID))
             {
                 try
                 {
-                    string username = Environment.UserName;
                     Logger.Debug($"GetUserRegID:username={username}");
                     string regpath = @"SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList";
                     var regkey = Microsoft.Win32.Registry.LocalMachine.OpenSubKey(regpath);
@@ -282,6 +297,11 @@ namespace Infrastructure.File
                 {
                     Logger.Debug("GetUserRegID:" + ex.StackTrace);
                 }
+            }
+
+            if (string.IsNullOrEmpty(userRegID))
+            {
+                userRegID = username.Replace(' ', '_');
             }
 
             return userRegID;

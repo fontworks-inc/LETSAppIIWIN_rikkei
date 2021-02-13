@@ -290,20 +290,13 @@ namespace Infrastructure.API
 
         private void SseMessageProc()
         {
+            string eventID = string.Empty;
             while (sseQue.Count > 0)
             {
                 SseMessage sseMessage = sseQue.Dequeue();
 
                 Logger.Debug("sseMessageProc:NotifyMessage:" + sseMessage.Data);
-                UserStatus userStatus = this.userStatusRepository.GetStatus();
-                try
-                {
-                    userStatus.LastEventId = int.Parse(sseMessage.Id);
-                }
-                catch (Exception)
-                {
-                    // Parseに失敗したら設定しない
-                }
+                eventID = sseMessage.Id;
 
                 ActivateFont font = JsonConvert.DeserializeObject<ActivateFont>(sseMessage.Data);
                 switch (sseMessage.EventType)
@@ -322,6 +315,20 @@ namespace Infrastructure.API
                         break;
                     default:
                         break;
+                }
+            }
+
+            if (!string.IsNullOrEmpty(eventID))
+            {
+                UserStatus userStatus = this.userStatusRepository.GetStatus();
+                try
+                {
+                    userStatus.LastEventId = int.Parse(eventID);
+                    this.userStatusRepository.SaveStatus(userStatus);
+                }
+                catch (Exception)
+                {
+                    // Parseに失敗したら設定しない
                 }
             }
         }

@@ -447,6 +447,9 @@ namespace Client.UI.Components
 
             // クイックメニューにお知らせを表示
             this.QuickMenu.MenuAnnouncePage.SetNumberOfUnreadMessages(numberOfUnreadMessages);
+
+            // アイコン表示ルールに従いアイコンを設定
+            this.ApplicationIcon.SetIcon();
         }
 
         /// <summary>
@@ -684,12 +687,20 @@ namespace Client.UI.Components
                         GetClassName(hWnd, csb, csb.Capacity);
 
                         // プロセスIDからプロセス名を取得する
-                        int pid;
-                        GetWindowThreadProcessId(hWnd, out pid);
-                        Process p = Process.GetProcessById(pid);
-                        string procname = p.ProcessName;
+                        string procname = string.Empty;
+                        try
+                        {
+                            int pid;
+                            GetWindowThreadProcessId(hWnd, out pid);
+                            Process p = Process.GetProcessById(pid);
+                            procname = p.ProcessName;
+                        }
+                        catch (Exception)
+                        {
+                            // NOP
+                        }
 
-                        if (tsb.ToString().Contains("LETS-Ver") && csb.ToString().Contains("#32770") && procname.Contains("msiexec"))
+                        if (tsb.ToString().Contains("LETS-Ver") && csb.ToString().Contains("#32770") && (procname.Contains("msiexec") || string.IsNullOrEmpty(procname)))
                         {
                             Logger.Debug("EnumWindowCallBack:" + tsb.ToString());
                             Logger.Debug("EnumWindowCallBack:ProcName=" + procname);

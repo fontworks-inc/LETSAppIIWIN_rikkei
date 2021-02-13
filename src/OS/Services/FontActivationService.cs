@@ -371,7 +371,7 @@ namespace OS.Services
             {
                 // 登録済（アクティベート⇒ディアクティベート）の場合
                 target.IsActivated = false;
-                target.RegistryKey = string.Empty;
+                // target.RegistryKey = string.Empty;
             }
 
             // 保存

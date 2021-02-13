@@ -92,7 +92,7 @@ namespace Org.OpenAPITools.Client
                     var filePath = String.IsNullOrEmpty(_configuration.TempFolderPath)
                         ? Path.GetTempPath()
                         : _configuration.TempFolderPath;
-                    var regex = new Regex(@"Content-Disposition=.*filename=['""]?([^'""\s]+)['""]?$");
+                    var regex = new Regex(@"Content-Disposition=.*filename=['""]?([^'""]+)['""]?$");
                     foreach (var header in headers)
                     {
                         var match = regex.Match(header.ToString());

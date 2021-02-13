@@ -1,5 +1,7 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Windows;
+using Client.UI.Views.Helper;
 
 namespace Client.UI.Views
 {
@@ -39,6 +41,24 @@ namespace Client.UI.Views
             // アプリケーションを終了しない
             this.Hide();
             e.Cancel = true;
+        }
+
+        /// <summary>
+        /// ウィンドウ初期化時の処理
+        /// </summary>
+        /// <param name="e">EventArgs</param>
+        protected override void OnSourceInitialized(EventArgs e)
+        {
+            base.OnSourceInitialized(e);
+
+            // アイコン非表示
+            WindowHelper.RemoveIcon(this);
+
+            // 閉じるボタンの無効化（閉じるメニューを削除することで実現している）
+            WindowHelper.RemoveCloseMenu(this);
+
+            // タイトルバーのボタン削除 上記の閉じるボタンの無効化で対応するが、下記の場合はボタン全削除に対応
+            // WindowHelper.RemoveFrameButton(this);
         }
     }
 }

@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 
 namespace InstallerUtil
 {
@@ -46,11 +48,17 @@ namespace InstallerUtil
             {
                 string[] pids = this.GetUserregIDs();
 
+                // ログアウトバッチの実行
+                string username = this.LogoutUser(letsfolder);
+                if(!string.IsNullOrEmpty(username))
+                {
+                    List<string> pidlist = new List<string>(pids);
+                    pidlist.Add(username);
+                    pids = pidlist.ToArray();
+                }
+
                 if (pids != null)
                 {
-                    // ログアウトバッチの実行
-                    this.LogoutUser(letsfolder);
-
                     // フォント削除バッチの実行
                     string[] dellines = this.UninstallFontsAllUser(letsfolder, pids);
                     File.WriteAllText(uninstallfontsbat, "REM フォントファイル削除" + Environment.NewLine, System.Text.Encoding.GetEncoding("shift_jis"));
@@ -86,7 +94,7 @@ namespace InstallerUtil
             }
             catch (Exception ex)
             {
-                File.WriteAllText($@"{letsfolder}\Uninstall.log", ex.Message);
+                File.AppendAllText($@"{letsfolder}\Uninstall.log", ex.Message);
             }
 
         }
@@ -110,20 +118,35 @@ namespace InstallerUtil
                         }
                     }
                     Process.Start(new ProcessStartInfo(uninstfontbat) { CreateNoWindow = true, UseShellExecute = false });
+                    File.AppendAllText($@"{letsfolder}\Uninstall.log", $"run {uninstfontbat}" + "\n");
                 }
             }
 
             return alldellines.ToArray();
         }
 
-        private void LogoutUser(string letsfolder)
+        private string LogoutUser(string letsfolder)
         {
+            string username = string.Empty;
             string logoutbat = Path.Combine(letsfolder, $"logout.bat");
             if (File.Exists(logoutbat))
             {
+                try
+                {
+                    string[] lines = File.ReadAllLines(logoutbat);
+                    string[] line1 = lines[0].Split(' ');
+                    username = line1[1];
+                }
+                catch (Exception)
+                {
+                    // NOP
+                }
                 this.SetHidden(logoutbat, false);
                 Process.Start(new ProcessStartInfo(logoutbat) { CreateNoWindow = true, UseShellExecute = false });
+                File.AppendAllText($@"{letsfolder}\Uninstall.log", $"run {logoutbat}" + "\n");
             }
+
+            return username;
         }
         private void UnregistAllUser(string letsfolder, string[] pids)
         {
@@ -134,6 +157,7 @@ namespace InstallerUtil
                 {
                     this.SetHidden(uninstregbat, false);
                     Process.Start(new ProcessStartInfo(uninstregbat) { CreateNoWindow = true, UseShellExecute = false });
+                    File.AppendAllText($@"{letsfolder}\Uninstall.log", $"run {uninstregbat}" + "\n");
                 }
             }
         }
@@ -146,6 +170,7 @@ namespace InstallerUtil
                 {
                     this.SetHidden(clearuserbat, false);
                     Process.Start(new ProcessStartInfo(clearuserbat) { CreateNoWindow = true, UseShellExecute = false });
+                    File.AppendAllText($@"{letsfolder}\Uninstall.log", $"run {clearuserbat}" + "\n");
                 }
             }
         }
@@ -308,13 +333,21 @@ namespace InstallerUtil
                 GetWindowText(hWnd, tsb, tsb.Capacity);
 
                 // プロセスIDからプロセス名を取得する
-                int pid;
-                GetWindowThreadProcessId(hWnd, out pid);
-                Process p = Process.GetProcessById(pid);
-                string procname = p.ProcessName;
+                string procname = string.Empty;
+                try
+                {
+                    int pid;
+                    GetWindowThreadProcessId(hWnd, out pid);
+                    Process p = Process.GetProcessById(pid);
+                    procname = p.ProcessName;
+                }
+                catch (Exception)
+                {
+                    // NOP
+                }
 
                 //ウィンドウのタイトルが"LETS"ならば終了メッセージを送信する
-                if (tsb.ToString() == "LETS" && procname == "LETS")
+                if (tsb.ToString() == "LETS" && (procname == "LETS" || string.IsNullOrEmpty(procname)))
                 {
                     SendMessageTimeout(hWnd, (uint)0x8001, IntPtr.Zero, new IntPtr(3), 0x2, 30 * 1000, IntPtr.Zero);
                 }

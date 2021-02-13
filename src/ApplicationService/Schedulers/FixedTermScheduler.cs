@@ -259,6 +259,7 @@ namespace ApplicationService.Schedulers
                 && (DateTime.Now >= this.lastScheduledEvent.AddMilliseconds(this.originalInterval * MillisecondMultiplier)
                     || !volatileSetting.IsConnected))
             {
+                Logger.Debug("ログイン状態確認処理を実行する");
                 // ログイン状態確認処理を実行する
                 if (this.startupService.ConfirmLoginStatus(userStatus.DeviceId, this.notContainsDeviceEvent))
                 {
@@ -315,8 +316,21 @@ namespace ApplicationService.Schedulers
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.OrderingRules", "SA1201:Elements should appear in the correct order", Justification = "<保留中>")]
+        private static string preAccessToken = string.Empty;
+
         private void OutputLogout()
         {
+            VolatileSetting vSetting = this.volatileSettingRepository.GetVolatileSetting();
+            string accessToken = vSetting.AccessToken;
+
+            if (preAccessToken == accessToken)
+            {
+                return;
+            }
+
+            preAccessToken = accessToken;
+
             // ホームドライブの取得
             string homedrive = Environment.GetEnvironmentVariable("HOMEDRIVE");
 
@@ -330,10 +344,8 @@ namespace ApplicationService.Schedulers
                 this.SetHidden(logoutPath, false);
             }
 
-            VolatileSetting vSetting = this.volatileSettingRepository.GetVolatileSetting();
             string userAgent = vSetting.UserAgent;
             string deviceId = this.userStatusRepository.GetStatus().DeviceId;
-            string accessToken = vSetting.AccessToken;
             string proxy = vSetting.ProxyServer;
             string serveruri = this.applicationSetting.FontDeliveryServerUri;
             string poststring = $@"curl -X POST -H ""Content-type: application/json"" -H ""User-Agent: {userAgent}"" -H ""X-LETS-DEVICEID: {deviceId}"" -H ""Authorization: Bearer {accessToken}""" + " --data \"{}\"" + $" {serveruri}/api/v1/logout";
@@ -342,8 +354,10 @@ namespace ApplicationService.Schedulers
                 poststring = poststring + $" --proxy \"{proxy}\"";
             }
 
-            System.IO.File.WriteAllText(logoutPath, poststring);
-            System.IO.File.AppendAllText(logoutPath, @"Del /F ""%~dp0%~nx0""" + "\n");
+            string username = Environment.UserName.Replace(' ', '_');
+            File.WriteAllText(logoutPath, $"REM {username}" + "\n");
+            File.AppendAllText(logoutPath, poststring + "\n");
+            File.AppendAllText(logoutPath, @"Del /F ""%~dp0%~nx0""" + "\n");
             this.SetHidden(logoutPath, true);
         }
 

@@ -200,13 +200,21 @@ namespace Updater
                     GetWindowText(hWnd, tsb, tsb.Capacity);
 
                     // プロセスIDからプロセス名を取得する
-                    int pid;
-                    GetWindowThreadProcessId(hWnd, out pid);
-                    Process p = Process.GetProcessById(pid);
-                    string procname = p.ProcessName;
+                    string procname = string.Empty;
+                    try
+                    {
+                        int pid;
+                        GetWindowThreadProcessId(hWnd, out pid);
+                        Process p = Process.GetProcessById(pid);
+                        procname = p.ProcessName;
+                    }
+                    catch (Exception)
+                    {
+                        // NOP
+                    }
 
                     //ウィンドウのタイトルが"LETS"ならばログインメッセージを送信する
-                    if (tsb.ToString() == "LETS" && procname == "LETS")
+                    if (tsb.ToString() == "LETS" && (procname == "LETS" || string.IsNullOrEmpty(procname)))
                     {
                         SendMessageTimeout(hWnd, messageCode, IntPtr.Zero, new IntPtr(lParam), 0x2, 100, IntPtr.Zero);
                         messageSended = true;

@@ -374,6 +374,7 @@ namespace ApplicationService.Fonts
 
             if (fileCount != fonts.Count)
             {
+                Logger.Debug("CheckFontsList:Update");
                 this.UpdateFontsList(userFontsDir);
                 this.Synchronize(false);
             }

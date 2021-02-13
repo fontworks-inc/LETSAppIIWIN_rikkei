@@ -54,8 +54,6 @@ namespace Infrastructure.API
                         Total = ret.Data.Total,
                         ExistsLatestNotice = ret.Data.ExistsLatestNotice,
                     };
-                    Logger.Debug("UnreadNotice:existsLatestNotice={response.ExistsLatestNotice}");
-                    Logger.Debug("UnreadNotice:total={response.Total}");
                 }
                 else
                 {
