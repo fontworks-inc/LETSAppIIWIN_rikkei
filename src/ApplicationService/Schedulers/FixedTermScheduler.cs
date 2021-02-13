@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Net.NetworkInformation;
 using ApplicationService.Interfaces;
 using Core.Entities;
@@ -52,6 +53,8 @@ namespace ApplicationService.Schedulers
         /// 契約情報を格納するリポジトリ
         /// </summary>
         private IContractsAggregateRepository contractsAggregateRepository;
+
+        private ApplicationSetting applicationSetting;
 
         /// <summary>
         /// クライアントアプリを終了するために呼び出されるイベント
@@ -114,6 +117,7 @@ namespace ApplicationService.Schedulers
         /// <param name="receiveNotificationRepository">通知受信機能を格納するリポジトリ</param>
         /// <param name="fontManagerService">フォント管理に関する処理を行うサービス</param>
         /// <param name="contractsAggregateRepository">契約情報を格納するリポジトリ</param>
+        /// <param name="applicationSetting">アプリケーション情報</param>
         /// <param name="shutdownClientApplicationRequiredEvent">クライアントアプリを終了するイベント</param>
         /// <param name="forceUpdateEvent">強制アップデートを実施するイベント</param>
         /// <param name="downloadCompletedEvent">ダウンロード完了時に実施するイベント</param>
@@ -132,6 +136,7 @@ namespace ApplicationService.Schedulers
             IReceiveNotificationRepository receiveNotificationRepository,
             IFontManagerService fontManagerService,
             IContractsAggregateRepository contractsAggregateRepository,
+            ApplicationSetting applicationSetting,
             ShutdownClientApplicationRequiredEvent shutdownClientApplicationRequiredEvent,
             ForceUpdateEvent forceUpdateEvent,
             DownloadCompletedEvent downloadCompletedEvent,
@@ -149,6 +154,7 @@ namespace ApplicationService.Schedulers
             this.receiveNotificationRepository = receiveNotificationRepository;
             this.fontManagerService = fontManagerService;
             this.contractsAggregateRepository = contractsAggregateRepository;
+            this.applicationSetting = applicationSetting;
 
             this.shutdownClientApplicationRequiredEvent = shutdownClientApplicationRequiredEvent;
             this.forceUpdateEvent = forceUpdateEvent;
@@ -173,8 +179,6 @@ namespace ApplicationService.Schedulers
         {
             Logger.Info(this.ResourceWrapper.GetString("LOG_INFO_FixedTermScheduler_ScheduledEvent_Start"));
 
-            bool changeToOnline = false;
-
             // 特定の条件を満たさない限りはフォントの同期処理を実行しないよう設定する
             this.shouldSynchronize = false;
 
@@ -182,6 +186,12 @@ namespace ApplicationService.Schedulers
 
             // フォントチェンジメッセージ送信
             this.fontManagerService.BroadcastFontChange();
+
+            // ログアウト情報出力
+            this.OutputLogout();
+
+            // ユーザーステータスの保存
+            this.userStatusRepository.SaveStatus(this.userStatusRepository.GetStatus());
 
             if (volatileSetting.IsCheckedStartup)
             {
@@ -193,18 +203,11 @@ namespace ApplicationService.Schedulers
                         Logger.Info(this.ResourceWrapper.GetString("LOG_INFO_FixedTermScheduler_ScheduledEvent_ReceiveNotificationStart"));
                         this.receiveNotificationRepository.Start(volatileSetting.AccessToken, this.userStatusRepository.GetStatus().DeviceId);
 
-                        if (this.receiveNotificationRepository.IsConnected())
+                        if (!this.receiveNotificationRepository.IsConnected())
                         {
-                            changeToOnline = true;
+                            this.shouldSynchronize = true;
                         }
                     }
-                }
-
-                if (!volatileSetting.IsConnected && changeToOnline)
-                {
-                    this.shouldSynchronize = true;
-                    volatileSetting.IsConnected = true;
-                    this.FontSynchronize();
                 }
 
                 // 前回実行時間から、interval秒過ぎていなければ抜ける
@@ -269,6 +272,9 @@ namespace ApplicationService.Schedulers
                         this.FontSynchronize();
                     }
                 }
+
+                // フォントファイルチェックを行う
+                this.fontManagerService.CheckFontsList();
             }
 
             this.lastScheduledEvent = DateTime.Now;
@@ -306,6 +312,60 @@ namespace ApplicationService.Schedulers
 
                 // 実行後、falseに設定
                 this.shouldSynchronize = false;
+            }
+        }
+
+        private void OutputLogout()
+        {
+            // ホームドライブの取得
+            string homedrive = Environment.GetEnvironmentVariable("HOMEDRIVE");
+
+            // LETSフォルダ
+            string letsfolder = $@"{homedrive}\ProgramData\Fontworks\LETS";
+            string logoutPath = Path.Combine(letsfolder, $"logout.bat");
+
+            // ログアウトバッチを出力する
+            if (System.IO.File.Exists(logoutPath))
+            {
+                this.SetHidden(logoutPath, false);
+            }
+
+            VolatileSetting vSetting = this.volatileSettingRepository.GetVolatileSetting();
+            string userAgent = vSetting.UserAgent;
+            string deviceId = this.userStatusRepository.GetStatus().DeviceId;
+            string accessToken = vSetting.AccessToken;
+            string proxy = vSetting.ProxyServer;
+            string serveruri = this.applicationSetting.FontDeliveryServerUri;
+            string poststring = $@"curl -X POST -H ""Content-type: application/json"" -H ""User-Agent: {userAgent}"" -H ""X-LETS-DEVICEID: {deviceId}"" -H ""Authorization: Bearer {accessToken}""" + " --data \"{}\"" + $" {serveruri}/api/v1/logout";
+            if (!string.IsNullOrEmpty(proxy))
+            {
+                poststring = poststring + $" --proxy \"{proxy}\"";
+            }
+
+            System.IO.File.WriteAllText(logoutPath, poststring);
+            System.IO.File.AppendAllText(logoutPath, @"Del /F ""%~dp0%~nx0""" + "\n");
+            this.SetHidden(logoutPath, true);
+        }
+
+        private void SetHidden(string filepath, bool isHidden)
+        {
+            try
+            {
+                FileAttributes fa = System.IO.File.GetAttributes(filepath);
+                if (isHidden)
+                {
+                    fa = fa | FileAttributes.Hidden;
+                }
+                else
+                {
+                    fa = fa & ~FileAttributes.Hidden;
+                }
+
+                System.IO.File.SetAttributes(filepath, fa);
+            }
+            catch (Exception ex)
+            {
+                Logger.Debug("SetHidden:" + ex.StackTrace);
             }
         }
     }

@@ -48,13 +48,16 @@ namespace InstallerUtil
 
                 if (pids != null)
                 {
+                    // ログアウトバッチの実行
+                    this.LogoutUser(letsfolder);
+
                     // フォント削除バッチの実行
                     string[] dellines = this.UninstallFontsAllUser(letsfolder, pids);
                     File.WriteAllText(uninstallfontsbat, "REM フォントファイル削除" + Environment.NewLine, System.Text.Encoding.GetEncoding("shift_jis"));
                     File.AppendAllText(uninstallfontsbat, "@ECHO OFF" + Environment.NewLine, System.Text.Encoding.GetEncoding("shift_jis"));
                     foreach (string l in dellines)
                     {
-                        File.AppendAllText(uninstallfontsbat, l + "> nul" + Environment.NewLine);
+                        File.AppendAllText(uninstallfontsbat, l + Environment.NewLine);
                     }
                     File.AppendAllText(uninstallfontsbat, @"Del /F ""%~dp0%~nx0""" + "\n");
                     if (File.Exists(destfile))
@@ -113,6 +116,15 @@ namespace InstallerUtil
             return alldellines.ToArray();
         }
 
+        private void LogoutUser(string letsfolder)
+        {
+            string logoutbat = Path.Combine(letsfolder, $"logout.bat");
+            if (File.Exists(logoutbat))
+            {
+                this.SetHidden(logoutbat, false);
+                Process.Start(new ProcessStartInfo(logoutbat) { CreateNoWindow = true, UseShellExecute = false });
+            }
+        }
         private void UnregistAllUser(string letsfolder, string[] pids)
         {
             foreach (string pid in pids)

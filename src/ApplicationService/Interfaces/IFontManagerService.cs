@@ -78,6 +78,11 @@ namespace ApplicationService.Interfaces
         void DeactivateFont(string fontId);
 
         /// <summary>
+        /// フォント：フォント一覧のチェック
+        /// </summary>
+        void CheckFontsList();
+
+        /// <summary>
         /// フォント：フォント一覧の更新
         /// </summary>
         /// <param name="userFontsDir">ユーザーフォントのディレクトリ</param>

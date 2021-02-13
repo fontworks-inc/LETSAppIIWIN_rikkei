@@ -4,12 +4,12 @@ using System.Runtime.InteropServices;
 // アセンブリに関する一般情報は以下の属性セットをとおして制御されます。
 // 制御されます。アセンブリに関連付けられている情報を変更するには、
 // これらの属性値を変更します。
-[assembly: AssemblyTitle("setup")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("LETSデスクトップアプリインストーラー")]
+[assembly: AssemblyDescription("LETSデスクトップアプリインストーラー")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("setup")]
-[assembly: AssemblyCopyright("Copyright ©  2021")]
+[assembly: AssemblyCompany("Fontworks")]
+[assembly: AssemblyProduct("LETS デスクトップアプリ")]
+[assembly: AssemblyCopyright("© Fontworks Inc. All Rights Reserved.")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

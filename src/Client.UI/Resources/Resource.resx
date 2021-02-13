@@ -613,8 +613,8 @@ LETSデスクトップアプリをログアウトしてください。</value>
     <comment>起動時チェック処理内で、契約更新の必要と判定された場合に出力されるログ</comment>
   </data>
   <data name="LOG_INFO_StartupService_IsCheckedStartup_LoggingOut" xml:space="preserve">
-    <value>ログアウト中と判定されたため、以後の起動時チェック処理を行わない</value>
-    <comment>起動時チェック処理内のログイン状態確認処理でログアウト中と判定された際に出力されるログ</comment>
+    <value>オフライン中と判定されたため、以後の起動時チェック処理を行わない</value>
+    <comment>起動時チェック処理内のログイン状態確認処理でオフライン中と判定された際に出力されるログ</comment>
   </data>
   <data name="LOG_INFO_StartupService_IsCheckedStartup_Result_True" xml:space="preserve">
     <value>起動時チェック処理が正常に終了</value>

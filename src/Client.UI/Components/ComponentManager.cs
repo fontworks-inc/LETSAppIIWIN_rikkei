@@ -529,6 +529,7 @@ namespace Client.UI.Components
 
                         case LParamType.DeactivateFontsAndShutdown:
                             // 終了メッセージ(ディアクティベートあり)
+                            Logger.Debug("WndProc:LParamType.DeactivateFontsAndShutdown");
                             this.Exit(true);
                             break;
 

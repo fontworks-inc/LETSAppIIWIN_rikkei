@@ -249,9 +249,6 @@ namespace ApplicationService.Authentication
                 throw new InvalidOperationException(this.resourceWrapper.GetString("LOG_ERR_AuthenticationService_Logout_InvalidOperationException"));
             }
 
-            // [フォント：フォント情報]でアクティベートされているLETSフォントをディアクティベート
-            this.fontManagerService.DeactivateSettingFonts();
-
             // ユーザ別保存：デバイスIDを取得
             var userStatus = this.userStatusRepository.GetStatus();
             var deviceId = userStatus.DeviceId;
@@ -271,6 +268,9 @@ namespace ApplicationService.Authentication
                     Logger.Warn(ex);
                 }
             }
+
+            // [フォント：フォント情報]でアクティベートされているLETSフォントをディアクティベート
+            this.fontManagerService.DeactivateSettingFonts();
 
             // 通知停止
             this.receiveNotificationRepository.Stop();

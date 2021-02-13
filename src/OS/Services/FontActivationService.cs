@@ -199,7 +199,15 @@ namespace OS.Services
         public void Deactivate(Font font)
         {
             // レジストリから除外
-            this.ReleaseRegistry(font.RegistryKey);
+            if (string.IsNullOrEmpty(font.RegistryKey))
+            {
+                string fontName = this.GetFontName(font);
+                this.ReleaseRegistry(fontName);
+            }
+            else
+            {
+                this.ReleaseRegistry(font.RegistryKey);
+            }
 
             // ユーザ別フォント情報にも保存
             font.IsActivated = false;
@@ -217,11 +225,31 @@ namespace OS.Services
         }
 
         /// <summary>
+        /// フォント名取得
+        /// </summary>
+        private string GetFontName(Font font)
+        {
+            using (var pfc = new System.Drawing.Text.PrivateFontCollection())
+            {
+                pfc.AddFontFile(font.Path);
+                if (pfc.Families.Length != 0)
+                {
+                    // フォント名
+                    var fontName = pfc.Families[0].Name;
+                    return fontName;
+                }
+            }
+
+            return string.Empty;
+        }
+
+        /// <summary>
         /// フォント追加
         /// </summary>
         /// <param name="lpFileName">フォント名称</param>
         /// <returns>成功時：追加されたフォントの数、失敗時：0</returns>
         [DllImport("gdi32.dll", EntryPoint = "AddFontResourceW", SetLastError = true)]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.OrderingRules", "SA1204:Static elements should appear before instance elements", Justification = "<保留中>")]
         private static extern int AddFontResource([In][MarshalAs(UnmanagedType.LPWStr)] string lpFileName);
 
         /// <summary>

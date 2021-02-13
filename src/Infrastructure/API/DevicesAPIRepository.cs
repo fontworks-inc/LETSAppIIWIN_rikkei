@@ -59,6 +59,10 @@ namespace Infrastructure.API
                                   };
                     ret.Data.ForEach(action);
                 }
+                else
+                {
+                    throw new ApiException(ret.Code, ret.Message);
+                }
             }
             catch (ApiException)
             {

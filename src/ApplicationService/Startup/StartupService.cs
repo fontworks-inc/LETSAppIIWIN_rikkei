@@ -428,9 +428,9 @@ namespace ApplicationService.Startup
                 IList<Device> devices = this.GetAllDevices(deviceId);
                 if (devices.Count <= 0)
                 {
-                    Logger.Debug("ConfirmLoginStatus:デバイスリストが存在しない場合はログアウト状態と判断する");
+                    Logger.Debug("ConfirmLoginStatus:デバイスリストが存在しない場合ログアウト");
                     notContainsDeviceEvent();
-                    return false;   // デバイスリストが存在しない場合はログアウト状態と判断する
+                    return false;
                 }
 
                 if (!devices.Any(device => device.DeviceId == deviceId))
@@ -448,6 +448,12 @@ namespace ApplicationService.Startup
             {
                 // 全端末情報を取得で例外が発生した場合は失敗扱い
                 Logger.Debug("ConfirmLoginStatus:全端末情報を取得で例外が発生した場合は失敗扱い");
+                return false;
+            }
+            catch (Exception ex)
+            {
+                // 全端末情報を取得で例外が発生した場合は失敗扱い
+                Logger.Debug("ConfirmLoginStatus:その他のエラー:" + ex.StackTrace);
                 return false;
             }
         }
@@ -620,12 +626,6 @@ namespace ApplicationService.Startup
             {
                 Logger.Debug("StartupFontCheck:Start");
 
-                // フォント一覧の更新
-                Logger.Debug("StartupFontCheck:UpdateFontsList:Start");
-                var local = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-                var userFontsDir = @$"{local}\Microsoft\Windows\Fonts";
-                this.fontManagerService.UpdateFontsList(userFontsDir);
-
                 // フォントアクティブ/ディアクティブ情報の同期
                 Logger.Debug("StartupFontCheck:Synchronize:Start");
                 this.fontManagerService.Synchronize(true);
@@ -637,10 +637,6 @@ namespace ApplicationService.Startup
                 // サーバから削除されたフォントの削除チェック
                 Logger.Debug("StartupFontCheck:DeletedFontCheck:Start");
                 this.DeletedFontCheck();
-
-                //// 他端末コピーチェック
-                // Logger.Debug("StartupFontCheck:FontCopyCheck:Start");
-                // this.FontCopyCheck(detectionFontCopyEvent);
 
                 // wait download
                 bool doSecondCheck = false;

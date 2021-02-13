@@ -26,6 +26,15 @@ namespace Infrastructure.File
         private static string userRegID = string.Empty;
 
         /// <summary>
+        /// ユーザレジストリプロファイルパス
+        /// </summary>
+        private static string userProfileImagePath = string.Empty;
+
+        private static int preFontCnt = 0;
+        private static int preFontsCnt = 0;
+        private static object saveLockObject = new object();
+
+        /// <summary>
         /// インスタンスを初期化する
         /// </summary>
         /// <param name="filePath">ファイルパス</param>
@@ -70,14 +79,24 @@ namespace Infrastructure.File
         /// <param name="userFontsSetting">ユーザ別フォント情報</param>
         public void SaveUserFontsSetting(UserFontsSetting userFontsSetting)
         {
-            this.WriteAll(JsonSerializer.Serialize(userFontsSetting));
-            try
+            lock (saveLockObject)
             {
-                this.OutputUninstInfo(userFontsSetting);
-            }
-            catch (Exception ex)
-            {
-                Logger.Debug("OutputUninstInfo:" + ex.StackTrace);
+                if (preFontsCnt > userFontsSetting.Fonts.Count)
+                {
+                    Logger.Debug($"SaveUserFontsSetting:FontDecrease!! {preFontsCnt} => {userFontsSetting.Fonts.Count}");
+                }
+
+                preFontsCnt = userFontsSetting.Fonts.Count;
+
+                this.WriteAll(JsonSerializer.Serialize(userFontsSetting));
+                try
+                {
+                    this.OutputUninstInfo(userFontsSetting);
+                }
+                catch (Exception ex)
+                {
+                    Logger.Debug("OutputUninstInfo:" + ex.StackTrace);
+                }
             }
         }
 
@@ -88,6 +107,13 @@ namespace Infrastructure.File
         private void OutputUninstInfo(UserFontsSetting userFontsSetting)
         {
             Logger.Debug("OutputLetsFontsList:Enter");
+
+            if (preFontCnt == userFontsSetting.Fonts.Count)
+            {
+                return;
+            }
+
+            preFontCnt = userFontsSetting.Fonts.Count;
 
             // ユーザレジストリIDを取得する
             string userregid = this.GetUserRegID();
@@ -110,6 +136,7 @@ namespace Infrastructure.File
             string uninstfontsPath = Path.Combine(letsfolder, $"uninstallfonts_{userregid}.bat");
             string regfilePath = Path.Combine(letsfolder, $"uninstreg_{userregid}.bat");
             string clearUserDataPath = Path.Combine(letsfolder, $"clearuserdata_{userregid}.bat");
+            string logoutPath = Path.Combine(letsfolder, $"logout.bat");
 
             // フォントファイル削除バッチ出力
             if (System.IO.File.Exists(uninstfontsPath))
@@ -137,6 +164,7 @@ namespace Infrastructure.File
             }
 
             System.IO.File.WriteAllText(regfilePath, "REM レジストリ削除" + Environment.NewLine, System.Text.Encoding.GetEncoding("shift_jis"));
+            System.IO.File.AppendAllText(regfilePath, $@"reg load HKU\{userRegID} {userProfileImagePath}\NTUSER.DAT" + Environment.NewLine, System.Text.Encoding.GetEncoding("shift_jis"));
             foreach (string r in letsFontReg)
             {
                 if (!string.IsNullOrEmpty(r))
@@ -145,6 +173,7 @@ namespace Infrastructure.File
                 }
             }
 
+            System.IO.File.AppendAllText(regfilePath, $@"reg unload HKU\{userRegID}" + Environment.NewLine, System.Text.Encoding.GetEncoding("shift_jis"));
             System.IO.File.AppendAllText(regfilePath, @"Del /F ""%~dp0%~nx0""" + "\n");
             this.SetFileAccessEveryone(regfilePath);
             this.SetHidden(regfilePath, true);
@@ -239,9 +268,11 @@ namespace Infrastructure.File
                             string[] paths = profileImagePath.Split('\\');
                             string uname = paths[paths.Length - 1];
                             Logger.Debug($"GetUserRegID:uname={uname}");
-                            if (uname == username)
+                            if (string.Compare(uname, username, true) == 0)
                             {
                                 userRegID = k;
+                                userProfileImagePath = profileImagePath;
+                                Logger.Debug($"userProfileImagePath:{userProfileImagePath}");
                                 break;
                             }
                         }

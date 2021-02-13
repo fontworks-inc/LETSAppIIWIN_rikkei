@@ -103,13 +103,13 @@ namespace Client.UI
             string deviceid = userStatusFileRepository.GetStatus().DeviceId;
             Logger.Debug("deviceid=" + deviceid);
 
-            // フォント情報
-            var userFontsSettingFileRepository = new UserFontsSettingFileRepository(Path.Combine(UserDataDirectory, "fonts.dat"));
-            containerRegistry.RegisterInstance<IUserFontsSettingRepository>(userFontsSettingFileRepository);
-
             // APIConfiguration
             ApplicationSetting applicationSetting = applicationSettingRepository.GetSetting();
             var apiConfiguration = new APIConfiguration(applicationSetting.FontDeliveryServerUri, applicationSetting.NotificationServerUri, applicationSetting.FixedTermConfirmationInterval, applicationSetting.CommunicationRetryCount);
+
+            // フォント情報
+            var userFontsSettingFileRepository = new UserFontsSettingFileRepository(Path.Combine(UserDataDirectory, "fonts.dat"));
+            containerRegistry.RegisterInstance<IUserFontsSettingRepository>(userFontsSettingFileRepository);
 
             // 各種画面で利用する情報
             var resourceWrapper = new ResourceWrapper();
@@ -278,6 +278,7 @@ namespace Client.UI
                     receiveNotificationRepository,
                     fontManagerService,
                     contractsAggregateFileRepository,
+                    applicationSetting,
                     () =>
                     {
                         // 強制ログアウト画面の表示(UIスレッドで実行)

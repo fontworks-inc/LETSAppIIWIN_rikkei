@@ -245,6 +245,10 @@ namespace Infrastructure.API
             this.subscribed = false;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.OrderingRules", "SA1201:Elements should appear in the correct order", Justification = "<保留中>")]
+        private static Queue<SseMessage> sseQue = new Queue<SseMessage>();
+        private static Task sseproctask = null;
+
         /// <summary>
         /// 受信メッセージによる処理分岐
         /// </summary>
@@ -261,36 +265,63 @@ namespace Infrastructure.API
                 if (!sseMessage.IsCommentOnly())
                 {
                     Logger.Debug("NotifyMessage:" + sseMessage.Data);
-                    ActivateFont font = JsonConvert.DeserializeObject<ActivateFont>(sseMessage.Data);
-                    UserStatus userStatus = this.userStatusRepository.GetStatus();
-                    try
-                    {
-                        userStatus.LastEventId = int.Parse(sseMessage.Id);
-                        this.userStatusRepository.SaveStatus(userStatus);
-                    }
-                    catch (Exception)
-                    {
-                        // Parseに失敗したら設定しない
-                    }
+                    sseQue.Enqueue(sseMessage);
 
-                    this.userStatusRepository.SaveStatus(userStatus);
-                    switch (sseMessage.EventType)
+                    if (sseproctask != null)
                     {
-                        case "font-activate":
-                            Logger.Debug("font-activate");
-                            this.fontNotificationService.Activate(font);
-                            break;
-                        case "font-deactivate":
-                            Logger.Debug("font-deactivate");
-                            this.fontNotificationService.Deactivate(font.FontId);
-                            break;
-                        case "font-all-uninstall":
-                            Logger.Debug("font-all-uninstall");
-                            this.fontNotificationService.AllUninstall();
-                            break;
-                        default:
-                            break;
+                        if (sseproctask.IsCompleted)
+                        {
+                            sseproctask = Task.Run(() =>
+                            {
+                                this.SseMessageProc();
+                            });
+                        }
                     }
+                    else
+                    {
+                        sseproctask = Task.Run(() =>
+                        {
+                            this.SseMessageProc();
+                        });
+                    }
+                }
+            }
+        }
+
+        private void SseMessageProc()
+        {
+            while (sseQue.Count > 0)
+            {
+                SseMessage sseMessage = sseQue.Dequeue();
+
+                Logger.Debug("sseMessageProc:NotifyMessage:" + sseMessage.Data);
+                UserStatus userStatus = this.userStatusRepository.GetStatus();
+                try
+                {
+                    userStatus.LastEventId = int.Parse(sseMessage.Id);
+                }
+                catch (Exception)
+                {
+                    // Parseに失敗したら設定しない
+                }
+
+                ActivateFont font = JsonConvert.DeserializeObject<ActivateFont>(sseMessage.Data);
+                switch (sseMessage.EventType)
+                {
+                    case "font-activate":
+                        Logger.Debug("font-activate");
+                        this.fontNotificationService.Activate(font);
+                        break;
+                    case "font-deactivate":
+                        Logger.Debug("font-deactivate");
+                        this.fontNotificationService.Deactivate(font.FontId);
+                        break;
+                    case "font-all-uninstall":
+                        Logger.Debug("font-all-uninstall");
+                        this.fontNotificationService.AllUninstall();
+                        break;
+                    default:
+                        break;
                 }
             }
         }

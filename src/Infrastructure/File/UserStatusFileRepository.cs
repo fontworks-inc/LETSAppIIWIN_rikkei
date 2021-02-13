@@ -1,6 +1,8 @@
-﻿using System.Text.Json;
+﻿using System;
+using System.Text.Json;
 using Core.Entities;
 using Core.Interfaces;
+using NLog;
 
 namespace Infrastructure.File
 {
@@ -9,6 +11,13 @@ namespace Infrastructure.File
     /// </summary>
     public class UserStatusFileRepository : EncryptFileBase, IUserStatusRepository
     {
+        /// <summary>
+        /// ロガー
+        /// </summary>
+        private static readonly Logger Logger = LogManager.GetLogger("nlog.config");
+
+        private static object saveLockObject = new object();
+
         /// <summary>
         /// インスタンスを初期化する
         /// </summary>
@@ -27,8 +36,16 @@ namespace Infrastructure.File
             if (System.IO.File.Exists(this.FilePath))
             {
                 // ファイルが存在する場合、内容を返す
-                string jsonString = this.ReadAll();
-                return JsonSerializer.Deserialize<UserStatus>(jsonString);
+                try
+                {
+                    string jsonString = this.ReadAll();
+                    return JsonSerializer.Deserialize<UserStatus>(jsonString);
+                }
+                catch (Exception ex)
+                {
+                    Logger.Debug("UserStatus:" + ex.StackTrace);
+                    return new UserStatus();
+                }
             }
             else
             {
@@ -43,7 +60,10 @@ namespace Infrastructure.File
         /// <param name="status">ユーザ別ステータス情報</param>
         public void SaveStatus(UserStatus status)
         {
-            this.WriteAll(JsonSerializer.Serialize(status));
+            lock (saveLockObject)
+            {
+                this.WriteAll(JsonSerializer.Serialize(status));
+            }
         }
     }
 }
