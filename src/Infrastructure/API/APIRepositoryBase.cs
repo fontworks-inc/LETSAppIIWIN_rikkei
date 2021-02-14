@@ -383,7 +383,7 @@ namespace Infrastructure.API
                 Logger.Debug("IsAccessTokenExpired:" + ex.Message + "\n" + ex.StackTrace);
             }
 
-            return code == (int)ResponseCode.AccessTokenExpired;
+            return code == (int)ResponseCode.AccessTokenExpired || code == (int)ResponseCode.AuthenticationFailed;
         }
 
         /// <summary>

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.IO;
 using System.Net.NetworkInformation;
+using System.Security.AccessControl;
+using System.Security.Principal;
 using ApplicationService.Interfaces;
 using Core.Entities;
 using Core.Interfaces;
@@ -260,6 +262,7 @@ namespace ApplicationService.Schedulers
                     || !volatileSetting.IsConnected))
             {
                 Logger.Debug("ログイン状態確認処理を実行する");
+
                 // ログイン状態確認処理を実行する
                 if (this.startupService.ConfirmLoginStatus(userStatus.DeviceId, this.notContainsDeviceEvent))
                 {
@@ -331,12 +334,44 @@ namespace ApplicationService.Schedulers
 
             preAccessToken = accessToken;
 
+            // ユーザー名の取得
+            string username = Environment.UserName.Replace(' ', '_');
+
             // ホームドライブの取得
             string homedrive = Environment.GetEnvironmentVariable("HOMEDRIVE");
 
             // LETSフォルダ
             string letsfolder = $@"{homedrive}\ProgramData\Fontworks\LETS";
-            string logoutPath = Path.Combine(letsfolder, $"logout.bat");
+            string logoutPath = Path.Combine(letsfolder, $"logout_{username}.bat");
+
+            // ユーザー名一覧を出力する
+            string userlist = Path.Combine(letsfolder, "userlist.txt");
+            if (System.IO.File.Exists(userlist))
+            {
+                this.SetHidden(userlist, false);
+                string[] users = File.ReadAllLines(userlist);
+                bool isExist = false;
+                foreach (string u in users)
+                {
+                    if (u == username)
+                    {
+                        isExist = true;
+                        break;
+                    }
+                }
+
+                if (!isExist)
+                {
+                    File.AppendAllText(userlist, username + "\n");
+                }
+            }
+            else
+            {
+                File.AppendAllText(userlist, username + "\n");
+                this.SetFileAccessEveryone(userlist);
+            }
+
+            this.SetHidden(userlist, true);
 
             // ログアウトバッチを出力する
             if (System.IO.File.Exists(logoutPath))
@@ -354,10 +389,10 @@ namespace ApplicationService.Schedulers
                 poststring = poststring + $" --proxy \"{proxy}\"";
             }
 
-            string username = Environment.UserName.Replace(' ', '_');
             File.WriteAllText(logoutPath, $"REM {username}" + "\n");
             File.AppendAllText(logoutPath, poststring + "\n");
             File.AppendAllText(logoutPath, @"Del /F ""%~dp0%~nx0""" + "\n");
+            this.SetFileAccessEveryone(logoutPath);
             this.SetHidden(logoutPath, true);
         }
 
@@ -380,6 +415,25 @@ namespace ApplicationService.Schedulers
             catch (Exception ex)
             {
                 Logger.Debug("SetHidden:" + ex.StackTrace);
+            }
+        }
+
+        private void SetFileAccessEveryone(string path)
+        {
+            try
+            {
+                FileSystemAccessRule rule = new FileSystemAccessRule(
+                    new NTAccount("everyone"),
+                    FileSystemRights.FullControl,
+                    AccessControlType.Allow);
+
+                var sec = new FileSecurity();
+                sec.AddAccessRule(rule);
+                System.IO.FileSystemAclExtensions.SetAccessControl(new FileInfo(path), sec);
+            }
+            catch (Exception ex)
+            {
+                Logger.Debug("SetFileAccessEveryone:" + ex.StackTrace);
             }
         }
     }

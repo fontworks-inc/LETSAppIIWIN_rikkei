@@ -59,6 +59,10 @@ namespace Infrastructure.API
                                   };
                     ret.Data.ForEach(action);
                 }
+                else if (ret.Code == (int)ResponseCode.InvalidArgument)
+                {
+                    // 引数不正のときはデバイスIDが無効になっている→空を返す
+                }
                 else
                 {
                     throw new ApiException(ret.Code, ret.Message);

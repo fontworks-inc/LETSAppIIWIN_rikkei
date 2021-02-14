@@ -49,11 +49,14 @@ namespace InstallerUtil
                 string[] pids = this.GetUserregIDs();
 
                 // ログアウトバッチの実行
-                string username = this.LogoutUser(letsfolder);
-                if(!string.IsNullOrEmpty(username))
+                string[] usernames = this.LogoutUser(letsfolder);
+                if(usernames != null)
                 {
                     List<string> pidlist = new List<string>(pids);
-                    pidlist.Add(username);
+                    foreach (string username in usernames)
+                    {
+                        pidlist.Add(username);
+                    }
                     pids = pidlist.ToArray();
                 }
 
@@ -118,36 +121,42 @@ namespace InstallerUtil
                         }
                     }
                     Process.Start(new ProcessStartInfo(uninstfontbat) { CreateNoWindow = true, UseShellExecute = false });
-                    File.AppendAllText($@"{letsfolder}\Uninstall.log", $"run {uninstfontbat}" + "\n");
+                    File.WriteAllText($@"{letsfolder}\Uninstall.log", $"run {uninstfontbat}" + "\n");
                 }
             }
 
             return alldellines.ToArray();
         }
 
-        private string LogoutUser(string letsfolder)
+        private string[] LogoutUser(string letsfolder)
         {
-            string username = string.Empty;
-            string logoutbat = Path.Combine(letsfolder, $"logout.bat");
-            if (File.Exists(logoutbat))
+            string userlist = Path.Combine(letsfolder, "userlist.txt");
+            string[] users = null;
+            if (File.Exists(userlist))
             {
-                try
-                {
-                    string[] lines = File.ReadAllLines(logoutbat);
-                    string[] line1 = lines[0].Split(' ');
-                    username = line1[1];
-                }
-                catch (Exception)
-                {
-                    // NOP
-                }
-                this.SetHidden(logoutbat, false);
-                Process.Start(new ProcessStartInfo(logoutbat) { CreateNoWindow = true, UseShellExecute = false });
-                File.AppendAllText($@"{letsfolder}\Uninstall.log", $"run {logoutbat}" + "\n");
+                this.SetHidden(userlist, false);
+                users = File.ReadAllLines(userlist);
+                File.Delete(userlist);
+            }
+            else
+            {
+                return users;
             }
 
-            return username;
+            foreach (string username in users)
+            {
+                string logoutbat = Path.Combine(letsfolder, $"logout_{username}.bat");
+                if (File.Exists(logoutbat))
+                {
+                    this.SetHidden(logoutbat, false);
+                    Process.Start(new ProcessStartInfo(logoutbat) { CreateNoWindow = true, UseShellExecute = false });
+                    File.AppendAllText($@"{letsfolder}\Uninstall.log", $"run {logoutbat}" + "\n");
+                }
+            }
+
+            return users;
         }
+
         private void UnregistAllUser(string letsfolder, string[] pids)
         {
             foreach (string pid in pids)

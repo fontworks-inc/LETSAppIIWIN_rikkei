@@ -55,6 +55,10 @@ namespace Infrastructure.API
                     response.FirstName = ret.Data.FirstName;
                     response.LastName = ret.Data.LastName;
                 }
+                else
+                {
+                    throw new ApiException(ret.Code, ret.Message);
+                }
             }
             catch (ApiException)
             {

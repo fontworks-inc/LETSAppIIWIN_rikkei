@@ -337,10 +337,14 @@ namespace ApplicationService.Startup
                 string startingVersionDirectoryPath = this.applicationVersionService.GetTargetVerisonDirectory(startingVersion);
                 if (Directory.Exists(startingVersionDirectoryPath))
                 {
-                    this.startProcessService.StartProcessAdministrator(startingVersionDirectoryPath, "LETS.exe", null, false);
+                    string programPath = Path.Combine(startingVersionDirectoryPath, "LETS.exe");
+                    if (File.Exists(programPath))
+                    {
+                        this.startProcessService.StartProcessAdministrator(startingVersionDirectoryPath, "LETS.exe", null, false);
 
-                    Logger.Info(this.resourceWrapper.GetString("LOG_Info_StartingVersionCheck_RebootClientApplication"));
-                    return false;
+                        Logger.Info(this.resourceWrapper.GetString("LOG_Info_StartingVersionCheck_RebootClientApplication"));
+                        return false;
+                    }
                 }
             }
 
@@ -441,13 +445,13 @@ namespace ApplicationService.Startup
                     return false;
                 }
 
-                Logger.Debug("ConfirmLoginStatus:trye");
+                Logger.Debug("ConfirmLoginStatus:true");
                 return true;
             }
-            catch (GetAllDevicesException)
+            catch (GetAllDevicesException ex)
             {
                 // 全端末情報を取得で例外が発生した場合は失敗扱い
-                Logger.Debug("ConfirmLoginStatus:全端末情報を取得で例外が発生した場合は失敗扱い");
+                Logger.Debug("ConfirmLoginStatus:全端末情報を取得で例外が発生した場合は失敗扱い：" + ex.StackTrace);
                 return false;
             }
             catch (Exception ex)
