@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.IO.Compression;
 using System.Windows;
 
 namespace Updater
@@ -240,7 +239,7 @@ namespace Updater
             }
 
             // Zipファイルを展開する
-            ZipFile.ExtractToDirectory(ZipPath, targetfolder);
+            System.IO.Compression.ZipFile.ExtractToDirectory(ZipPath, targetfolder);
         }
 
         private static void CreateShortcut(string shortcutPath, string targetPath, string wkfolder)
