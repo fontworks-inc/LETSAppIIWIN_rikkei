@@ -1,4 +1,8 @@
-﻿using System.Text.Json;
+﻿using System;
+using System.IO;
+using System.Security.AccessControl;
+using System.Security.Principal;
+using System.Text.Json;
 using Core.Entities;
 using Core.Interfaces;
 
@@ -44,6 +48,26 @@ namespace Infrastructure.File
         public void SaveApplicationRuntime(ApplicationRuntime applicationRuntime)
         {
             this.WriteAll(JsonSerializer.Serialize(applicationRuntime));
+            this.SetFileAccessEveryone(this.FilePath);
+        }
+
+        private void SetFileAccessEveryone(string path)
+        {
+            try
+            {
+                FileSystemAccessRule rule = new FileSystemAccessRule(
+                    new NTAccount("everyone"),
+                    FileSystemRights.FullControl,
+                    AccessControlType.Allow);
+
+                var sec = new FileSecurity();
+                sec.AddAccessRule(rule);
+                System.IO.FileSystemAclExtensions.SetAccessControl(new FileInfo(path), sec);
+            }
+            catch (Exception)
+            {
+                // NOP
+            }
         }
     }
 }

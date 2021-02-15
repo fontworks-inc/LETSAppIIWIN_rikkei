@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Core.Entities;
 using Core.Interfaces;
+using NLog;
 using Org.OpenAPITools.Api;
 using Org.OpenAPITools.Client;
 using Org.OpenAPITools.Model;
@@ -13,6 +14,11 @@ namespace Infrastructure.API
     /// </summary>
     public class DevicesAPIRepository : APIRepositoryBase, IDevicesRepository
     {
+        /// <summary>
+        /// ロガー
+        /// </summary>
+        private static readonly Logger Logger = LogManager.GetLogger("nlog.config");
+
         /// <summary>
         /// インスタンスの初期化を行う
         /// </summary>
@@ -62,6 +68,7 @@ namespace Infrastructure.API
                 else if (ret.Code == (int)ResponseCode.InvalidArgument)
                 {
                     // 引数不正のときはデバイスIDが無効になっている→空を返す
+                    Logger.Debug("GetAllDevices:引数不正のときはデバイスIDが無効になっている→空を返す");
                 }
                 else
                 {

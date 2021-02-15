@@ -110,9 +110,21 @@ namespace Infrastructure.API
                     if (this.IsAccessTokenExpired(this.ApiResponse, vSetting.AccessToken))
                     {
                         // アクセストークンの更新
-                        if (!this.RefreshAccessToken())
+                        int ret = this.RefreshAccessToken();
+                        if (ret != 0)
                         {
                             // 更新に失敗したのでループを止めてエラーコードを返す。
+                            if (ret == -1)
+                            {
+                                if (action.Method.Name == "CallGetDevicesApi")
+                                {
+                                    if (this.APIConfiguration.ForceLogout != null)
+                                    {
+                                        this.APIConfiguration.ForceLogout();
+                                    }
+                                }
+                            }
+
                             break;
                         }
 
@@ -227,7 +239,7 @@ namespace Infrastructure.API
         /// アクセストークン更新APIを呼び出しアクセストークンを更新する
         /// </summary>
         /// <returns>更新に成功:true、失敗:false</returns>
-        private bool RefreshAccessToken()
+        private int RefreshAccessToken()
         {
             VolatileSetting vSetting = new VolatileSettingMemoryRepository().GetVolatileSetting();
             Configuration config = new Configuration();
@@ -267,14 +279,14 @@ namespace Infrastructure.API
                     Logger.Debug("RefreshAccessToken:Code=" + tokenResponse.Code);
                     Logger.Debug("RefreshAccessToken:DeviceId=" + this.ApiParam[APIParam.DeviceId]);
                     Logger.Debug("RefreshAccessToken:RefreshToken=" + this.ApiParam[APIParam.RefreshToken]);
-                    return false;
+                    return -1;
                 }
                 else
                 {
                     Logger.Debug("RefreshAccessToken:Code=" + tokenResponse.Code);
                     Logger.Debug("RefreshAccessToken:DeviceId=" + this.ApiParam[APIParam.DeviceId]);
                     Logger.Debug("RefreshAccessToken:RefreshToken=" + this.ApiParam[APIParam.RefreshToken]);
-                    return false;
+                    return -2;
                 }
             }
             catch (ApiException e) when (e.ErrorCode == 400)
@@ -282,16 +294,16 @@ namespace Infrastructure.API
                 // リフレッシュトークン有効期限切れエラー
                 // 通信自体は成功しているためエラーコードを返す。
                 tokenResponse = JsonConvert.DeserializeObject<AccessTokenResponse>(e.ErrorContent.ToString());
-                return false;
+                return -3;
             }
             catch (Exception e)
             {
                 // throw;
                 Logger.Debug("RefreshAccessToken:Exception=" + e.Message + "\n" + e.StackTrace);
-                return false;
+                return -4;
             }
 
-            return true;
+            return 0;
         }
 
         /// <summary>

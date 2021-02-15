@@ -474,6 +474,11 @@ namespace Client.UI.Components
         /// </summary>
         public void ForcedLogout()
         {
+            if (!this.userStatusRepository.GetStatus().IsLoggingIn)
+            {
+                return;
+            }
+
             // タスクトレイアイコンを操作不可とする
             this.ApplicationIcon.Enabled = false;
 
