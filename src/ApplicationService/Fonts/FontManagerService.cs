@@ -487,6 +487,12 @@ namespace ApplicationService.Fonts
             UserFontsSetting userFontsSetting = this.userFontsSettingRepository.GetUserFontsSetting();
             foreach (Font font in userFontsSetting.Fonts)
             {
+                if (!font.IsLETS)
+                {
+                    // LETSフォントじゃなければ対象外
+                    continue;
+                }
+
                 if (font.IsFreemium)
                 {
                     continue;
@@ -524,6 +530,12 @@ namespace ApplicationService.Fonts
             // 最後の期限から１ヶ月以上経過しているとき、[フォント：フォント一覧.削除対象]をTRUEに設定する
             foreach (Font font in userFontsSetting.Fonts)
             {
+                if (!font.IsLETS)
+                {
+                    // LETSフォントじゃなければ対象外
+                    continue;
+                }
+
                 if (font.IsActivated != false)
                 {
                     continue;
