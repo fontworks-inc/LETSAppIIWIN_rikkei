@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -641,7 +642,7 @@ namespace Client.UI.Components
         /// ウィンドウのプロセスIDを取得する
         /// </summary>
         /// <param name="compManager">コンポーネントマネージャ</param>
-        private void ExitLETS(ComponentManager compManager)
+        private async void ExitLETS(ComponentManager compManager)
         {
             try
             {
@@ -654,7 +655,7 @@ namespace Client.UI.Components
                         return;
                     }
 
-                    Thread.Sleep(1000);
+                    await Task.Delay(3000);
                 }
             }
             catch (Exception ex)
@@ -679,50 +680,52 @@ namespace Client.UI.Components
             {
                 // ウィンドウのタイトルの長さを取得する
                 int textLen = GetWindowTextLength(hWnd);
-                if (textLen > 0)
+                if (textLen <= 0)
                 {
-                    try
+                    return true;
+                }
+
+                // ウィンドウのタイトルを取得する
+                StringBuilder tsb = new StringBuilder(textLen + 1);
+                GetWindowText(hWnd, tsb, tsb.Capacity);
+                if (!tsb.ToString().Contains("LETS-Ver"))
+                {
+                    return true;
+                }
+
+                // ウィンドウのクラス名を取得する
+                StringBuilder csb = new StringBuilder(256);
+                GetClassName(hWnd, csb, csb.Capacity);
+                if (!csb.ToString().Contains("#32770"))
+                {
+                    return true;
+                }
+
+                // プロセスIDからプロセス名を取得する
+                string procname = string.Empty;
+                try
+                {
+                    int pid;
+                    GetWindowThreadProcessId(hWnd, out pid);
+                    Process p = Process.GetProcessById(pid);
+                    procname = p.ProcessName;
+                    if (!procname.Contains("msiexec"))
                     {
-                        // ウィンドウのタイトルを取得する
-                        StringBuilder tsb = new StringBuilder(textLen + 1);
-                        GetWindowText(hWnd, tsb, tsb.Capacity);
-
-                        // ウィンドウのクラス名を取得する
-                        StringBuilder csb = new StringBuilder(256);
-                        GetClassName(hWnd, csb, csb.Capacity);
-
-                        // プロセスIDからプロセス名を取得する
-                        string procname = string.Empty;
-                        try
-                        {
-                            int pid;
-                            GetWindowThreadProcessId(hWnd, out pid);
-                            Process p = Process.GetProcessById(pid);
-                            procname = p.ProcessName;
-                        }
-                        catch (Exception)
-                        {
-                            // NOP
-                        }
-
-                        if (tsb.ToString().Contains("LETS-Ver") && csb.ToString().Contains("#32770") && (procname.Contains("msiexec") || string.IsNullOrEmpty(procname)))
-                        {
-                            Logger.Debug("EnumWindowCallBack:" + tsb.ToString());
-                            Logger.Debug("EnumWindowCallBack:ProcName=" + procname);
-                            isExitLETS = true;
-                            if (myhWnd != IntPtr.Zero)
-                            {
-                                SendMessage(myhWnd, 0x8001, 0, 3);
-                            }
-
-                            return false;
-                        }
-                    }
-                    catch (Exception)
-                    {
-                        // Logger.Debug("EnumWindowCallBack:" + ex.Message + "\n");
+                        return true;
                     }
                 }
+                catch (Exception)
+                {
+                    // NOP
+                }
+
+                isExitLETS = true;
+                if (myhWnd != IntPtr.Zero)
+                {
+                    SendMessage(myhWnd, 0x8001, 0, 3);
+                }
+
+                return false;
             }
             catch (Exception ex)
             {

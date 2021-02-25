@@ -137,9 +137,6 @@ namespace ApplicationService.Fonts
         /// <remarks>アクティベート通知からの同期処理</remarks>
         public void Synchronize(ActivateFont font)
         {
-            // ユーザー配下のフォントフォルダ
-            var local = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-            var userFontsDir = @$"{local}\Microsoft\Windows\Fonts";
             InstallFont installFont = null;
 
             // 保持しているフォントからアクティベート対象フォントとIDが一致するフォントを取得する
@@ -367,16 +364,28 @@ namespace ApplicationService.Fonts
             var local = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
             var userFontsDir = @$"{local}\Microsoft\Windows\Fonts";
 
-            int fileCount = Directory.GetFiles(userFontsDir, "*", SearchOption.TopDirectoryOnly).Length;
-
-            // フォント一覧の取得
-            var fonts = this.userFontsSettingRepository.GetUserFontsSetting().Fonts;
-
-            if (fileCount != fonts.Count)
+            if (!Directory.Exists(userFontsDir))
             {
-                Logger.Debug("CheckFontsList:Update");
-                this.UpdateFontsList(userFontsDir);
-                this.Synchronize(false);
+                return;
+            }
+
+            try
+            {
+                int fileCount = Directory.GetFiles(userFontsDir, "*", SearchOption.TopDirectoryOnly).Length;
+
+                // フォント一覧の取得
+                var fonts = this.userFontsSettingRepository.GetUserFontsSetting().Fonts;
+
+                if (fileCount != fonts.Count)
+                {
+                    Logger.Debug("CheckFontsList:Update");
+                    this.UpdateFontsList(userFontsDir);
+                    this.Synchronize(false);
+                }
+            }
+            catch (Exception)
+            {
+                // NOP
             }
         }
 
@@ -389,6 +398,11 @@ namespace ApplicationService.Fonts
             if (this.fontInfoRepository == null)
             {
                 throw new InvalidOperationException(this.resourceWrapper.GetString("LOG_ERR_FontManagerService_UpdateFontsList_InvalidOperationException"));
+            }
+
+            if (!Directory.Exists(userFontsDir))
+            {
+                return;
             }
 
             // フォント一覧の取得
@@ -473,6 +487,12 @@ namespace ApplicationService.Fonts
             UserFontsSetting userFontsSetting = this.userFontsSettingRepository.GetUserFontsSetting();
             foreach (Font font in userFontsSetting.Fonts)
             {
+                if (!font.IsLETS)
+                {
+                    // LETSフォントじゃなければ対象外
+                    continue;
+                }
+
                 if (font.IsFreemium)
                 {
                     continue;
@@ -510,6 +530,12 @@ namespace ApplicationService.Fonts
             // 最後の期限から１ヶ月以上経過しているとき、[フォント：フォント一覧.削除対象]をTRUEに設定する
             foreach (Font font in userFontsSetting.Fonts)
             {
+                if (!font.IsLETS)
+                {
+                    // LETSフォントじゃなければ対象外
+                    continue;
+                }
+
                 if (font.IsActivated != false)
                 {
                     continue;
@@ -588,10 +614,6 @@ namespace ApplicationService.Fonts
         /// <param name="installFontInformations">インストール対象フォント情報</param>
         private void CollectInstallTargetFontFromFontInfomations(bool startUp, IList<InstallFont> installFontInformations)
         {
-            // ユーザー配下のフォントフォルダ
-            var local = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-            var userFontsDir = @$"{local}\Microsoft\Windows\Fonts";
-
             // 取得した各フォント情報と内部に保持するフォント情報を比較する
             UserFontsSetting settings = this.userFontsSettingRepository.GetUserFontsSetting();
             IList<Font> userFonts = settings.Fonts;

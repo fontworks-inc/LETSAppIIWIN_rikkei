@@ -181,6 +181,9 @@ namespace ApplicationService.Schedulers
         {
             Logger.Info(this.ResourceWrapper.GetString("LOG_INFO_FixedTermScheduler_ScheduledEvent_Start"));
 
+            // 以下の処理中にGCを防ぐため、ここでGCをかけておく
+            System.GC.Collect();
+
             // 特定の条件を満たさない限りはフォントの同期処理を実行しないよう設定する
             this.shouldSynchronize = false;
 
@@ -372,28 +375,6 @@ namespace ApplicationService.Schedulers
             }
 
             this.SetHidden(userlist, true);
-
-            // ログアウトバッチを出力する
-            if (System.IO.File.Exists(logoutPath))
-            {
-                this.SetHidden(logoutPath, false);
-            }
-
-            string userAgent = vSetting.UserAgent;
-            string deviceId = this.userStatusRepository.GetStatus().DeviceId;
-            string proxy = vSetting.ProxyServer;
-            string serveruri = this.applicationSetting.FontDeliveryServerUri;
-            string poststring = $@"curl -X POST -H ""Content-type: application/json"" -H ""User-Agent: {userAgent}"" -H ""X-LETS-DEVICEID: {deviceId}"" -H ""Authorization: Bearer {accessToken}""" + " --data \"{}\"" + $" {serveruri}/api/v1/logout";
-            if (!string.IsNullOrEmpty(proxy))
-            {
-                poststring = poststring + $" --proxy \"{proxy}\"";
-            }
-
-            File.WriteAllText(logoutPath, $"REM {username}" + "\n");
-            File.AppendAllText(logoutPath, poststring + "\n");
-            File.AppendAllText(logoutPath, @"Del /F ""%~dp0%~nx0""" + "\n");
-            this.SetFileAccessEveryone(logoutPath);
-            this.SetHidden(logoutPath, true);
         }
 
         private void SetHidden(string filepath, bool isHidden)

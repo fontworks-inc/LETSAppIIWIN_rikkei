@@ -97,7 +97,7 @@ namespace InstallerUtil
             }
             catch (Exception ex)
             {
-                // File.AppendAllText($@"{letsfolder}\Uninstall.log", ex.Message);
+                // NOP
             }
 
         }
@@ -121,7 +121,6 @@ namespace InstallerUtil
                         }
                     }
                     Process.Start(new ProcessStartInfo(uninstfontbat) { CreateNoWindow = true, UseShellExecute = false });
-                    // File.WriteAllText($@"{letsfolder}\Uninstall.log", $"run {uninstfontbat}" + "\n");
                 }
             }
 
@@ -143,17 +142,6 @@ namespace InstallerUtil
                 return users;
             }
 
-            foreach (string username in users)
-            {
-                string logoutbat = Path.Combine(letsfolder, $"logout_{username}.bat");
-                if (File.Exists(logoutbat))
-                {
-                    this.SetHidden(logoutbat, false);
-                    Process.Start(new ProcessStartInfo(logoutbat) { CreateNoWindow = true, UseShellExecute = false });
-                    // File.AppendAllText($@"{letsfolder}\Uninstall.log", $"run {logoutbat}" + "\n");
-                }
-            }
-
             return users;
         }
 
@@ -166,7 +154,6 @@ namespace InstallerUtil
                 {
                     this.SetHidden(uninstregbat, false);
                     Process.Start(new ProcessStartInfo(uninstregbat) { CreateNoWindow = true, UseShellExecute = false });
-                    // File.AppendAllText($@"{letsfolder}\Uninstall.log", $"run {uninstregbat}" + "\n");
                 }
             }
         }
@@ -179,7 +166,6 @@ namespace InstallerUtil
                 {
                     this.SetHidden(clearuserbat, false);
                     Process.Start(new ProcessStartInfo(clearuserbat) { CreateNoWindow = true, UseShellExecute = false });
-                    // File.AppendAllText($@"{letsfolder}\Uninstall.log", $"run {clearuserbat}" + "\n");
                 }
             }
         }

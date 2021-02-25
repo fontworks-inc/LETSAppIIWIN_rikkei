@@ -103,8 +103,6 @@ namespace Updater
 
             SendMessage(hWnd, WMSETICON, IntPtr.Zero, IntPtr.Zero);
             SendMessage(hWnd, WMSETICON, new IntPtr(1), IntPtr.Zero);
-
-            //SetWindowPos(hWnd, IntPtr.Zero, 0, 0, 0, 0, SWPNOMOVE | SWPNOSIZE | SWPNOZORDER | SWPNOACTIVATE | SWPFRAMECHANGED);
         }
 
         /// <summary>
@@ -136,8 +134,6 @@ namespace Updater
         {
             messageCode = 0x8001;
             lParam = 2;
-            //string tmppath = Path.GetTempPath();
-            //File.AppendAllText($@"{tmppath}Message.log", "SEND:0x8001:" + "2\n");
             MessageOperation();
         }
 
@@ -145,8 +141,6 @@ namespace Updater
         {
             messageCode = 0x8002;
             lParam = percent;
-            //string tmppath = Path.GetTempPath();
-            //File.AppendAllText($@"{tmppath}Message.log", "SEND:0x8002:" + percent.ToString() + "\n");
             MessageOperation();
         }
 

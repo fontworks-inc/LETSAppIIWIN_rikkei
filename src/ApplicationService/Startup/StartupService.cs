@@ -242,7 +242,7 @@ namespace ApplicationService.Startup
                     return false;
                 }
 
-                this.StartupFontCheck(contractsResult.ContractsAggregate.Contracts, detectionFontCopyEvent);
+                Task.Run(() => this.StartupFontCheck(contractsResult.ContractsAggregate.Contracts, detectionFontCopyEvent));
 
                 // 起動時チェック状態の保存(チェックした日時と「処理済みである」という情報)
                 VolatileSetting volatileSetting = this.volatileSettingRepository.GetVolatileSetting();
@@ -624,51 +624,48 @@ namespace ApplicationService.Startup
         /// </summary>
         /// <param name="contracts">契約情報</param>
         /// <param name="detectionFontCopyEvent">コピーされたフォント発見時の処理</param>
-        private void StartupFontCheck(IList<Contract> contracts, DetectionFontCopyEvent detectionFontCopyEvent)
+        private async Task StartupFontCheck(IList<Contract> contracts, DetectionFontCopyEvent detectionFontCopyEvent)
         {
-            Task.Run(() =>
+            Logger.Debug("StartupFontCheck:Start");
+
+            // フォントアクティブ/ディアクティブ情報の同期
+            Logger.Debug("StartupFontCheck:Synchronize:Start");
+            this.fontManagerService.Synchronize(true);
+
+            // 契約切れフォントのディアクティベート
+            Logger.Debug("StartupFontCheck:DeactivateExpiredFonts:Start");
+            this.fontManagerService.DeactivateExpiredFonts(contracts);
+
+            // サーバから削除されたフォントの削除チェック
+            Logger.Debug("StartupFontCheck:DeletedFontCheck:Start");
+            this.DeletedFontCheck();
+
+            // wait download
+            bool doSecondCheck = false;
+            while (!doSecondCheck)
             {
-                Logger.Debug("StartupFontCheck:Start");
-
-                // フォントアクティブ/ディアクティブ情報の同期
-                Logger.Debug("StartupFontCheck:Synchronize:Start");
-                this.fontManagerService.Synchronize(true);
-
-                // 契約切れフォントのディアクティベート
-                Logger.Debug("StartupFontCheck:DeactivateExpiredFonts:Start");
-                this.fontManagerService.DeactivateExpiredFonts(contracts);
-
-                // サーバから削除されたフォントの削除チェック
-                Logger.Debug("StartupFontCheck:DeletedFontCheck:Start");
-                this.DeletedFontCheck();
-
-                // wait download
-                bool doSecondCheck = false;
-                while (!doSecondCheck)
+                if (this.fontManagerService.GetIsFirstDownloadCompleted())
                 {
-                    if (this.fontManagerService.GetIsFirstDownloadCompleted())
-                    {
-                        // 契約切れフォントのディアクティベート
-                        Logger.Debug("StartupFontCheck:2nd:DeactivateExpiredFonts:Start");
-                        this.fontManagerService.DeactivateExpiredFonts(contracts);
+                    // 契約切れフォントのディアクティベート
+                    Logger.Debug("StartupFontCheck:2nd:DeactivateExpiredFonts:Start");
+                    this.fontManagerService.DeactivateExpiredFonts(contracts);
 
-                        // サーバから削除されたフォントの削除チェック
-                        Logger.Debug("StartupFontCheck:2nd:DeletedFontCheck:Start");
-                        this.DeletedFontCheck();
+                    // サーバから削除されたフォントの削除チェック
+                    Logger.Debug("StartupFontCheck:2nd:DeletedFontCheck:Start");
+                    this.DeletedFontCheck();
 
-                        // 他端末コピーチェック
-                        Logger.Debug("StartupFontCheck:2nd:FontCopyCheck:Start");
-                        this.FontCopyCheck(detectionFontCopyEvent);
+                    // 他端末コピーチェック
+                    Logger.Debug("StartupFontCheck:2nd:FontCopyCheck:Start");
+                    this.FontCopyCheck(detectionFontCopyEvent);
 
-                        doSecondCheck = true;
-                        break;
-                    }
-
-                    System.Threading.Thread.Sleep(1000);
+                    doSecondCheck = true;
+                    break;
                 }
 
-                Logger.Debug("StartupFontCheck:End");
-            });
+                await Task.Delay(1000);
+            }
+
+            Logger.Debug("StartupFontCheck:End");
         }
 
         /// <summary>
