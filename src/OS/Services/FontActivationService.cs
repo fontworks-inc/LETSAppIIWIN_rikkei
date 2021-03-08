@@ -229,15 +229,22 @@ namespace OS.Services
         /// </summary>
         private string GetFontName(Font font)
         {
-            using (var pfc = new System.Drawing.Text.PrivateFontCollection())
+            try
             {
-                pfc.AddFontFile(font.Path);
-                if (pfc.Families.Length != 0)
+                using (var pfc = new System.Drawing.Text.PrivateFontCollection())
                 {
-                    // フォント名
-                    var fontName = pfc.Families[0].Name;
-                    return fontName;
+                    pfc.AddFontFile(font.Path);
+                    if (pfc.Families.Length != 0)
+                    {
+                        // フォント名
+                        var fontName = pfc.Families[0].Name;
+                        return fontName;
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                Logger.Error(ex.StackTrace);
             }
 
             return string.Empty;

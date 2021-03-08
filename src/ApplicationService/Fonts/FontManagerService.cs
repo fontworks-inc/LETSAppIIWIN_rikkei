@@ -695,9 +695,13 @@ namespace ApplicationService.Fonts
                     // 「アクティベート状態」がTrueかつ(有効な契約ありまたはフリーミアム)であればインストール対象フォントに追加
                     if (installFont.ActivateFlg && (installFont.ContractIds.Count > 0 || installFont.IsFreemium))
                     {
-                        if (!this.volatileSettingRepository.GetVolatileSetting().InstallTargetFonts.Contains(installFont))
+                        // すでに同じファイル名のフォントがユーザーフォントフォルダにあれば、ダウンロードしない
+                        if (!this.FontExitsInUserFonts(installFont.FileName))
                         {
-                            this.volatileSettingRepository.GetVolatileSetting().InstallTargetFonts.Add(installFont);
+                            if (!this.volatileSettingRepository.GetVolatileSetting().InstallTargetFonts.Contains(installFont))
+                            {
+                                this.volatileSettingRepository.GetVolatileSetting().InstallTargetFonts.Add(installFont);
+                            }
                         }
                     }
                 }
@@ -879,6 +883,30 @@ namespace ApplicationService.Fonts
                 false);
 
             return addFont;
+        }
+
+        private bool FontExitsInUserFonts(string filename)
+        {
+            try
+            {
+                // ユーザー配下のフォントフォルダ
+                var local = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+                var userFontsDir = @$"{local}\Microsoft\Windows\Fonts";
+
+                if (!Directory.Exists(userFontsDir))
+                {
+                    return false;
+                }
+
+                string fontpath = Path.Combine(userFontsDir, filename);
+                return File.Exists(fontpath);
+            }
+            catch (Exception ex)
+            {
+                Logger.Error(ex.StackTrace);
+            }
+
+            return false;
         }
     }
 }

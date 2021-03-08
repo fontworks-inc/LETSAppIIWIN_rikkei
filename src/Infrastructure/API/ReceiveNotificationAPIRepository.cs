@@ -53,6 +53,16 @@ namespace Infrastructure.API
         private bool subscribed = false;
 
         /// <summary>
+        /// 購読中になった時間
+        /// </summary>
+        private DateTime subscribedTime = new DateTime(0);
+
+        /// <summary>
+        /// 購読に使用したアクセストークン
+        /// </summary>
+        private string subscribedAccessToken = string.Empty;
+
+        /// <summary>
         /// 処理機能
         /// </summary>
         private Action<List<string>> emitter;
@@ -112,6 +122,7 @@ namespace Infrastructure.API
             if (accessToken != null)
             {
                 request.Headers.Add("Authorization", $"Bearer {accessToken}");
+                this.subscribedAccessToken = accessToken;
             }
 
             int? lastEventId = this.userStatusRepository.GetStatus().LastEventId;
@@ -172,6 +183,18 @@ namespace Infrastructure.API
         [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.OrderingRules", "SA1202:Elements should be ordered by access", Justification = "<保留中>")]
         public void Stop()
         {
+            if (this.subscribed)
+            {
+                try
+                {
+                    this.streamReader.Close();
+                }
+                catch (Exception ex)
+                {
+                    Logger.Error(ex.StackTrace);
+                }
+            }
+
             this.subscribed = false;
             Logger.Debug("SSE Stop:subscribed = false");
         }
@@ -186,6 +209,24 @@ namespace Infrastructure.API
         }
 
         /// <summary>
+        /// 接続した時間を返す
+        /// </summary>
+        /// <returns>接続開始日時</returns>
+        public DateTime ConnectedTime()
+        {
+            return this.subscribedTime;
+        }
+
+        /// <summary>
+        /// 接続時に使用したアクセストークンを返す
+        /// </summary>
+        /// <returns>接続開始時アクセストークン</returns>
+        public string ConnectedAccessToken()
+        {
+            return this.subscribedAccessToken;
+        }
+
+        /// <summary>
         /// SSE 購読受信スレッド.
         /// </summary>
         /// <param name="client">HTTP Clientインスタンス.</param>
@@ -196,6 +237,7 @@ namespace Infrastructure.API
             {
                 Logger.Debug("Establishing connection");
                 this.subscribed = true;
+                this.subscribedTime = DateTime.Now;
                 var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
                 response.EnsureSuccessStatusCode();
                 Logger.Debug("response.EnsureSuccessStatusCode");

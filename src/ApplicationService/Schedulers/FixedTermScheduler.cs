@@ -213,6 +213,16 @@ namespace ApplicationService.Schedulers
                             this.shouldSynchronize = true;
                         }
                     }
+
+                    if (this.receiveNotificationRepository.IsConnected())
+                    {
+                        // アクセストークンが変わっている or 前回接続時より1時間経過している場合、再接続を行うため、一度切断する
+                        if ((volatileSetting.AccessToken.CompareTo(this.receiveNotificationRepository.ConnectedAccessToken()) != 0)
+                            || (this.receiveNotificationRepository.ConnectedTime().AddHours(1).CompareTo(DateTime.Now) < 0))
+                        {
+                            this.receiveNotificationRepository.Stop();
+                        }
+                    }
                 }
 
                 // 前回実行時間から、interval秒過ぎていなければ抜ける

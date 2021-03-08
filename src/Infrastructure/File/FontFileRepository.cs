@@ -41,10 +41,23 @@ namespace Infrastructure.File
             // 正常終了の0以外の場合
             if (ret != 0)
             {
-                throw new Exception(this.resourceWrapper.GetString("LOG_ERR_FontFileRepository_GetFontInfo_Exception"));
+                FontIdInfo errFontIdInfo = default(FontIdInfo);
+                errFontIdInfo.NameInfo.Ids.FontId = string.Empty;
+                errFontIdInfo.DeviceId = string.Empty;
+                errFontIdInfo.UserId = string.Empty;
+                errFontIdInfo.NameInfo.UniqueName = string.Empty;
+                errFontIdInfo.NameInfo.Version = string.Empty;
+                return errFontIdInfo;
             }
 
-            return (FontIdInfo)Marshal.PtrToStructure(outGotIdInfo, info.GetType());
+            var fontIdInfo = (FontIdInfo)Marshal.PtrToStructure(outGotIdInfo, info.GetType());
+            bool isLets = !string.IsNullOrEmpty(fontIdInfo.UserId) || !string.IsNullOrEmpty(fontIdInfo.DeviceId);
+            if (!isLets)
+            {
+                fontIdInfo.NameInfo.Ids.FontId = string.Empty;
+            }
+
+            return fontIdInfo;
         }
 
         /// <summary>

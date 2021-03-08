@@ -98,6 +98,11 @@ namespace Infrastructure.API
         {
             ClientApplicationVersion response = null;
 
+            if (string.IsNullOrEmpty(deviceId))
+            {
+                throw new ApiException(1001, "invalid argument");
+            }
+
             // APIの引数の値をセット(個別処理)
             this.ApiParam[APIParam.DeviceId] = deviceId;
             this.ApiParam[APIParam.AccessToken] = accessToken;
