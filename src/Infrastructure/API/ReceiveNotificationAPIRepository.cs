@@ -388,7 +388,14 @@ namespace Infrastructure.API
             try
             {
                 RegistryKey key = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Internet Settings");
-                proxyserver = (string)key.GetValue("ProxyServer");
+                if (key != null)
+                {
+                    int proxyenable = (int)key.GetValue("ProxyEnable");
+                    if (proxyenable != 0)
+                    {
+                        proxyserver = (string)key.GetValue("ProxyServer");
+                    }
+                }
 
                 if (proxyserver == null || proxyserver == string.Empty)
                 {

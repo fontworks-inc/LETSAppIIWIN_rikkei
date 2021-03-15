@@ -417,12 +417,23 @@ namespace Org.OpenAPITools.Client
             // レジストリからproxy設定を取得
             try
             {
+                string proxyserver = string.Empty;
                 RegistryKey key = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Internet Settings");
-                var proxyserver = (string)key.GetValue("ProxyServer");
-                client.Proxy = new WebProxy(proxyserver);
-                Logger.Debug("ApiClient:ProxyByRegistry=" + proxyserver);
+                if (key != null)
+                {
+                    int proxyenable = (int)key.GetValue("ProxyEnable");
+                    if (proxyenable != 0)
+                    {
+                        proxyserver = (string)key.GetValue("ProxyServer");
+                    }
+                }
 
-                if (proxyserver == null || proxyserver == "")
+                if (!string.IsNullOrEmpty(proxyserver))
+                {
+                    client.Proxy = new WebProxy(proxyserver);
+                    Logger.Debug("ApiClient:ProxyByRegistry=" + proxyserver);
+                }
+                else
                 {
                     Process p = new Process();
                     // コマンドプロンプトと同じように実行します
