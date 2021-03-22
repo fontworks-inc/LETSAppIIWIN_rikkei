@@ -873,7 +873,7 @@ namespace ApplicationService.Fonts
             var addFont = new Font(
                 idInfo.NameInfo.Ids.FontId,
                 filePath,
-                !string.IsNullOrEmpty(idInfo.UserId) || !string.IsNullOrEmpty(idInfo.DeviceId),
+                !string.IsNullOrEmpty(idInfo.NameInfo.Ids.FontId),
                 false,
                 idInfo.NameInfo.UniqueName,
                 idInfo.NameInfo.Version,

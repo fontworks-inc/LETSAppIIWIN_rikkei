@@ -1,4 +1,6 @@
-﻿namespace ApplicationService.Interfaces
+﻿using Core.Entities;
+
+namespace ApplicationService.Interfaces
 {
     /// <summary>
     /// クライアントアプリを終了するために呼び出されるイベント
@@ -57,6 +59,7 @@
         /// <param name="notContainsDeviceEvent">自デバイスの情報が端末情報に含まれていない場合に呼び出されるイベント</param>
         /// <param name="existsUnreadNotificationEvent">未読お知らせが有るときに呼び出されるイベント</param>
         /// <param name="detectionFontCopyEvent">他端末からフォントがコピーされていたときに呼び出されるイベント</param>
+        /// <param name="multipleInfo">多重起動チェック情報</param>
         /// <returns>チェック結果を返す</returns>
         bool IsCheckedStartup(
             ShutdownClientApplicationRequiredEvent shutdownClientApplicationRequiredEvent,
@@ -66,7 +69,8 @@
             StartDownloadEvent startDownloadEvent,
             NotContainsDeviceEvent notContainsDeviceEvent,
             ExistsUnreadNotificationEvent existsUnreadNotificationEvent,
-            DetectionFontCopyEvent detectionFontCopyEvent);
+            DetectionFontCopyEvent detectionFontCopyEvent,
+            MultiplePreventionInfo multipleInfo);
 
         /// <summary>
         /// 強制アップデートチェック
@@ -78,8 +82,9 @@
         /// <summary>
         /// 起動指定バージョンチェック
         /// </summary>
+        /// <param name="multipleInfo">多重起動チェック情報</param>
         /// <returns>再起動が必要な場合true、不要な場合false</returns>
-        bool StartingVersionCheck();
+        bool StartingVersionCheck(MultiplePreventionInfo multipleInfo);
 
         /// <summary>
         /// 次バージョンチェック

@@ -168,6 +168,7 @@ namespace ApplicationService.Startup
         /// <param name="notContainsDeviceEvent">自デバイスの情報が端末情報に含まれていない場合に呼び出されるイベント</param>
         /// <param name="existsUnreadNotificationEvent">未読お知らせが有るときに呼び出されるイベント</param>
         /// <param name="detectionFontCopyEvent">他端末からフォントがコピーされていたときに呼び出されるイベント</param>
+        /// <param name="multipleInfo">多重起動チェック情報</param>
         /// <returns>チェック結果を返す</returns>
         public bool IsCheckedStartup(
             ShutdownClientApplicationRequiredEvent shutdownClientApplicationRequiredEvent,
@@ -177,7 +178,8 @@ namespace ApplicationService.Startup
             StartDownloadEvent startDownloadEvent,
             NotContainsDeviceEvent notContainsDeviceEvent,
             ExistsUnreadNotificationEvent existsUnreadNotificationEvent,
-            DetectionFontCopyEvent detectionFontCopyEvent)
+            DetectionFontCopyEvent detectionFontCopyEvent,
+            MultiplePreventionInfo multipleInfo)
         {
             try
             {
@@ -205,7 +207,7 @@ namespace ApplicationService.Startup
                 this.ForceUpdateCheck(forceUpdateEvent, downloadCompletedEvent);
 
                 // 起動指定バージョンチェックを実施し、起動する別バージョンのクライアントアプリがある場合は起動中のクライアントアプリを終了する
-                if (!this.StartingVersionCheck())
+                if (!this.StartingVersionCheck(multipleInfo))
                 {
                     shutdownClientApplicationRequiredEvent();
                     return false;
@@ -301,8 +303,9 @@ namespace ApplicationService.Startup
         /// <summary>
         /// 起動指定バージョンチェック
         /// </summary>
+        /// <param name="multipleInfo">多重起動チェック情報</param>
         /// <returns>再起動が不要な場合true、必要な場合false</returns>
-        public bool StartingVersionCheck()
+        public bool StartingVersionCheck(MultiplePreventionInfo multipleInfo)
         {
             // 起動Ver情報取得APIを呼び出し、「アプリバージョン」（起動指定バージョン）を取得する
             string startingVersion = string.Empty;
@@ -340,6 +343,14 @@ namespace ApplicationService.Startup
                     string programPath = Path.Combine(startingVersionDirectoryPath, "LETS.exe");
                     if (File.Exists(programPath))
                     {
+                        // Mutexを削除する
+                        if (multipleInfo != null && multipleInfo.HasHandle)
+                        {
+                            multipleInfo.MutexInfo.ReleaseMutex();
+                            multipleInfo.MutexInfo.Close();
+                            multipleInfo.HasHandle = false;
+                        }
+
                         this.startProcessService.StartProcessAdministrator(startingVersionDirectoryPath, "LETS.exe", null, false);
 
                         Logger.Info(this.resourceWrapper.GetString("LOG_Info_StartingVersionCheck_RebootClientApplication"));

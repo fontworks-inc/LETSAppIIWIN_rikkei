@@ -100,6 +100,11 @@ namespace ApplicationService.Schedulers
         private DetectionFontCopyEvent detectionFontCopyEvent;
 
         /// <summary>
+        /// 多重起動チェック情報
+        /// </summary>
+        private MultiplePreventionInfo multipleInfo;
+
+        /// <summary>
         /// フォントの同期処理を行うべきかどうか
         /// </summary>
         private bool shouldSynchronize;
@@ -128,6 +133,7 @@ namespace ApplicationService.Schedulers
         /// <param name="notContainsDeviceEvent">自デバイスの情報が端末情報に含まれていない場合に呼び出されるイベント</param>
         /// <param name="existsUnreadNotificationEvent">未読お知らせが有るときに呼び出されるイベント</param>
         /// <param name="detectionFontCopyEvent">他端末からフォントがコピーされていたときに呼び出されるイベント</param>
+        /// <param name="multipleInfo">多重起動チェック情報</param>
         public FixedTermScheduler(
             double interval,
             ExceptionNotify exceptionNotify,
@@ -146,7 +152,8 @@ namespace ApplicationService.Schedulers
             StartDownloadEvent startDownloadEvent,
             NotContainsDeviceEvent notContainsDeviceEvent,
             ExistsUnreadNotificationEvent existsUnreadNotificationEvent,
-            DetectionFontCopyEvent detectionFontCopyEvent)
+            DetectionFontCopyEvent detectionFontCopyEvent,
+            MultiplePreventionInfo multipleInfo)
             : base(60 * MillisecondMultiplier, exceptionNotify, resourceWrapper)
         {
             this.originalInterval = interval;
@@ -166,6 +173,7 @@ namespace ApplicationService.Schedulers
             this.notContainsDeviceEvent = notContainsDeviceEvent;
             this.existsUnreadNotificationEvent = existsUnreadNotificationEvent;
             this.detectionFontCopyEvent = detectionFontCopyEvent;
+            this.multipleInfo = multipleInfo;
 
             this.shouldSynchronize = false;
 
@@ -246,7 +254,8 @@ namespace ApplicationService.Schedulers
                     this.startDownloadEvent,
                     this.notContainsDeviceEvent,
                     this.existsUnreadNotificationEvent,
-                    this.detectionFontCopyEvent))
+                    this.detectionFontCopyEvent,
+                    this.multipleInfo))
                 {
                     Logger.Info(this.ResourceWrapper.GetString("LOG_INFO_FixedTermScheduler_ScheduledEvent_IsCheckedStartup_True"));
 

@@ -33,7 +33,7 @@ namespace Infrastructure.File
             // 識別子確認のDLLを介し、情報を取得する
             var info = default(FontIdInfo);
 
-            string outValid = string.Empty;
+            string outValid = string.Empty.PadLeft(1);
             IntPtr outGotIdInfo = Marshal.AllocCoTaskMem(Marshal.SizeOf(info));
 
             int ret = f_get_id(fontFilePath, outValid, outGotIdInfo);
@@ -51,7 +51,7 @@ namespace Infrastructure.File
             }
 
             var fontIdInfo = (FontIdInfo)Marshal.PtrToStructure(outGotIdInfo, info.GetType());
-            bool isLets = !string.IsNullOrEmpty(fontIdInfo.UserId) || !string.IsNullOrEmpty(fontIdInfo.DeviceId);
+            bool isLets = outValid.CompareTo("\u0001") == 0;
             if (!isLets)
             {
                 fontIdInfo.NameInfo.Ids.FontId = string.Empty;

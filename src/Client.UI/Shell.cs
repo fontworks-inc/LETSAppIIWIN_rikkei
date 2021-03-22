@@ -67,6 +67,11 @@ namespace Client.UI
         }
 
         /// <summary>
+        /// 多重起動防止情報
+        /// </summary>
+        public static MultiplePreventionInfo MultiplePrevention { get; set; } = new Core.Entities.MultiplePreventionInfo();
+
+        /// <summary>
         /// DIコンテナに登録する型を指定する
         /// </summary>
         /// <param name="containerRegistry">コンテナレジストリ</param>
@@ -293,7 +298,8 @@ namespace Client.UI
                     () => Current.Dispatcher.Invoke(this.componentManager.StartUpdateProgramDownload),
                     () => Current.Dispatcher.Invoke(this.componentManager.ForcedLogout),
                     (numberOfUnreadMessages) => Current.Dispatcher.Invoke(() => this.componentManager.ShowNotification(numberOfUnreadMessages)),
-                    () => Current.Dispatcher.Invoke(() => this.componentManager.SetIcon())));
+                    () => Current.Dispatcher.Invoke(() => this.componentManager.SetIcon()),
+                    MultiplePrevention));
 
             // APIに強制ログアウト処理を持たせる
             apiConfiguration.ForceLogout = () =>
@@ -369,7 +375,8 @@ namespace Client.UI
                     this.componentManager.StartUpdateProgramDownload,
                     this.componentManager.ForcedLogout,
                     this.componentManager.ShowNotification,
-                    () => this.componentManager.SetIcon()))
+                    () => this.componentManager.SetIcon(),
+                    MultiplePrevention))
                 {
                     // 起動時チェック処理が処理済みとなった場合、通知受信処理を開始する
                     receiveNotificationRepository.Start(volatileSettingRepository.GetVolatileSetting().AccessToken, userStatusRepository.GetStatus().DeviceId);

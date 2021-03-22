@@ -188,7 +188,7 @@ namespace OS.Services
             {
                 // 起動中の他のアプリケーションに通知
                 fontChange = false;
-                SendMessageTimeout((IntPtr)HWNDBROADCAST, WMFONTCHANGE, IntPtr.Zero, IntPtr.Zero, 0x2, 10 * 1000, IntPtr.Zero);
+                PostMessage((IntPtr)HWNDBROADCAST, WMFONTCHANGE, 0x0, 0x0);
             }
         }
 
@@ -218,10 +218,7 @@ namespace OS.Services
             Logger.Debug("Deactivate:RemoveFontResource:" + font.Path);
 
             // 起動中の他のアプリケーションに通知
-            if (result > 0)
-            {
-                fontChange = true;
-            }
+            fontChange = true;
         }
 
         /// <summary>
@@ -276,7 +273,7 @@ namespace OS.Services
         /// <param name="lParam">メッセージの追加情報</param>
         /// <returns>メッセージ処理の結果</returns>
         [DllImport("user32.dll")]
-        private static extern int SendMessage(IntPtr hWnd, uint msg, int wParam, int lParam);
+        private static extern int PostMessage(IntPtr hWnd, uint msg, int wParam, int lParam);
 
         [DllImport("user32.dll", SetLastError = true)]
         private static extern IntPtr SendMessageTimeout(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam, int fuFlags, int uTimeout, IntPtr lpdwResult);
