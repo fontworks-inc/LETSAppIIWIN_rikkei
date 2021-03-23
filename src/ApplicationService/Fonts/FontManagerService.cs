@@ -162,6 +162,12 @@ namespace ApplicationService.Fonts
                 this.UpdateFontInfo(font);
             }
 
+            if (!this.userStatusRepository.GetStatus().IsLoggingIn)
+            {
+                // ログアウトされていたら処理を行わない
+                return;
+            }
+
             if (installFont == null)
             {
                 return;
@@ -792,6 +798,11 @@ namespace ApplicationService.Fonts
 
                                 Logger.Debug("DownloadFontFile:Path=" + installFont.Path);
 
+                                if (!this.userStatusRepository.GetStatus().IsLoggingIn)
+                                {
+                                    break;
+                                }
+
                                 if (installFont.Path != null)
                                 {
                                     Font f = new Font(installFont.FontId, installFont.FileName, true, installFont.ActivateFlg, installFont.DisplayFontName, installFont.Version, string.Empty, installFont.IsFreemium, installFont.ContractIds);
@@ -825,7 +836,10 @@ namespace ApplicationService.Fonts
 
                     if (isInstall)
                     {
-                        this.FontDownloadCompletedEvent(memory.NotificationFonts);
+                        if (this.userStatusRepository.GetStatus().IsLoggingIn)
+                        {
+                            this.FontDownloadCompletedEvent(memory.NotificationFonts);
+                        }
 
                         memory.NotificationFonts.Clear();
                     }

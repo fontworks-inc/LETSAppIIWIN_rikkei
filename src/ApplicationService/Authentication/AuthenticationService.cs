@@ -253,6 +253,10 @@ namespace ApplicationService.Authentication
             var userStatus = this.userStatusRepository.GetStatus();
             var deviceId = userStatus.DeviceId;
 
+            // [ユーザー別保存：ログイン状態]に「ログアウト」を保存する
+            userStatus.IsLoggingIn = false;
+            this.userStatusRepository.SaveStatus(userStatus);
+
             // アクセストークン取得
             var accessToken = this.volatileSettingRepository.GetVolatileSetting().AccessToken;
 
@@ -280,8 +284,8 @@ namespace ApplicationService.Authentication
             userStatus.DeviceId = string.Empty; // デバイスIDをクリアする
             this.userStatusRepository.SaveStatus(userStatus);
 
-            // お客様情報の削除
-            this.customerRepository.Delete();
+            //// お客様情報のクリア
+            this.customerRepository.SaveCustomer(new Customer());
 
             return true;
         }

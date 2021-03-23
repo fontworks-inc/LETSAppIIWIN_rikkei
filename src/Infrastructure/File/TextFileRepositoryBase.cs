@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
+using NLog;
 
 namespace Infrastructure.File
 {
@@ -7,6 +9,11 @@ namespace Infrastructure.File
     /// </summary>
     public abstract class TextFileRepositoryBase
     {
+        /// <summary>
+        /// ロガー
+        /// </summary>
+        private static readonly Logger Logger = LogManager.GetLogger("nlog.config");
+
         /// <summary>
         /// ロック用オブジェクト
         /// </summary>

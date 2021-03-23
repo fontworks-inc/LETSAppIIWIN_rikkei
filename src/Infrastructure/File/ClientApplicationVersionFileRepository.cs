@@ -1,7 +1,9 @@
-﻿using System.Text.Json;
+﻿using System;
+using System.Text.Json;
 using Core.Entities;
 using Core.Interfaces;
 using Infrastructure.API;
+using NLog;
 
 namespace Infrastructure.File
 {
@@ -10,6 +12,11 @@ namespace Infrastructure.File
     /// </summary>
     public class ClientApplicationVersionFileRepository : EncryptFileBase, IClientApplicationVersionRepository
     {
+        /// <summary>
+        /// ロガー
+        /// </summary>
+        private static readonly Logger Logger = LogManager.GetLogger("nlog.config");
+
         private ClientApplicationVersionAPIRepository clientApplicationVersionAPIRepository;
 
         /// <summary>
@@ -45,8 +52,16 @@ namespace Infrastructure.File
             if (System.IO.File.Exists(this.FilePath))
             {
                 // ファイルが存在する場合、内容を返す
-                string jsonString = this.ReadAll();
-                return JsonSerializer.Deserialize<ClientApplicationVersion>(jsonString);
+                try
+                {
+                    string jsonString = this.ReadAll();
+                    return JsonSerializer.Deserialize<ClientApplicationVersion>(jsonString);
+                }
+                catch (Exception ex)
+                {
+                    Logger.Error("GetClientApplicationVersion:" + ex.StackTrace);
+                    return new ClientApplicationVersion();
+                }
             }
             else
             {

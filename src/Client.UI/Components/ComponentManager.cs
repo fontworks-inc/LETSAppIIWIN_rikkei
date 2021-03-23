@@ -67,6 +67,7 @@ namespace Client.UI.Components
         /// </summary>
         private readonly IApplicationRuntimeRepository applicationRuntimeRepository;
 
+        /// <summary>
         /// お客様情報API
         /// </summary>
         private readonly ICustomerRepository customerRepository;
@@ -90,6 +91,11 @@ namespace Client.UI.Components
         /// フォント管理に関する処理を行うサービス
         /// </summary>
         private IFontManagerService fontManagerService = null;
+
+        /// <summary>
+        /// 多重起動防止情報
+        /// </summary>
+        private MultiplePreventionInfo multipleInfo = null;
 
         /// <summary>
         /// コンストラクタ
@@ -251,6 +257,14 @@ namespace Client.UI.Components
                 }
                 else
                 {
+                    // Mutexを削除する
+                    if (this.multipleInfo != null && this.multipleInfo.HasHandle)
+                    {
+                        this.multipleInfo.MutexInfo.ReleaseMutex();
+                        this.multipleInfo.MutexInfo.Close();
+                        this.multipleInfo.HasHandle = false;
+                    }
+
                     // 更新後のプログラムを起動する
                     // ホームドライブの取得
                     string homedrive = Environment.GetEnvironmentVariable("HOMEDRIVE");
@@ -502,6 +516,15 @@ namespace Client.UI.Components
         {
             // アイコン表示ルールに従いアイコンを設定
             this.ApplicationIcon.SetIcon(selected);
+        }
+
+        /// <summary>
+        /// 多重起動チェック情報設定
+        /// </summary>
+        /// <param name="multipleInfo">多重起動チェック情報</param>
+        public void SetMultiplePreventionInfo(MultiplePreventionInfo multipleInfo)
+        {
+            this.multipleInfo = multipleInfo;
         }
 
         /// <summary>

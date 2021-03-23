@@ -45,6 +45,11 @@ namespace OS.Services
         private readonly IUserFontsSettingRepository userFontsSettingRepository;
 
         /// <summary>
+        /// ユーザ別ステータス情報を格納するリポジトリ
+        /// </summary>
+        private readonly IUserStatusRepository userStatusRepository = null;
+
+        /// <summary>
         /// ユーザー配下のフォントフォルダ
         /// </summary>
         private readonly string fontDir = string.Empty;
@@ -53,9 +58,11 @@ namespace OS.Services
         /// インスタンスの初期化を行う
         /// </summary>
         /// <param name="userFontsSettingRepository">ユーザ別フォント情報を格納するリポジトリ</param>
-        public FontActivationService(IUserFontsSettingRepository userFontsSettingRepository)
+        /// <param name="userStatusRepository">ユーザ別ステータス情報を格納するリポジトリ</param>
+        public FontActivationService(IUserFontsSettingRepository userFontsSettingRepository, IUserStatusRepository userStatusRepository)
         {
             this.userFontsSettingRepository = userFontsSettingRepository;
+            this.userStatusRepository = userStatusRepository;
 
             // ユーザー配下のローカルフォルダ
             var local = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
@@ -69,6 +76,11 @@ namespace OS.Services
         /// <returns>インストールが成功した場合はtrueを返す</returns>
         public bool Install(Font font)
         {
+            if (!this.userStatusRepository.GetStatus().IsLoggingIn)
+            {
+                return false;
+            }
+
             try
             {
                 Logger.Debug("Install:Path(Source)=" + font.Path);
@@ -133,6 +145,11 @@ namespace OS.Services
         public bool Activate(Font font)
         {
             Logger.Debug("Activate:" + font.Path);
+
+            if (!this.userStatusRepository.GetStatus().IsLoggingIn)
+            {
+                return false;
+            }
 
             var fontPath = font.Path;
 

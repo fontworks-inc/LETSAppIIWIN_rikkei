@@ -2,6 +2,7 @@
 using System.Text.Json;
 using Core.Entities;
 using Core.Interfaces;
+using NLog;
 
 namespace Infrastructure.File
 {
@@ -10,6 +11,11 @@ namespace Infrastructure.File
     /// </summary>
     public class CustomerFileRepository : EncryptFileBase, ICustomerRepository
     {
+        /// <summary>
+        /// ロガー
+        /// </summary>
+        private static readonly Logger Logger = LogManager.GetLogger("nlog.config");
+
         /// <summary>
         /// お客様情報APIリポジトリ
         /// </summary>
@@ -37,8 +43,16 @@ namespace Infrastructure.File
             if (System.IO.File.Exists(this.FilePath))
             {
                 // ファイルが存在する場合、内容を返す
-                string jsonString = this.ReadAll();
-                return JsonSerializer.Deserialize<Customer>(jsonString);
+                try
+                {
+                    string jsonString = this.ReadAll();
+                    return JsonSerializer.Deserialize<Customer>(jsonString);
+                }
+                catch (Exception ex)
+                {
+                    Logger.Error("GetCustomer:" + ex.StackTrace);
+                    return new Customer();
+                }
             }
             else
             {

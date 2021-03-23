@@ -43,7 +43,7 @@ namespace Infrastructure.File
                 }
                 catch (Exception ex)
                 {
-                    Logger.Debug("UserStatus:" + ex.StackTrace);
+                    Logger.Error("UserStatus:" + ex.StackTrace);
                     return new UserStatus();
                 }
             }

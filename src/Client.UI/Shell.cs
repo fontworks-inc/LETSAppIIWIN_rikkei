@@ -137,7 +137,7 @@ namespace Client.UI
             containerRegistry.RegisterInstance<IDevicesRepository>(devicesRepository);
 
             // フォントのアクティベートサービス
-            var fontActivationService = new FontActivationService(userFontsSettingFileRepository);
+            var fontActivationService = new FontActivationService(userFontsSettingFileRepository, userStatusFileRepository);
             containerRegistry.Register<IFontActivationService, FontActivationService>();
 
             // 未読お知らせ情報
@@ -211,6 +211,7 @@ namespace Client.UI
 
             // アプリケーションコンポーネントを生成
             this.componentManager = new ComponentManager();
+            this.componentManager.SetMultiplePreventionInfo(MultiplePrevention);
             var componentManagerWrapper = new ComponentManagerWrapper();
             componentManagerWrapper.Manager = this.componentManager;
             containerRegistry.RegisterInstance<IComponentManagerWrapper>(componentManagerWrapper);

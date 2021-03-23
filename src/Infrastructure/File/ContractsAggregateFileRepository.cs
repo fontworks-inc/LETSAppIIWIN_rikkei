@@ -1,7 +1,9 @@
-﻿using System.Text.Json;
+﻿using System;
+using System.Text.Json;
 using Core.Entities;
 using Core.Interfaces;
 using Infrastructure.API;
+using NLog;
 
 namespace Infrastructure.File
 {
@@ -10,6 +12,11 @@ namespace Infrastructure.File
     /// </summary>
     public class ContractsAggregateFileRepository : EncryptFileBase, IContractsAggregateRepository
     {
+        /// <summary>
+        /// ロガー
+        /// </summary>
+        private static readonly Logger Logger = LogManager.GetLogger("nlog.config");
+
         private ContractsAggregateAPIRepository contractsAggregateAPIRepository;
 
         /// <summary>
@@ -31,8 +38,16 @@ namespace Infrastructure.File
             if (System.IO.File.Exists(this.FilePath))
             {
                 // ファイルが存在する場合、内容を返す
-                string jsonString = this.ReadAll();
-                return JsonSerializer.Deserialize<ContractsAggregate>(jsonString);
+                try
+                {
+                    string jsonString = this.ReadAll();
+                    return JsonSerializer.Deserialize<ContractsAggregate>(jsonString);
+                }
+                catch (Exception ex)
+                {
+                    Logger.Error("GetContractsAggregate:" + ex.StackTrace);
+                    return new ContractsAggregate();
+                }
             }
             else
             {
