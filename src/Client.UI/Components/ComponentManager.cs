@@ -267,7 +267,8 @@ namespace Client.UI.Components
 
                     // 更新後のプログラムを起動する
                     // ホームドライブの取得
-                    string homedrive = Environment.GetEnvironmentVariable("HOMEDRIVE");
+                    string appPath = AppDomain.CurrentDomain.BaseDirectory;
+                    string homedrive = appPath.Substring(0, appPath.IndexOf("\\"));
 
                     // LETSアプリの起動(ショートカットを実行する)
                     string shortcut = $@"{homedrive}\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\LETS デスクトップアプリ.lnk";

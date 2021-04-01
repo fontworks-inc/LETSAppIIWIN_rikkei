@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Net;
 using System.Text.RegularExpressions;
 using Core.Entities;
 using Infrastructure.Memory;
@@ -203,35 +204,9 @@ namespace Infrastructure.API
                 return;
             }
 
-            // アプリバージョンの取得
-            var output = string.Empty;
-            var appver = string.Empty;
-            var apppath = vSetting.ClientApplicationPath;
+            string useragent = this.APIConfiguration.GetUserAgent(vSetting.ClientApplicationPath);
 
-            if (System.IO.File.Exists(apppath))
-            {
-                FileVersionInfo versionInfo = FileVersionInfo.GetVersionInfo(apppath);
-                appver = versionInfo.ProductVersion;
-            }
-
-            System.Diagnostics.Process pro = new System.Diagnostics.Process();
-
-            pro.StartInfo.FileName = System.Environment.GetEnvironmentVariable("ComSpec");
-            pro.StartInfo.Arguments = @"/c ver";
-            pro.StartInfo.CreateNoWindow = true;
-            pro.StartInfo.UseShellExecute = false;
-            pro.StartInfo.RedirectStandardOutput = true;
-
-            pro.Start();
-            output = pro.StandardOutput.ReadToEnd();
-
-            MatchCollection matches = Regex.Matches(output, @"\d+\.\d+\.\d+\.\d+");
-            foreach (Match match in matches)
-            {
-                output = string.Concat("LETS/", appver, " (Win ", match.Value, ")");
-            }
-
-            vSetting.UserAgent = output;
+            vSetting.UserAgent = useragent;
             this.ApiParam[APIParam.UserAgent] = vSetting.UserAgent;
         }
 
@@ -245,6 +220,7 @@ namespace Infrastructure.API
             Configuration config = new Configuration();
             config.BasePath = this.BasePath;
             config.UserAgent = (string)this.ApiParam[APIParam.UserAgent];
+            config.WebProxy = this.APIConfiguration.GetWebProxy(this.BasePath);
             if (!this.ApiParam.ContainsKey(APIParam.RefreshToken) || (string)this.ApiParam[APIParam.RefreshToken] == string.Empty)
             {
                 this.ApiParam[APIParam.RefreshToken] = vSetting.RefreshToken;
@@ -299,7 +275,7 @@ namespace Infrastructure.API
             catch (Exception e)
             {
                 // throw;
-                Logger.Debug("RefreshAccessToken:Exception=" + e.Message + "\n" + e.StackTrace);
+                Logger.Error("RefreshAccessToken:Exception=" + e.Message + "\n" + e.StackTrace);
                 return -4;
             }
 

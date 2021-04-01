@@ -81,8 +81,20 @@ namespace Client.UI
                 string selfpath = System.Reflection.Assembly.GetExecutingAssembly().Location;
                 System.IO.FileInfo fi = new System.IO.FileInfo(selfpath);
 
-                Logger.Debug("===========================================");
-                Logger.Debug("LETS.exe:CreationTime=" + fi.CreationTime);
+                System.Diagnostics.Process pro = new System.Diagnostics.Process();
+
+                pro.StartInfo.FileName = System.Environment.GetEnvironmentVariable("ComSpec");
+                pro.StartInfo.Arguments = @"/c ver";
+                pro.StartInfo.CreateNoWindow = true;
+                pro.StartInfo.UseShellExecute = false;
+                pro.StartInfo.RedirectStandardOutput = true;
+
+                pro.Start();
+                string output = pro.StandardOutput.ReadToEnd();
+
+                Logger.Warn("===========================================");
+                Logger.Warn("LETS.exe:CreationTime=" + fi.CreationTime);
+                Logger.Warn(output);
                 this.SetLogAccessEveryone();
             }
 
@@ -94,6 +106,10 @@ namespace Client.UI
             // 共通設定情報
             var applicationSettingRepository = new ApplicationSettingFileRepository(Path.Combine(ApplicationSettingFolder, "appsettings.json"));
             containerRegistry.RegisterInstance<IApplicationSettingRepository>(applicationSettingRepository);
+
+            // プロキシ認証情報
+            var proxyAuthSettingRepository = new ProxyAuthSettingFileRepository(Path.Combine(ApplicationSettingFolder, "puroxyauth.json"));
+            containerRegistry.RegisterInstance<IProxyAuthSettingRepository>(proxyAuthSettingRepository);
 
             // 共通保存情報
             var applicationRuntimeRepository = new ApplicationRuntimeFileRepository(Path.Combine(ApplicationSettingFolder, "appruntime.json"));
@@ -110,7 +126,7 @@ namespace Client.UI
 
             // APIConfiguration
             ApplicationSetting applicationSetting = applicationSettingRepository.GetSetting();
-            var apiConfiguration = new APIConfiguration(applicationSetting.FontDeliveryServerUri, applicationSetting.NotificationServerUri, applicationSetting.FixedTermConfirmationInterval, applicationSetting.CommunicationRetryCount);
+            var apiConfiguration = new APIConfiguration(applicationSetting.FontDeliveryServerUri, applicationSetting.NotificationServerUri, applicationSetting.FixedTermConfirmationInterval, applicationSetting.CommunicationRetryCount, proxyAuthSettingRepository);
 
             // フォント情報
             var userFontsSettingFileRepository = new UserFontsSettingFileRepository(Path.Combine(UserDataDirectory, "fonts.dat"));
@@ -198,7 +214,7 @@ namespace Client.UI
                 new AuthenticationService((Application.Current as PrismApplication).Container));
 
             // 更新プログラムダウンロードサービス
-            var applicationDownloadService = new ApplicationDownloadService(resourceWrapper, volatileSettingMemoryRepository, applicationRuntimeRepository);
+            var applicationDownloadService = new ApplicationDownloadService(resourceWrapper, volatileSettingMemoryRepository, applicationRuntimeRepository, (IAPIConfiguration)apiConfiguration);
             containerRegistry.RegisterInstance<IApplicationDownloadService>(applicationDownloadService);
 
             // プロセス実施サービス
@@ -457,7 +473,8 @@ namespace Client.UI
             try
             {
                 // ホームドライブの取得
-                string homedrive = Environment.GetEnvironmentVariable("HOMEDRIVE");
+                string appPath = AppDomain.CurrentDomain.BaseDirectory;
+                string homedrive = appPath.Substring(0, appPath.IndexOf("\\"));
 
                 // ログフォルダ
                 string letsfolder = $@"{homedrive}\ProgramData\Fontworks\LETS\config";

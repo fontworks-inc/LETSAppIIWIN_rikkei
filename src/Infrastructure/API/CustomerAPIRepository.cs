@@ -89,6 +89,7 @@ namespace Infrastructure.API
             Configuration config = new Configuration();
             config.BasePath = this.BasePath;
             config.UserAgent = (string)this.ApiParam[APIParam.UserAgent];
+            config.WebProxy = this.APIConfiguration.GetWebProxy(this.BasePath);
             config.AccessToken = (string)this.ApiParam[APIParam.AccessToken];
             CustomerApi apiInstance = new CustomerApi(config);
             this.ApiResponse = apiInstance.GetCustomer((string)this.ApiParam[APIParam.DeviceId], (string)this.ApiParam[APIParam.UserAgent]);

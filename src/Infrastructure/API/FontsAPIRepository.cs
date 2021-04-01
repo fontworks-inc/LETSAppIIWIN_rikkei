@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using Core.Entities;
 using Core.Interfaces;
@@ -145,6 +146,7 @@ namespace Infrastructure.API
             Configuration config = new Configuration();
             config.BasePath = this.BasePath;
             config.UserAgent = (string)this.ApiParam[APIParam.UserAgent];
+            config.WebProxy = this.APIConfiguration.GetWebProxy(this.BasePath);
             config.AccessToken = (string)this.ApiParam[APIParam.AccessToken];
             FontApi apiInstance = new FontApi(config);
             this.ApiResponse = apiInstance.GetFont((string)this.ApiParam[APIParam.DeviceId], config.UserAgent, (string)this.ApiParam[APIParam.FontId]);
@@ -158,6 +160,7 @@ namespace Infrastructure.API
             Configuration config = new Configuration();
             config.BasePath = this.BasePath;
             config.UserAgent = (string)this.ApiParam[APIParam.UserAgent];
+            config.WebProxy = this.APIConfiguration.GetWebProxy(this.BasePath);
             config.AccessToken = (string)this.ApiParam[APIParam.AccessToken];
             FontApi apiInstance = new FontApi(config);
             this.ApiResponse = apiInstance.GetInstallFonts((string)this.ApiParam[APIParam.DeviceId], config.UserAgent, (string)this.ApiParam[APIParam.Contains]);

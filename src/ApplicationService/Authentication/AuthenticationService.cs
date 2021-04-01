@@ -179,10 +179,21 @@ namespace ApplicationService.Authentication
             }
             catch (SystemException ret)
             {
-                return new AuthenticationInformationResponse()
+                try
                 {
-                    Code = int.Parse(ret.Message),
-                };
+                    return new AuthenticationInformationResponse()
+                    {
+                        Code = int.Parse(ret.Message),
+                    };
+                }
+                catch (Exception)
+                {
+                    return new AuthenticationInformationResponse()
+                    {
+                        Message = ret.Message,
+                        Code = -1,
+                    };
+                }
             }
 
             // ユーザ別保存：デバイスIDに保存

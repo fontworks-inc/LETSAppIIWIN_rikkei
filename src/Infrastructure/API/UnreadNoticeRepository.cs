@@ -1,4 +1,5 @@
-﻿using Core.Entities;
+﻿using System;
+using Core.Entities;
 using Core.Interfaces;
 using NLog;
 using Org.OpenAPITools.Api;
@@ -77,6 +78,7 @@ namespace Infrastructure.API
             Configuration config = new Configuration();
             config.BasePath = this.BasePath;
             config.UserAgent = (string)this.ApiParam[APIParam.UserAgent];
+            config.WebProxy = this.APIConfiguration.GetWebProxy(this.BasePath);
             config.AccessToken = (string)this.ApiParam[APIParam.AccessToken];
             NoticeApi apiInstance = new NoticeApi(config);
             this.ApiResponse = apiInstance.GetNotice((string)this.ApiParam[APIParam.DeviceId], config.UserAgent);

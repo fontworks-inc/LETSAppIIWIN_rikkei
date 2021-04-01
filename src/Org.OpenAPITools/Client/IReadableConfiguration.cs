@@ -11,6 +11,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Security.Cryptography.X509Certificates;
 
 namespace Org.OpenAPITools.Client
@@ -80,6 +81,12 @@ namespace Org.OpenAPITools.Client
         /// </summary>
         /// <value>User agent.</value>
         string UserAgent { get; }
+
+        /// <summary>
+        /// Gets the WebProxy.
+        /// </summary>
+        /// <value>WebProxy.</value>
+        IWebProxy WebProxy { get; }
 
         /// <summary>
         /// Gets the username.

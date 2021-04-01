@@ -144,6 +144,7 @@ namespace Infrastructure.API
             Configuration config = new Configuration();
             config.BasePath = this.BasePath;
             config.UserAgent = (string)this.ApiParam[APIParam.UserAgent];
+            config.WebProxy = this.APIConfiguration.GetWebProxy(this.BasePath);
             config.AccessToken = (string)this.ApiParam[APIParam.AccessToken];
             ClientAppApi apiInstance = new ClientAppApi(config);
             this.ApiResponse = apiInstance.GetClientAppUpdateInfo((string)this.ApiParam[APIParam.DeviceId], config.UserAgent);
@@ -157,6 +158,7 @@ namespace Infrastructure.API
             Configuration config = new Configuration();
             config.BasePath = this.BasePath;
             config.UserAgent = (string)this.ApiParam[APIParam.UserAgent];
+            config.WebProxy = this.APIConfiguration.GetWebProxy(this.BasePath);
             config.AccessToken = (string)this.ApiParam[APIParam.AccessToken];
             ClientAppApi apiInstance = new ClientAppApi(config);
             this.ApiResponse = apiInstance.GetClientAppVersion((string)this.ApiParam[APIParam.DeviceId], config.UserAgent);

@@ -95,17 +95,14 @@ namespace Infrastructure.API
             if (this.client == null)
             {
                 HttpClientHandler ch = new HttpClientHandler();
-                string proxyserver = this.GetProxyServer();
+                UserStatus userStatus = this.userStatusRepository.GetStatus();
+                IWebProxy proxyserver = this.APIConfiguration.GetWebProxy(this.NotifyBasePath);
                 if (proxyserver != null)
                 {
-                    ch.Proxy = new WebProxy(proxyserver);
-                    ch.UseProxy = true;
-                    this.client = new HttpClient(ch);
+                    ch.Proxy = proxyserver;
                 }
-                else
-                {
-                    this.client = new HttpClient();
-                }
+
+                this.client = new HttpClient(ch);
 
                 this.client.BaseAddress = new Uri(this.NotifyBasePath);
                 this.client.Timeout = Timeout.InfiniteTimeSpan;
@@ -145,35 +142,9 @@ namespace Infrastructure.API
                 return vSetting.UserAgent;
             }
 
-            // アプリバージョンの取得
-            var output = string.Empty;
-            var appver = string.Empty;
-            var apppath = vSetting.ClientApplicationPath;
+            var useragent = this.APIConfiguration.GetUserAgent(vSetting.ClientApplicationPath);
 
-            if (System.IO.File.Exists(apppath))
-            {
-                FileVersionInfo versionInfo = FileVersionInfo.GetVersionInfo(apppath);
-                appver = versionInfo.ProductVersion;
-            }
-
-            System.Diagnostics.Process pro = new System.Diagnostics.Process();
-
-            pro.StartInfo.FileName = System.Environment.GetEnvironmentVariable("ComSpec");
-            pro.StartInfo.Arguments = @"/c ver";
-            pro.StartInfo.CreateNoWindow = true;
-            pro.StartInfo.UseShellExecute = false;
-            pro.StartInfo.RedirectStandardOutput = true;
-
-            pro.Start();
-            output = pro.StandardOutput.ReadToEnd();
-
-            MatchCollection matches = Regex.Matches(output, @"\d+\.\d+\.\d+\.\d+");
-            foreach (Match match in matches)
-            {
-                output = string.Concat("LETS/", appver, " (Win ", match.Value, ")");
-            }
-
-            vSetting.UserAgent = output;
+            vSetting.UserAgent = useragent;
             return vSetting.UserAgent;
         }
 
@@ -373,69 +344,6 @@ namespace Infrastructure.API
                     // Parseに失敗したら設定しない
                 }
             }
-        }
-
-        private string GetProxyServer()
-        {
-            VolatileSetting vSetting = SingletonVolatileSetting.GetInstance();
-            if (vSetting.ProxyServer != string.Empty)
-            {
-                return vSetting.ProxyServer;
-            }
-
-            string proxyserver = null;
-
-            try
-            {
-                RegistryKey key = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Internet Settings");
-                if (key != null)
-                {
-                    int proxyenable = (int)key.GetValue("ProxyEnable");
-                    if (proxyenable != 0)
-                    {
-                        proxyserver = (string)key.GetValue("ProxyServer");
-                    }
-                }
-
-                if (proxyserver == null || proxyserver == string.Empty)
-                {
-                    Process p = new Process();
-
-                    // コマンドプロンプトと同じように実行します
-                    p.StartInfo.FileName = System.Environment.GetEnvironmentVariable("ComSpec");
-                    p.StartInfo.Arguments = "/c " + "netsh winhttp show proxy"; // 実行するファイル名（コマンド）
-                    p.StartInfo.CreateNoWindow = true; // コンソール・ウィンドウは開かない
-                    p.StartInfo.UseShellExecute = false; // シェル機能を使用しない
-                    p.StartInfo.RedirectStandardOutput = true;
-                    p.Start();
-                    string cmdresult = p.StandardOutput.ReadToEnd();
-                    p.WaitForExit();
-
-                    var lines = cmdresult.Replace("\r\n", "\n").Split(new[] { '\n', '\r' });
-                    foreach (string line in lines)
-                    {
-                        var words = line.Replace("  ", " ").Split(' ');
-                        string preWord = string.Empty;
-                        foreach (string w in words)
-                        {
-                            if (preWord == "サーバー:")
-                            {
-                                proxyserver = w;
-                            }
-
-                            preWord = w;
-                        }
-                    }
-                }
-            }
-            catch (Exception)
-            {
-                // Proxy設定に失敗したら無視する
-            }
-
-            vSetting.ProxyServer = proxyserver;
-
-            return proxyserver;
         }
     }
 }

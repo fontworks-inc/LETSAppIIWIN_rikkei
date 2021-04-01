@@ -41,6 +41,11 @@ namespace ApplicationService.Startup
         private IApplicationRuntimeRepository applicationRuntimeRepository;
 
         /// <summary>
+        /// APIアクセスの設定情報を格納するリポジトリ
+        /// </summary>
+        private IAPIConfiguration aPIConfiguration;
+
+        /// <summary>
         /// ダウンロード完了時に呼び出されるComponent側のイベント
         /// </summary>
         private DownloadCompletedComponentEvent downloadCompletedComponentEvent = null;
@@ -74,15 +79,18 @@ namespace ApplicationService.Startup
         /// <param name="volatileSettingRepository">メモリで保持する情報を格納するリポジトリ</param>
         /// <param name="applicationRuntimeRepository">共通保存情報情報を格納するリポジトリ</param>
         /// <param name="timeoutMillisecond">タイムアウトまでの時間（デフォルトでは60秒）</param>
+        /// <param name="aPIConfiguration">APIアクセスの設定</param>
         public ApplicationDownloadService(
             IResourceWrapper resourceWrapper,
             IVolatileSettingRepository volatileSettingRepository,
             IApplicationRuntimeRepository applicationRuntimeRepository,
+            IAPIConfiguration aPIConfiguration,
             int timeoutMillisecond = 600000)
         {
             this.resourceWrapper = resourceWrapper;
             this.volatileSettingRepository = volatileSettingRepository;
             this.applicationRuntimeRepository = applicationRuntimeRepository;
+            this.aPIConfiguration = aPIConfiguration;
             this.timeoutMillisecond = timeoutMillisecond;
         }
 
@@ -162,10 +170,11 @@ namespace ApplicationService.Startup
 
             // ダウンロードURL
             Uri url = new Uri(installer.Url);
-            string proxyserver = this.GetProxyServer();
+            IWebProxy proxyServer = this.aPIConfiguration.GetWebProxy(installer.Url);
 
             // ダウンロード先のファイルパス
-            string homedrive = Environment.GetEnvironmentVariable("HOMEDRIVE");
+            string appPath = AppDomain.CurrentDomain.BaseDirectory;
+            string homedrive = appPath.Substring(0, appPath.IndexOf("\\"));
             string dirPath = Path.Combine($@"{homedrive}\ProgramData\Fontworks\LETS", "LETS-Ver" + installer.Version);
             string fileName = string.Format(FileNameTamplate, installer.Version);
             string filePath = Path.Combine(dirPath, fileName);
@@ -179,9 +188,9 @@ namespace ApplicationService.Startup
             if (this.webClient == null)
             {
                 this.webClient = new MyWebClient(this.timeoutMillisecond);
-                if (!string.IsNullOrEmpty(proxyserver))
+                if (proxyServer != null)
                 {
-                    this.webClient.Proxy = new WebProxy(proxyserver);
+                    this.webClient.Proxy = proxyServer;
                 }
 
                 // イベントハンドラの作成
@@ -221,69 +230,6 @@ namespace ApplicationService.Startup
                 VolatileSetting volatileSetting = this.volatileSettingRepository.GetVolatileSetting();
                 volatileSetting.IsDownloading = false;
             }
-        }
-
-        private string GetProxyServer()
-        {
-            VolatileSetting vSetting = this.volatileSettingRepository.GetVolatileSetting();
-            if (vSetting.ProxyServer != string.Empty)
-            {
-                return vSetting.ProxyServer;
-            }
-
-            string proxyserver = null;
-
-            try
-            {
-                RegistryKey key = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Internet Settings");
-                if (key != null)
-                {
-                    int proxyenable = (int)key.GetValue("ProxyEnable");
-                    if (proxyenable != 0)
-                    {
-                        proxyserver = (string)key.GetValue("ProxyServer");
-                    }
-                }
-
-                if (proxyserver == null || proxyserver == string.Empty)
-                {
-                    Process p = new Process();
-
-                    // コマンドプロンプトと同じように実行します
-                    p.StartInfo.FileName = System.Environment.GetEnvironmentVariable("ComSpec");
-                    p.StartInfo.Arguments = "/c " + "netsh winhttp show proxy"; // 実行するファイル名（コマンド）
-                    p.StartInfo.CreateNoWindow = true; // コンソール・ウィンドウは開かない
-                    p.StartInfo.UseShellExecute = false; // シェル機能を使用しない
-                    p.StartInfo.RedirectStandardOutput = true;
-                    p.Start();
-                    string cmdresult = p.StandardOutput.ReadToEnd();
-                    p.WaitForExit();
-
-                    var lines = cmdresult.Replace("\r\n", "\n").Split(new[] { '\n', '\r' });
-                    foreach (string line in lines)
-                    {
-                        var words = line.Replace("  ", " ").Split(' ');
-                        string preWord = string.Empty;
-                        foreach (string w in words)
-                        {
-                            if (preWord == "サーバー:")
-                            {
-                                proxyserver = w;
-                            }
-
-                            preWord = w;
-                        }
-                    }
-                }
-            }
-            catch (Exception)
-            {
-                // Proxy設定に失敗したら無視する
-            }
-
-            vSetting.ProxyServer = proxyserver;
-
-            return proxyserver;
         }
 
         private class MyWebClient : WebClient

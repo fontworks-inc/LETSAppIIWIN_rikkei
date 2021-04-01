@@ -1,4 +1,5 @@
-﻿using Core.Entities;
+﻿using System;
+using Core.Entities;
 using Core.Interfaces;
 using Newtonsoft.Json;
 using NLog;
@@ -148,6 +149,7 @@ namespace Infrastructure.API
             Configuration config = new Configuration();
             config.BasePath = this.BasePath;
             config.UserAgent = (string)this.ApiParam[APIParam.UserAgent];
+            config.WebProxy = this.APIConfiguration.GetWebProxy(this.BasePath);
             config.AccessToken = (string)this.ApiParam[APIParam.AccessToken];
             FontSecurityApi apiInstance = new FontSecurityApi(config);
             this.ApiResponse = apiInstance.GetUserId((string)this.ApiParam[APIParam.DeviceId], config.UserAgent);
@@ -161,6 +163,7 @@ namespace Infrastructure.API
             Configuration config = new Configuration();
             config.BasePath = this.BasePath;
             config.UserAgent = (string)this.ApiParam[APIParam.UserAgent];
+            config.WebProxy = this.APIConfiguration.GetWebProxy(this.BasePath);
             config.AccessToken = (string)this.ApiParam[APIParam.AccessToken];
             FontSecurityApi apiInstance = new FontSecurityApi(config);
             var body = new InlineObject5(
@@ -179,6 +182,7 @@ namespace Infrastructure.API
             Configuration config = new Configuration();
             config.BasePath = this.BasePath;
             config.UserAgent = (string)this.ApiParam[APIParam.UserAgent];
+            config.WebProxy = this.APIConfiguration.GetWebProxy(this.BasePath);
             config.AccessToken = (string)this.ApiParam[APIParam.AccessToken];
             FontSecurityApi apiInstance = new FontSecurityApi(config);
             this.ApiResponse = apiInstance.NotifyVerifiedFonts((string)this.ApiParam[APIParam.DeviceId], config.UserAgent);

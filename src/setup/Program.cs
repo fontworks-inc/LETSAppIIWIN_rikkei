@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Text.RegularExpressions;
 using System.Threading;
 
 namespace setup
@@ -9,6 +10,39 @@ namespace setup
     {
         static void Main(string[] args)
         {
+            System.Diagnostics.Process pro = new System.Diagnostics.Process();
+
+            pro.StartInfo.FileName = System.Environment.GetEnvironmentVariable("ComSpec");
+            pro.StartInfo.Arguments = @"/c ver";
+            pro.StartInfo.CreateNoWindow = true;
+            pro.StartInfo.UseShellExecute = false;
+            pro.StartInfo.RedirectStandardOutput = true;
+
+            pro.Start();
+            string output = pro.StandardOutput.ReadToEnd();
+            string[] versions = null;
+
+            MatchCollection matches = Regex.Matches(output, @"\d+\.\d+\.\d+(\.\d+)?");
+            foreach (Match match in matches)
+            {
+                versions = match.Value.Split('.');
+            }
+            if (versions != null)
+            {
+                try
+                {
+                    int major = int.Parse(versions[0]);
+                    if (major < 10)
+                    {
+                        System.Windows.Forms.MessageBox.Show("Windows10 未満の OS では LETS をご利用できません。");
+                        return;
+                    }
+                }
+                catch (Exception)
+                {
+                    // NOP
+                }
+            }
             //var os = Environment.OSVersion;
             //if (os.Version.Major < 10)
             //{
@@ -17,7 +51,8 @@ namespace setup
             //}
 
             // ホームドライブの取得
-            string homedrive = Environment.GetEnvironmentVariable("HOMEDRIVE");
+            string winDir = System.Environment.GetFolderPath(Environment.SpecialFolder.Windows);
+            string homedrive = winDir.Substring(0, winDir.IndexOf("\\"));
 
             // ショートカットにバッチがあるか確認
             // LETSアプリの起動(ショートカットを実行する)

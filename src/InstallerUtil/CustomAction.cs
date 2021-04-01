@@ -33,7 +33,8 @@ namespace InstallerUtil
             ExitLETS();
 
             // ホームドライブの取得
-            string homedrive = Environment.GetEnvironmentVariable("HOMEDRIVE");
+            string winDir = System.Environment.GetFolderPath(Environment.SpecialFolder.Windows);
+            string homedrive = winDir.Substring(0, winDir.IndexOf("\\"));
 
             // LETSフォルダ
             string letsfolder = $@"{homedrive}\ProgramData\Fontworks\LETS";
@@ -95,7 +96,7 @@ namespace InstallerUtil
                     File.Move($@"{uninstallfontsbat}", destfile);
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // NOP
             }
@@ -205,7 +206,8 @@ namespace InstallerUtil
             base.Uninstall(savedState);
 
             // ホームドライブの取得
-            string homedrive = Environment.GetEnvironmentVariable("HOMEDRIVE");
+            string winDir = System.Environment.GetFolderPath(Environment.SpecialFolder.Windows);
+            string homedrive = winDir.Substring(0, winDir.IndexOf("\\"));
 
             // LETSフォルダ
             string letsfolder = $@"{homedrive}\ProgramData\Fontworks\LETS";

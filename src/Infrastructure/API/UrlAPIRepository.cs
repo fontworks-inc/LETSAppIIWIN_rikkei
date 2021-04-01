@@ -1,4 +1,5 @@
-﻿using Core.Entities;
+﻿using System;
+using Core.Entities;
 using Core.Interfaces;
 using Org.OpenAPITools.Api;
 using Org.OpenAPITools.Client;
@@ -203,6 +204,7 @@ namespace Infrastructure.API
             Configuration config = new Configuration();
             config.BasePath = this.BasePath;
             config.UserAgent = (string)this.ApiParam[APIParam.UserAgent];
+            config.WebProxy = this.APIConfiguration.GetWebProxy(this.BasePath);
             LoginApi apiInstance = new LoginApi(config);
             this.ApiResponse = apiInstance.GetPasswordResetUrl(config.UserAgent);
         }
@@ -215,6 +217,7 @@ namespace Infrastructure.API
             Configuration config = new Configuration();
             config.BasePath = this.BasePath;
             config.UserAgent = (string)this.ApiParam[APIParam.UserAgent];
+            config.WebProxy = this.APIConfiguration.GetWebProxy(this.BasePath);
             LoginApi apiInstance = new LoginApi(config);
             this.ApiResponse = apiInstance.GetMemberRegistrationUrl(config.UserAgent);
         }
@@ -227,6 +230,7 @@ namespace Infrastructure.API
             Configuration config = new Configuration();
             config.BasePath = this.BasePath;
             config.UserAgent = (string)this.ApiParam[APIParam.UserAgent];
+            config.WebProxy = this.APIConfiguration.GetWebProxy(this.BasePath);
             config.AccessToken = (string)this.ApiParam[APIParam.AccessToken];
             ContractApi apiInstance = new ContractApi(config);
             this.ApiResponse = apiInstance.GetHomeUrl((string)this.ApiParam[APIParam.DeviceId], config.UserAgent);
@@ -240,6 +244,7 @@ namespace Infrastructure.API
             Configuration config = new Configuration();
             config.BasePath = this.BasePath;
             config.UserAgent = (string)this.ApiParam[APIParam.UserAgent];
+            config.WebProxy = this.APIConfiguration.GetWebProxy(this.BasePath);
             config.AccessToken = (string)this.ApiParam[APIParam.AccessToken];
             NoticeApi apiInstance = new NoticeApi(config);
             this.ApiResponse = apiInstance.GetNoticeUrl((string)this.ApiParam[APIParam.DeviceId], config.UserAgent);
@@ -253,6 +258,7 @@ namespace Infrastructure.API
             Configuration config = new Configuration();
             config.BasePath = this.BasePath;
             config.UserAgent = (string)this.ApiParam[APIParam.UserAgent];
+            config.WebProxy = this.APIConfiguration.GetWebProxy(this.BasePath);
             config.AccessToken = (string)this.ApiParam[APIParam.AccessToken];
             FontApi apiInstance = new FontApi(config);
             this.ApiResponse = apiInstance.GetFontListUrl((string)this.ApiParam[APIParam.DeviceId], config.UserAgent);

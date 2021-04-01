@@ -120,7 +120,8 @@ namespace Infrastructure.File
 
             // uninstall情報フォルダを作成
             // ホームドライブの取得
-            string homedrive = Environment.GetEnvironmentVariable("HOMEDRIVE");
+            string appPath = AppDomain.CurrentDomain.BaseDirectory;
+            string homedrive = appPath.Substring(0, appPath.IndexOf("\\"));
 
             // LETSフォルダ
             string letsfolder = $@"{homedrive}\ProgramData\Fontworks\LETS";

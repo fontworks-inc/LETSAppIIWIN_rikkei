@@ -407,72 +407,17 @@ namespace Org.OpenAPITools.Client
                 client.UserAgent = configuration.UserAgent;
             }
 
+            if (configuration.WebProxy != null)
+            {
+                client.Proxy = configuration.WebProxy;
+            }
+
             if (configuration.ClientCertificates != null)
             {
                 client.ClientCertificates = configuration.ClientCertificates;
             }
 
             InterceptRequest(req);
-
-            // レジストリからproxy設定を取得
-            try
-            {
-                string proxyserver = string.Empty;
-                RegistryKey key = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Internet Settings");
-                if (key != null)
-                {
-                    int proxyenable = (int)key.GetValue("ProxyEnable");
-                    if (proxyenable != 0)
-                    {
-                        proxyserver = (string)key.GetValue("ProxyServer");
-                    }
-                }
-
-                if (!string.IsNullOrEmpty(proxyserver))
-                {
-                    client.Proxy = new WebProxy(proxyserver);
-                    Logger.Debug("ApiClient:ProxyByRegistry=" + proxyserver);
-                }
-                else
-                {
-                    Process p = new Process();
-                    // コマンドプロンプトと同じように実行します
-                    p.StartInfo.FileName = System.Environment.GetEnvironmentVariable("ComSpec");
-                    p.StartInfo.Arguments = "/c " + "netsh winhttp show proxy"; // 実行するファイル名（コマンド）
-                    p.StartInfo.CreateNoWindow = true; // コンソール・ウィンドウは開かない
-                    p.StartInfo.UseShellExecute = false; // シェル機能を使用しない
-                    p.StartInfo.RedirectStandardOutput = true;
-                    p.Start();
-                    string cmdresult = p.StandardOutput.ReadToEnd();
-                    p.WaitForExit();
-
-                    var lines = cmdresult.Replace("\r\n", "\n").Split(new[] { '\n', '\r' });
-                    foreach (string line in lines)
-                    {
-                        var words = line.Replace("  ", " ").Split(' ');
-                        string preWord = "";
-                        foreach (string w in words)
-                        {
-                            if (preWord == "サーバー:")
-                            {
-                                proxyserver = w;
-                                if (proxyserver != "")
-                                {
-                                    client.Proxy = new WebProxy(proxyserver);
-                                    break;
-                                }
-                            }
-                            preWord = w;
-                        }
-                    }
-
-                }
-            }
-            catch (Exception e)
-            {
-                //Proxy設定に失敗したら握りつぶす
-                Logger.Debug("ApiClient:ProxyByGetDefaultProxy=" + e.Message + "\n" + e.StackTrace);
-            }
 
             var response = client.Execute<T>(req);
 
@@ -482,6 +427,11 @@ namespace Org.OpenAPITools.Client
             if (response.ErrorMessage != null)
             {
                 result.ErrorText = response.ErrorMessage;
+            }
+
+            if (response.StatusCode == HttpStatusCode.ProxyAuthenticationRequired)
+            {
+                throw new ApiException((int)response.StatusCode, response.StatusDescription);
             }
 
             if (response.Cookies != null && response.Cookies.Count > 0)
@@ -537,6 +487,11 @@ namespace Org.OpenAPITools.Client
                 client.UserAgent = configuration.UserAgent;
             }
 
+            if (configuration.WebProxy != null)
+            {
+                client.Proxy = configuration.WebProxy;
+            }
+
             if (configuration.ClientCertificates != null)
             {
                 client.ClientCertificates = configuration.ClientCertificates;
@@ -552,6 +507,11 @@ namespace Org.OpenAPITools.Client
             if (response.ErrorMessage != null)
             {
                 result.ErrorText = response.ErrorMessage;
+            }
+
+            if (response.StatusCode == HttpStatusCode.ProxyAuthenticationRequired)
+            {
+                throw new ApiException((int)response.StatusCode, response.StatusDescription);
             }
 
             if (response.Cookies != null && response.Cookies.Count > 0)

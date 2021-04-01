@@ -1,4 +1,5 @@
-﻿using Core.Entities;
+﻿using System;
+using Core.Entities;
 using Core.Interfaces;
 using NLog;
 using Org.OpenAPITools.Api;
@@ -155,6 +156,7 @@ namespace Infrastructure.API
             Configuration config = new Configuration();
             config.BasePath = this.BasePath;
             config.UserAgent = (string)this.ApiParam[APIParam.UserAgent];
+            config.WebProxy = this.APIConfiguration.GetWebProxy(this.BasePath);
             LoginApi apiInstance = new LoginApi(config);
             var body = new InlineObject(
                 (string)this.ApiParam[APIParam.MailAddress],
@@ -173,6 +175,7 @@ namespace Infrastructure.API
             Configuration config = new Configuration();
             config.BasePath = this.BasePath;
             config.UserAgent = (string)this.ApiParam[APIParam.UserAgent];
+            config.WebProxy = this.APIConfiguration.GetWebProxy(this.BasePath);
             config.AccessToken = (string)this.ApiParam[APIParam.AccessToken];
             LoginApi apiInstance = new LoginApi(config);
             var body = new object();
@@ -187,6 +190,7 @@ namespace Infrastructure.API
             Configuration config = new Configuration();
             config.BasePath = this.BasePath;
             config.UserAgent = (string)this.ApiParam[APIParam.UserAgent];
+            config.WebProxy = this.APIConfiguration.GetWebProxy(this.BasePath);
             LoginApi apiInstance = new LoginApi(config);
             var body = new InlineObject1((string)this.ApiParam[APIParam.TwoFactCode]);
             this.ApiResponse = apiInstance.Auth2fact((string)this.ApiParam[APIParam.DeviceId], config.UserAgent, body);

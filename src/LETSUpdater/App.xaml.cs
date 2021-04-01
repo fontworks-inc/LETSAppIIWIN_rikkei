@@ -45,7 +45,8 @@ namespace Updater
         private static void updateLETS(string updateVersion, string runVersion)
         {
             // ホームドライブの取得
-            string homedrive = Environment.GetEnvironmentVariable("HOMEDRIVE");
+            string appPath = AppDomain.CurrentDomain.BaseDirectory;
+            string homedrive = appPath.Substring(0, appPath.IndexOf("\\"));
 
             // LETSプログラムフォルダの取得
             string letsFolder = $@"{homedrive}\ProgramData\Fontworks\LETS";
@@ -133,7 +134,8 @@ namespace Updater
                     return -1;
                 }
 
-                string homedrive = Environment.GetEnvironmentVariable("HOMEDRIVE");
+                string appPath = AppDomain.CurrentDomain.BaseDirectory;
+                string homedrive = appPath.Substring(0, appPath.IndexOf("\\"));
                 string letsFolder = $@"{homedrive}\ProgramData\Fontworks\LETS";
                 string verFolderPrefix = $@"{letsFolder}\LETS-Ver";
                 int lenPrefix = verFolderPrefix.Length;

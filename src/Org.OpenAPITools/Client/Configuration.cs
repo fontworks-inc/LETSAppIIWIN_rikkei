@@ -14,6 +14,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Security.Cryptography.X509Certificates;
 
 namespace Org.OpenAPITools.Client
@@ -192,6 +193,12 @@ namespace Org.OpenAPITools.Client
         /// </summary>
         /// <value>Http user agent.</value>
         public virtual string UserAgent { get; set; }
+
+        /// <summary>
+        /// Gets or sets the WebProxy.
+        /// </summary>
+        /// <value>WebProxy.</value>
+        public virtual IWebProxy WebProxy { get; set; }
 
         /// <summary>
         /// Gets or sets the username (HTTP basic authentication).
@@ -403,6 +410,8 @@ namespace Org.OpenAPITools.Client
             foreach (var kvp in second.ApiKeyPrefix) apiKeyPrefix[kvp.Key] = kvp.Value;
             foreach (var kvp in second.DefaultHeaders) defaultHeaders[kvp.Key] = kvp.Value;
 
+            IWebProxy webproxy = second.WebProxy ?? first.WebProxy;
+
             var config = new Configuration
             {
                 ApiKey = apiKey,
@@ -410,6 +419,7 @@ namespace Org.OpenAPITools.Client
                 DefaultHeaders = defaultHeaders,
                 BasePath = second.BasePath ?? first.BasePath,
                 Timeout = second.Timeout,
+                WebProxy = webproxy,
                 UserAgent = second.UserAgent ?? first.UserAgent,
                 Username = second.Username ?? first.Username,
                 Password = second.Password ?? first.Password,
