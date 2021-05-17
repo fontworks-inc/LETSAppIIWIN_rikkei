@@ -152,8 +152,12 @@ namespace Client.UI
             var devicesRepository = new DevicesAPIRepository(apiConfiguration);
             containerRegistry.RegisterInstance<IDevicesRepository>(devicesRepository);
 
+            // フォントの内部情報リポジトリ
+            var fontInfoRepository = new FontFileRepository(resourceWrapper);
+            containerRegistry.Register<IFontFileRepository, FontFileRepository>();
+
             // フォントのアクティベートサービス
-            var fontActivationService = new FontActivationService(userFontsSettingFileRepository, userStatusFileRepository);
+            var fontActivationService = new FontActivationService(userFontsSettingFileRepository, userStatusFileRepository, fontInfoRepository);
             containerRegistry.Register<IFontActivationService, FontActivationService>();
 
             // 未読お知らせ情報
@@ -171,10 +175,6 @@ namespace Client.UI
             // プログラムバージョン取得サービス
             var applicationVersionService = new ApplicationVersionService(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "LETS.exe"));
             containerRegistry.RegisterInstance<IApplicationVersionService>(applicationVersionService);
-
-            // フォントの内部情報リポジトリ
-            var fontInfoRepository = new FontFileRepository(resourceWrapper);
-            containerRegistry.Register<IFontFileRepository, FontFileRepository>();
 
             // フォント管理サービス
             var fontManagerService = new FontManagerService(

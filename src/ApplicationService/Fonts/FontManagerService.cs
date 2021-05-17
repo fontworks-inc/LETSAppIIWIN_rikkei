@@ -867,6 +867,18 @@ namespace ApplicationService.Fonts
                     savedFont.Version = idInfo.NameInfo.Version;
                     savedFont.DisplayName = idInfo.NameInfo.UniqueName;
                 }
+
+                // 保存されているレジストリキーが正しくない場合、再アクティベートを行いレジストリキーを更新する
+                string savedRegKey = savedFont.RegistryKey;
+                if (!string.IsNullOrEmpty(savedRegKey))
+                {
+                    if (savedRegKey.CompareTo(idInfo.NameInfo.UniqueName) != 0)
+                    {
+                        this.fontActivationService.Deactivate(savedFont);
+                        this.fontActivationService.Activate(savedFont);
+                        savedFont.RegistryKey = idInfo.NameInfo.UniqueName;
+                    }
+                }
             }
 
             // 更新用のフォント

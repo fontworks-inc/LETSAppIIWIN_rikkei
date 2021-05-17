@@ -50,6 +50,11 @@ namespace OS.Services
         private readonly IUserStatusRepository userStatusRepository = null;
 
         /// <summary>
+        /// フォント内部情報を格納するリポジトリ
+        /// </summary>
+        private readonly IFontFileRepository fontInfoRepository = null;
+
+        /// <summary>
         /// ユーザー配下のフォントフォルダ
         /// </summary>
         private readonly string fontDir = string.Empty;
@@ -59,10 +64,11 @@ namespace OS.Services
         /// </summary>
         /// <param name="userFontsSettingRepository">ユーザ別フォント情報を格納するリポジトリ</param>
         /// <param name="userStatusRepository">ユーザ別ステータス情報を格納するリポジトリ</param>
-        public FontActivationService(IUserFontsSettingRepository userFontsSettingRepository, IUserStatusRepository userStatusRepository)
+        public FontActivationService(IUserFontsSettingRepository userFontsSettingRepository, IUserStatusRepository userStatusRepository, IFontFileRepository fontInfoRepository)
         {
             this.userFontsSettingRepository = userFontsSettingRepository;
             this.userStatusRepository = userStatusRepository;
+            this.fontInfoRepository = fontInfoRepository;
 
             // ユーザー配下のローカルフォルダ
             var local = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
@@ -155,25 +161,16 @@ namespace OS.Services
 
             try
             {
-                // フォント名の取得と登録
-                using (var pfc = new System.Drawing.Text.PrivateFontCollection())
-                {
-                    pfc.AddFontFile(fontPath);
-                    if (pfc.Families.Length != 0)
-                    {
-                        // フォント名
-                        var fontName = pfc.Families[0].Name;
-                        Logger.Debug("Activate:fontName=" + fontName);
+                // フォント名の取得
+                string fontName = this.GetFontName(font);
 
-                        // レジストリに登録
-                        this.AddRegistry(fontName, fontPath);
+                // レジストリに登録
+                this.AddRegistry(fontName, fontPath);
 
-                        // 登録したデータをユーザ別フォント情報にも保存
-                        font.IsActivated = true;
-                        font.RegistryKey = fontName;
-                        this.AddSettings(font, fontName);
-                    }
-                }
+                // 登録したデータをユーザ別フォント情報にも保存
+                font.IsActivated = true;
+                font.RegistryKey = fontName;
+                this.AddSettings(font, fontName);
 
                 // 削除してから追加：既に追加されてた場合、2重に登録された形になるため。
                 RemoveFontResource(fontPath);
@@ -245,15 +242,19 @@ namespace OS.Services
         {
             try
             {
-                using (var pfc = new System.Drawing.Text.PrivateFontCollection())
+                // 識別子確認のDLLを介し、情報を取得する
+                string filepath = font.Path;
+                if (File.Exists(filepath))
                 {
-                    pfc.AddFontFile(font.Path);
-                    if (pfc.Families.Length != 0)
+                    var fontIdInfo = this.fontInfoRepository.GetFontInfo(font.Path);
+                    string fontname = fontIdInfo.NameInfo.UniqueName;
+                    string ext = Path.GetExtension(font.Path).ToLower();
+                    if (ext.CompareTo(".ttc") == 0)
                     {
-                        // フォント名
-                        var fontName = pfc.Families[0].Name;
-                        return fontName;
+                        fontname += "(TTC)";
                     }
+
+                    return fontname;
                 }
             }
             catch (Exception ex)
@@ -333,6 +334,21 @@ namespace OS.Services
         private void AddRegistry(string key, string value)
         {
             var regkey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(this.registryFontsPath, true);
+
+            // 同じフォントパスに対して別のレジストリがあれば削除する
+            string[] keys = regkey.GetValueNames();
+            foreach (string k in keys)
+            {
+                string v = (string)regkey.GetValue(k);
+                if (v.Equals(value))
+                {
+                    if (!k.Equals(key))
+                    {
+                        regkey.DeleteValue(k);
+                    }
+                }
+            }
+
             regkey.SetValue(key, value);
             regkey.Close();
         }
