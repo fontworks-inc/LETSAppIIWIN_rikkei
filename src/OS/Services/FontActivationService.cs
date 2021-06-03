@@ -335,18 +335,25 @@ namespace OS.Services
         {
             var regkey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(this.registryFontsPath, true);
 
-            // 同じフォントパスに対して別のレジストリがあれば削除する
-            string[] keys = regkey.GetValueNames();
-            foreach (string k in keys)
+            try
             {
-                string v = (string)regkey.GetValue(k);
-                if (v.Equals(value))
+                // 同じフォントパスに対して別のレジストリがあれば削除する
+                string[] keys = regkey.GetValueNames();
+                foreach (string k in keys)
                 {
-                    if (!k.Equals(key))
+                    string v = (string)regkey.GetValue(k);
+                    if (!string.IsNullOrEmpty(v) && v.Equals(value))
                     {
-                        regkey.DeleteValue(k);
+                        if (!k.Equals(key))
+                        {
+                            regkey.DeleteValue(k);
+                        }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                Logger.Error(ex.StackTrace);
             }
 
             regkey.SetValue(key, value);

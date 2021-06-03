@@ -313,6 +313,11 @@ namespace Infrastructure.API
                     return false;
                 }
 
+                if (objnm == "MemoryStream")
+                {
+                    return true;
+                }
+
                 if (typeof(AccessTokenRefreshTokenResponse) == obj.GetType())
                 {
                     code = ((AccessTokenRefreshTokenResponse)obj).Code;
