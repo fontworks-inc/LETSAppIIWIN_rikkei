@@ -347,6 +347,7 @@ namespace ApplicationService.Schedulers
         private void OutputLogout()
         {
             VolatileSetting vSetting = this.volatileSettingRepository.GetVolatileSetting();
+
             string accessToken = vSetting.AccessToken;
 
             if (preAccessToken == accessToken)
@@ -365,7 +366,6 @@ namespace ApplicationService.Schedulers
 
             // LETSフォルダ
             string letsfolder = $@"{homedrive}\ProgramData\Fontworks\LETS";
-            string logoutPath = Path.Combine(letsfolder, $"logout_{username}.bat");
 
             // ユーザー名一覧を出力する
             string userlist = Path.Combine(letsfolder, "userlist.txt");

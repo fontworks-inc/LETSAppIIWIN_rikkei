@@ -64,6 +64,7 @@ namespace OS.Services
         /// </summary>
         /// <param name="userFontsSettingRepository">ユーザ別フォント情報を格納するリポジトリ</param>
         /// <param name="userStatusRepository">ユーザ別ステータス情報を格納するリポジトリ</param>
+        /// <param name="fontInfoRepository">フォント情報を格納するリポジトリ</param>
         public FontActivationService(IUserFontsSettingRepository userFontsSettingRepository, IUserStatusRepository userStatusRepository, IFontFileRepository fontInfoRepository)
         {
             this.userFontsSettingRepository = userFontsSettingRepository;
@@ -122,7 +123,7 @@ namespace OS.Services
         }
 
         /// <inheritdoc/>
-        public void Delete(Font font)
+        public bool Delete(Font font)
         {
             // フォントファイルの削除を試みる
             try
@@ -130,6 +131,7 @@ namespace OS.Services
                 if (File.Exists(font.Path))
                 {
                     File.Delete(font.Path);
+                    return true;
                 }
             }
             catch (UnauthorizedAccessException)
@@ -141,6 +143,8 @@ namespace OS.Services
             {
                 Logger.Debug("FontActivationService:Uninstall:" + ex.StackTrace);
             }
+
+            return false;
         }
 
         /// <summary>
@@ -233,6 +237,78 @@ namespace OS.Services
 
             // 起動中の他のアプリケーションに通知
             fontChange = true;
+        }
+
+        /// <summary>
+        /// フォントレジストリを削除する
+        /// </summary>
+        /// <param name="font">対象フォント</param>
+        public void DelRegistory(Font font)
+        {
+            Logger.Warn($"[Ph.2] DelRegistory:font={font.Path}");
+            var fontPath = font.Path;
+            try
+            {
+                RemoveFontResource(fontPath);
+                Logger.Debug(string.Format("DelRegistory:RemoveFontResource:" + fontPath, string.Empty));
+            }
+            catch (Exception ex)
+            {
+                Logger.Debug("DelRegistory:\n" + ex.StackTrace);
+            }
+
+            // レジストリから除外
+            if (string.IsNullOrEmpty(font.RegistryKey))
+            {
+                string fontName = this.GetFontName(font);
+                this.ReleaseRegistry(fontName);
+            }
+            else
+            {
+                this.ReleaseRegistry(font.RegistryKey);
+            }
+
+            // レジストリから削除したときにフォント一覧から消えることがあるため、アクティベートしなおす
+            try
+            {
+                // 追加：失敗時は0が戻り、成功時には追加されたフォント数が戻る（フォントは太字や斜体などがあるため1とは限らない）
+                var result = AddFontResource(fontPath);
+                Logger.Debug("DelRegistory:AddFontResource:" + fontPath + " result=" + result.ToString());
+
+                // 起動中の他のアプリケーションに通知
+                if (result > 0)
+                {
+                    fontChange = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Debug("DelRegistory:\n" + ex.StackTrace);
+                return;
+            }
+
+            // ユーザ別フォント情報にも保存
+            font.IsActivated = false;
+            this.ReleaseSettings(font);
+        }
+
+        /// <summary>
+        /// フォント設定ファイルの対象フォントを削除対象にする
+        /// </summary>
+        /// <param name="font">対象フォント</param>
+        /// <param name="flag">削除対象=true</param>
+        public void RemoveTargetSettings(Font font, bool flag = true)
+        {
+            var settings = this.userFontsSettingRepository.GetUserFontsSetting();
+
+            var target = settings.Fonts.FirstOrDefault(f => f.Path == font.Path);
+            if (target != null)
+            {
+                target.IsRemove = flag;
+            }
+
+            // 保存
+            this.userFontsSettingRepository.SaveUserFontsSetting(settings);
         }
 
         /// <summary>
@@ -415,24 +491,6 @@ namespace OS.Services
             {
                 // 登録済（アクティベート⇒ディアクティベート）の場合
                 target.IsActivated = false;
-            }
-
-            // 保存
-            this.userFontsSettingRepository.SaveUserFontsSetting(settings);
-        }
-
-        /// <summary>
-        /// フォント設定ファイルの対象フォントを削除対象にする
-        /// </summary>
-        /// <param name="font">対象フォント</param>
-        private void RemoveTargetSettings(Font font)
-        {
-            var settings = this.userFontsSettingRepository.GetUserFontsSetting();
-
-            var target = settings.Fonts.FirstOrDefault(f => f.Path == font.Path);
-            if (target != null)
-            {
-                target.IsRemove = true;
             }
 
             // 保存

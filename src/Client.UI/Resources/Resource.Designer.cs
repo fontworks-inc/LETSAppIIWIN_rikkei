@@ -493,6 +493,42 @@ namespace Client.UI.Resources {
         }
         
         /// <summary>
+        ///   同名フォントが存在したため、ダウンロードを中断しました。{0} に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string FONTDOWNLOAD_CANCELED_MESSAGE {
+            get {
+                return ResourceManager.GetString("FONTDOWNLOAD_CANCELED_MESSAGE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   フォントダウンロード中断 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string FONTDOWNLOAD_CANCELED_TITLE {
+            get {
+                return ResourceManager.GetString("FONTDOWNLOAD_CANCELED_TITLE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   デバイス管理ページからログアウトされたか、別のデバイスをログインしたために、このデバイスがログアウトされました。 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string FORCELOGOUT_TEXT {
+            get {
+                return ResourceManager.GetString("FORCELOGOUT_TEXT", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   LETSアプリのログアウト に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string FORCELOGOUT_TITLE {
+            get {
+                return ResourceManager.GetString("FORCELOGOUT_TITLE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   管理者権限で起動してください に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string FUNC_01_02_16_ERR_StartAsAdministrators {
@@ -1201,7 +1237,7 @@ namespace Client.UI.Resources {
         }
         
         /// <summary>
-        ///   ログアウト中と判定されたため、以後の起動時チェック処理を行わない に類似しているローカライズされた文字列を検索します。
+        ///   オフライン中と判定されたため、以後の起動時チェック処理を行わない に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string LOG_INFO_StartupService_IsCheckedStartup_LoggingOut {
             get {

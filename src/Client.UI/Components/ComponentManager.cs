@@ -6,7 +6,6 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using ApplicationService.Interfaces;
@@ -245,34 +244,50 @@ namespace Client.UI.Components
         /// <summary>
         /// アプリケーションを終了する
         /// </summary>
-        /// <param name="deactivateFonts">フォントをディアクティベートするかどうか</param>
-        public void Exit(bool deactivateFonts)
+        /// <param name="paramType">フォントをディアクティベートするかどうか</param>
+        public void Exit(LParamType paramType)
         {
             try
             {
-                if (deactivateFonts)
+                switch (paramType)
                 {
-                    // ログアウト処理を実行する
-                    this.Logout();
-                }
-                else
-                {
-                    // Mutexを削除する
-                    if (this.multipleInfo != null && this.multipleInfo.HasHandle)
-                    {
-                        this.multipleInfo.MutexInfo.ReleaseMutex();
-                        this.multipleInfo.MutexInfo.Close();
-                        this.multipleInfo.HasHandle = false;
-                    }
+                    case LParamType.DeactivateFontsAndShutdown:
+                        this.Logout();
+                        break;
 
-                    // 更新後のプログラムを起動する
-                    // ホームドライブの取得
-                    string appPath = AppDomain.CurrentDomain.BaseDirectory;
-                    string homedrive = appPath.Substring(0, appPath.IndexOf("\\"));
+                    case LParamType.Restart:
+                        // Mutexを削除する
+                        if (this.multipleInfo != null && this.multipleInfo.HasHandle)
+                        {
+                            this.multipleInfo.MutexInfo.ReleaseMutex();
+                            this.multipleInfo.MutexInfo.Close();
+                            this.multipleInfo.HasHandle = false;
+                        }
 
-                    // LETSアプリの起動(ショートカットを実行する)
-                    string shortcut = $@"{homedrive}\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\LETS デスクトップアプリ.lnk";
-                    Process.Start(new ProcessStartInfo("cmd", $"/c \"{shortcut}\"") { CreateNoWindow = true });
+                        // 更新後のプログラムを起動する
+                        // ホームドライブの取得
+                        string appPath = AppDomain.CurrentDomain.BaseDirectory;
+                        string homedrive = appPath.Substring(0, appPath.IndexOf("\\"));
+
+                        // LETSアプリの起動(ショートカットを実行する)
+                        string shortcut = $@"{homedrive}\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\LETS デスクトップアプリ.lnk";
+                        Process.Start(new ProcessStartInfo("cmd", $"/c \"{shortcut}\"") { CreateNoWindow = true });
+                        break;
+
+                    case LParamType.Shutdown:
+                        // Mutexを削除する
+                        if (this.multipleInfo != null && this.multipleInfo.HasHandle)
+                        {
+                            this.multipleInfo.MutexInfo.ReleaseMutex();
+                            this.multipleInfo.MutexInfo.Close();
+                            this.multipleInfo.HasHandle = false;
+                        }
+
+                        break;
+
+                    default:
+                        Logger.Debug("Unknown LParamType:" + paramType);
+                        break;
                 }
             }
             catch (Exception ex)
@@ -439,6 +454,18 @@ namespace Client.UI.Components
         }
 
         /// <summary>
+        /// フォントダウンロード中止
+        /// </summary>
+        /// <param name="font">フォント</param>
+        public void FontDownloadCancelled(InstallFont font)
+        {
+            Logger.Warn($"[Ph.2] FontDownloadCancelled:font={font.FileName}");
+            string title = this.resouceWrapper.GetString("FONTDOWNLOAD_CANCELED_TITLE");
+            string text = string.Format(this.resouceWrapper.GetString("FONTDOWNLOAD_CANCELED_MESSAGE"), font.DisplayFontName);
+            ToastNotificationWrapper.Show(title, text);
+        }
+
+        /// <summary>
         /// 更新あり
         /// </summary>
         public void IsUpdated()
@@ -498,9 +525,10 @@ namespace Client.UI.Components
             // タスクトレイアイコンを操作不可とする
             this.ApplicationIcon.Enabled = false;
 
-            // 強制ログアウトダイアログを表示
-            var forcedLogoutDialog = new ForceLogoutNotification();
-            forcedLogoutDialog.ShowDialog();
+            // 通知メッセージを表示
+            string title = this.resouceWrapper.GetString("FORCELOGOUT_TITLE");
+            string text = this.resouceWrapper.GetString("FORCELOGOUT_TEXT");
+            ToastNotificationWrapper.Show(title, text);
 
             // ログアウト処理を実施
             this.Logout(false);
@@ -551,19 +579,30 @@ namespace Client.UI.Components
                     {
                         case LParamType.LoadLoginWindow:
                             // ログインメッセージ
-                            this.ShowLoginWindow();
+                            Logger.Warn("WndProc:LParamType.LoadLoginWindow");
+                            if (!this.userStatusRepository.GetStatus().IsLoggingIn)
+                            {
+                                this.ShowLoginWindow();
+                            }
+
                             break;
 
-                        case LParamType.Shutdown:
-                            // 終了メッセージ(ディアクティベートなし)
-                            Logger.Debug("WndProc:LParamType.Shutdown");
-                            this.Exit(false);
+                        case LParamType.Restart:
+                            // 再起動メッセージ
+                            Logger.Warn("WndProc:LParamType.Restart");
+                            this.Exit(paramType);
                             break;
 
                         case LParamType.DeactivateFontsAndShutdown:
                             // 終了メッセージ(ディアクティベートあり)
-                            Logger.Debug("WndProc:LParamType.DeactivateFontsAndShutdown");
-                            this.Exit(true);
+                            Logger.Warn("WndProc:LParamType.DeactivateFontsAndShutdown");
+                            this.Exit(paramType);
+                            break;
+
+                        case LParamType.Shutdown:
+                            // 終了メッセージ(ディアクティベートなし)
+                            Logger.Warn("WndProc:LParamType.Shutdown");
+                            this.Exit(paramType);
                             break;
 
                         default:
@@ -575,7 +614,7 @@ namespace Client.UI.Components
                 case WindowMessageType.ProgressOfUpdate:
                     // プログラムアップデート進捗メッセージ
                     int progressRate = (int)m.LParam;
-                    Logger.Debug("WndProc:WindowMessageType.ProgressOfUpdate:" + progressRate.ToString());
+                    Logger.Warn("WndProc:WindowMessageType.ProgressOfUpdate:" + progressRate.ToString());
                     this.QuickMenu.ShowUpdateStatus();
                     this.QuickMenu.MenuUpdateStatus.SetProgressStatus(progressRate);
                     break;
@@ -746,7 +785,16 @@ namespace Client.UI.Components
                 isExitLETS = true;
                 if (myhWnd != IntPtr.Zero)
                 {
-                    SendMessage(myhWnd, 0x8001, 0, 3);
+                    if (this.IsRunFromSetup())
+                    {
+                        Logger.Warn("SendMessage(myhWnd, 0x8001, 0, LParamType.Shutdown)");
+                        SendMessage(myhWnd, 0x8001, 0, (int)LParamType.Shutdown);
+                    }
+                    else
+                    {
+                        Logger.Warn("SendMessage(myhWnd, 0x8001, 0, LParamType.DeactivateFontsAndShutdown)");
+                        SendMessage(myhWnd, 0x8001, 0, (int)LParamType.DeactivateFontsAndShutdown);
+                    }
                 }
 
                 return false;
@@ -757,6 +805,23 @@ namespace Client.UI.Components
             }
 
             return true;
+        }
+
+        private bool IsRunFromSetup()
+        {
+            // ホームドライブの取得
+            string winDir = System.Environment.GetFolderPath(Environment.SpecialFolder.Windows);
+            string homedrive = winDir.Substring(0, winDir.IndexOf("\\"));
+
+            // Setupプログラムから実行していることを示す一時ファイル
+            string tmpfile = $@"{homedrive}\ProgramData\.runfromletssetup";
+
+            if (File.Exists(tmpfile))
+            {
+                return true;
+            }
+
+            return false;
         }
     }
 }

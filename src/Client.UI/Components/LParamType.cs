@@ -11,14 +11,19 @@
         LoadLoginWindow = 1,
 
         /// <summary>
-        /// アプリケーションを終了
+        /// アプリケーションを終了して再起動
         /// </summary>
-        Shutdown = 2,
+        Restart = 2,
 
         /// <summary>
         /// すべてのフォントをディアクティベートして
         /// アプリケーションを終了
         /// </summary>
         DeactivateFontsAndShutdown = 3,
+
+        /// <summary>
+        /// アプリケーションを終了
+        /// </summary>
+        Shutdown = 4,
     }
 }

@@ -36,6 +36,12 @@ namespace ApplicationService.Interfaces
         public delegate void FontDownloadFailedEvent(InstallFont font);
 
         /// <summary>
+        /// ダウンロード中断時のイベント
+        /// </summary>
+        /// <param name="font">中断したフォント</param>
+        public delegate void FontDownloadCancelledEvent(InstallFont font);
+
+        /// <summary>
         /// フォントの同期処理を実施する
         /// </summary>
         /// <param name="font">アクティベート対象フォント</param>
@@ -52,6 +58,7 @@ namespace ApplicationService.Interfaces
         /// <summary>
         /// ダウンロード実行中フラグ取得
         /// </summary>
+        /// <returns>起動時ダウンロード実行終了フラグ</returns>
         bool GetIsFirstDownloadCompleted();
 
         /// <summary>

@@ -249,11 +249,11 @@
     <value>ログインが完了しました</value>
     <comment>ログイン完了画面　処理タイトル</comment>
   </data>
-	<data name="APP_07_01_WIN_TITLE" xml:space="preserve">
+  <data name="APP_07_01_WIN_TITLE" xml:space="preserve">
     <value>LETS</value>
     <comment>強制アップデートダイアログ　タイトル</comment>
   </data>
-	<data name="APP_07_01_BTN_OK" xml:space="preserve">
+  <data name="APP_07_01_BTN_OK" xml:space="preserve">
     <value>OK</value>
     <comment>強制アップデートダイアログ　OKボタン</comment>
   </data>
@@ -735,5 +735,21 @@ LETSデスクトップアプリをログアウトしてください。</value>
   <data name="ResponseCode_InvalidArgument" xml:space="preserve">
     <value>システムエラー(引数不正)</value>
     <comment>レスポンスコード：1001</comment>
+  </data>
+  <data name="FORCELOGOUT_TEXT" xml:space="preserve">
+    <value>デバイス管理ページからログアウトされたか、別のデバイスをログインしたために、このデバイスがログアウトされました。</value>
+    <comment>強制ログアウト通知メッセージ</comment>
+  </data>
+  <data name="FORCELOGOUT_TITLE" xml:space="preserve">
+    <value>LETSアプリのログアウト</value>
+    <comment>強制ログアウト通知タイトル</comment>
+  </data>
+  <data name="FONTDOWNLOAD_CANCELED_TITLE" xml:space="preserve">
+    <value>フォントダウンロード中断</value>
+    <comment>フォントダウンロード中断通知タイトル</comment>
+  </data>
+  <data name="FONTDOWNLOAD_CANCELED_MESSAGE" xml:space="preserve">
+    <value>同名フォントが存在したため、ダウンロードを中断しました。{0}</value>
+    <comment>フォントダウンロード中断通知メッセージ</comment>
   </data>
 </root>

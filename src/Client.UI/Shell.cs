@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using System.Security.AccessControl;
 using System.Security.Principal;
 using System.Threading;
@@ -92,8 +93,19 @@ namespace Client.UI
                 pro.Start();
                 string output = pro.StandardOutput.ReadToEnd();
 
-                Logger.Warn("===========================================");
-                Logger.Warn("LETS.exe:CreationTime=" + fi.CreationTime);
+                string ver = string.Empty;
+                try
+                {
+                    Assembly asm = Assembly.GetExecutingAssembly();
+                    ver = $"(Ver{asm.GetName().Version})";
+                }
+                catch (Exception)
+                {
+                }
+
+                Logger.Warn(string.Empty);
+                Logger.Warn("=====================================================");
+                Logger.Warn($"LETS.exe{ver}:CreationTime=" + fi.CreationTime);
                 Logger.Warn(output);
                 this.SetLogAccessEveryone();
             }
@@ -259,6 +271,14 @@ namespace Client.UI
                 Current.Dispatcher.Invoke(() =>
                 {
                     this.componentManager.FontDownloadFailed(font);
+                });
+            };
+
+            fontManagerService.FontDownloadCancelledEvent = (InstallFont font) =>
+            {
+                Current.Dispatcher.Invoke(() =>
+                {
+                    this.componentManager.FontDownloadCancelled(font);
                 });
             };
 

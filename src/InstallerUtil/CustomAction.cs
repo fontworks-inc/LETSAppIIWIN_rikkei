@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading;
 
 namespace InstallerUtil
 {
@@ -21,6 +19,11 @@ namespace InstallerUtil
 
         private void CustomAction_AfterUninstall(object sender, System.Configuration.Install.InstallEventArgs e)
         {
+            if(IsRunFromSetup())
+            {
+                return;
+            }
+
             using (UninstallConfirm f = new UninstallConfirm())
             {
                 f.ShowDialog();
@@ -39,6 +42,22 @@ namespace InstallerUtil
             // LETSフォルダ
             string letsfolder = $@"{homedrive}\ProgramData\Fontworks\LETS";
 
+            if (IsRunFromSetup())
+            {
+                return;
+            }
+
+            // ログアウト実行
+            try
+            {
+                string updator = $@"{homedrive}\ProgramData\Fontworks\LETS\LETSUpdater.exe";
+                Process upd = Process.Start(updator, "Logout");
+            }
+            catch(Exception)
+            {
+                   // NOP
+            }
+
             // uninstallfontバッチファイル名
             string uninstallbat = "uninstallfonts.bat";
             string uninstallfontsbat = $@"{letsfolder}\{uninstallbat}";
@@ -49,8 +68,8 @@ namespace InstallerUtil
             {
                 string[] pids = this.GetUserregIDs();
 
-                // ログアウトバッチの実行
-                string[] usernames = this.LogoutUser(letsfolder);
+                // ユーザ名の取得
+                string[] usernames = this.GetUsers(letsfolder);
                 if(usernames != null)
                 {
                     List<string> pidlist = new List<string>(pids);
@@ -128,7 +147,7 @@ namespace InstallerUtil
             return alldellines.ToArray();
         }
 
-        private string[] LogoutUser(string letsfolder)
+        private string[] GetUsers(string letsfolder)
         {
             string userlist = Path.Combine(letsfolder, "userlist.txt");
             string[] users = null;
@@ -170,7 +189,6 @@ namespace InstallerUtil
                 }
             }
         }
-
 
         private string[] GetUserregIDs()
         {
@@ -226,7 +244,14 @@ namespace InstallerUtil
             }
             catch (Exception ex)
             {
-                File.WriteAllText($@"{letsfolder}\Uninst.log", ex.Message);
+                try
+                {
+                    File.WriteAllText($@"{letsfolder}\Uninst.log", ex.Message);
+                }
+                catch(Exception)
+                {
+                    // NOP
+                }
             }
         }
 
@@ -288,6 +313,22 @@ namespace InstallerUtil
             }
         }
 
+        private static bool IsRunFromSetup()
+        {
+            // ホームドライブの取得
+            string winDir = System.Environment.GetFolderPath(Environment.SpecialFolder.Windows);
+            string homedrive = winDir.Substring(0, winDir.IndexOf("\\"));
+
+            // Setupプログラムから実行していることを示す一時ファイル
+            string tmpfile = $@"{homedrive}\ProgramData\.runfromletssetup";
+
+            if (File.Exists(tmpfile))
+            {
+                return true;
+            }
+            return false;
+        }
+
         [DllImport("gdi32.dll", EntryPoint = "RemoveFontResourceW", SetLastError = true)]
         private static extern int RemoveFontResource([In][MarshalAs(UnmanagedType.LPWStr)] string lpFileName);
 
@@ -314,6 +355,9 @@ namespace InstallerUtil
         {
             EnumWindows(new EnumWindowsDelegate(EnumWindowCallBack), IntPtr.Zero);
         }
+
+        [DllImport("user32.dll")]
+        private static extern int PostMessage(IntPtr hWnd, uint msg, int wParam, int lParam);
 
         [DllImport("user32.dll", SetLastError = true)]
         private static extern IntPtr SendMessageTimeout(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam, int fuFlags, int uTimeout, IntPtr lpdwResult);
@@ -346,7 +390,18 @@ namespace InstallerUtil
                 //ウィンドウのタイトルが"LETS"ならば終了メッセージを送信する
                 if (tsb.ToString() == "LETS" && (procname == "LETS" || string.IsNullOrEmpty(procname)))
                 {
-                    SendMessageTimeout(hWnd, (uint)0x8001, IntPtr.Zero, new IntPtr(3), 0x2, 30 * 1000, IntPtr.Zero);
+                    if (IsRunFromSetup())
+                    {
+                        // 終了メッセージ(ディアクティベートなし)
+                        //SendMessageTimeout(hWnd, (uint)0x8001, IntPtr.Zero, new IntPtr(4), 0x2, 30 * 1000, IntPtr.Zero);
+                        PostMessage(hWnd, (uint)0x8001, 0, 4);
+                    }
+                    else
+                    {
+                        // 終了メッセージ(ディアクティベートあり)
+                        //SendMessageTimeout(hWnd, (uint)0x8001, IntPtr.Zero, new IntPtr(3), 0x2, 30 * 1000, IntPtr.Zero);
+                        PostMessage(hWnd, (uint)0x8001, 0, 3);
+                    }
                 }
             }
 

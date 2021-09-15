@@ -131,6 +131,12 @@ namespace ApplicationService.Fonts
         public FontDownloadFailedEvent FontDownloadFailedEvent { get; set; }
 
         /// <summary>
+        /// ダウンロード失敗時のイベント
+        /// </summary>
+        /// <param name="font">失敗したフォント</param>
+        public FontDownloadCancelledEvent FontDownloadCancelledEvent { get; set; }
+
+        /// <summary>
         /// フォントの同期処理を実施する
         /// </summary>
         /// <param name="font">アクティベート対象フォント</param>
@@ -152,9 +158,31 @@ namespace ApplicationService.Fonts
                 // ID一致のフォントがある場合、バージョンを比較する
                 if (font.Version.CompareTo(userFont.Version) != 0)
                 {
-                    // バージョンによる更新ができないので、無効とする
-                    //// アクティベート対象フォントのバージョンが新しい場合、インストール対象フォントに加える
-                    // installFont = new InstallFont(string.Empty, true, font.FontId, font.DisplayFontName, string.Empty, font.FileSize, font.Version, false, true, font.IsFreemium, font.ContractIds);
+                    // アクティベート対象フォントのバージョンが新しい場合、インストール対象フォントに加える
+                    installFont = new InstallFont(string.Empty, true, font.FontId, font.DisplayFontName, string.Empty, font.FileSize, font.Version, false, true, font.IsFreemium, font.ContractIds);
+                    if (!this.FontExitsInUserFonts(installFont.FileName))
+                    {
+                        // ユーザーフォントフォルダにフォントファイルがない場合、インストール対象に加える
+                        Logger.Warn($"[Ph.2] Synchronize(Activate):VersionDiff: install font={installFont.FileName}");
+                        this.volatileSettingRepository.GetVolatileSetting().InstallTargetFonts.Add(installFont);
+
+                        // 削除フラグを落とす
+                        this.fontActivationService.RemoveTargetSettings(userFont, false);
+                    }
+                    else
+                    {
+                        // ユーザーフォントフォルダにフォントファイルがある場合、削除対象に加える
+                        Logger.Warn($"[Ph.2] Synchronize(Activate):VersionDiff: remove font={installFont.FileName}");
+
+                        // フォントレジストリ削除
+                        this.fontActivationService.DelRegistory(userFont);
+
+                        // 削除フラグを立てる
+                        this.fontActivationService.RemoveTargetSettings(userFont);
+
+                        // フォントダウンロード中断メッセージ
+                        this.FontDownloadCancelledEvent(installFont);
+                    }
                 }
 
                 // Activateのみ実行する
@@ -226,10 +254,22 @@ namespace ApplicationService.Fonts
                 this.isFirstDownloadCompleted = false;
 
                 // 「削除対象フォント」=TRUEのフォント削除を行う
+                bool delflg = false;
                 UserFontsSetting userFontsSetting = this.userFontsSettingRepository.GetUserFontsSetting();
                 foreach (Font font in userFontsSetting.Fonts.Where(font => font.IsRemove == true))
                 {
-                    this.fontActivationService.Delete(font);
+                    if (this.fontActivationService.Delete(font))
+                    {
+                        delflg = true;
+                    }
+                }
+
+                if (delflg)
+                {
+                    // ユーザー配下のフォントフォルダ
+                    var wlocal = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+                    var wuserFontsDir = @$"{wlocal}\Microsoft\Windows\Fonts";
+                    this.UpdateFontsList(wuserFontsDir);
                 }
             }
 
@@ -395,51 +435,57 @@ namespace ApplicationService.Fonts
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.OrderingRules", "SA1201:Elements should appear in the correct order", Justification = "<保留中>")]
+        private static object lockUpdateFontList = new object();
+
         /// <summary>
         /// フォント：フォント一覧の更新
         /// </summary>
         /// <param name="userFontsDir">ユーザーフォントのディレクトリ</param>
         public void UpdateFontsList(string userFontsDir)
         {
-            if (this.fontInfoRepository == null)
+            lock (lockUpdateFontList)
             {
-                throw new InvalidOperationException(this.resourceWrapper.GetString("LOG_ERR_FontManagerService_UpdateFontsList_InvalidOperationException"));
-            }
-
-            if (!Directory.Exists(userFontsDir))
-            {
-                return;
-            }
-
-            // フォント一覧の取得
-            var fonts = this.userFontsSettingRepository.GetUserFontsSetting().Fonts;
-
-            // フォルダ配下のファイルをすべて取得する
-            try
-            {
-                IEnumerable<string> files = Directory.EnumerateFiles(userFontsDir, "*", SearchOption.TopDirectoryOnly);
-
-                var updateFonts = new List<Font>();
-                foreach (string filePath in files)
+                if (this.fontInfoRepository == null)
                 {
-                    try
-                    {
-                        var savedFont = fonts.FirstOrDefault(f => f.Path == filePath);
-                        updateFonts.Add((savedFont != null) ? this.UpdateSavedFont(filePath, savedFont) : this.CreateFont(filePath));
-                    }
-                    catch (Exception ex)
-                    {
-                        // フォント情報取得時に例外が発生しましたが、本フォントは {0} は対象外として扱い処理を継続します
-                        Logger.Error(ex, string.Format(this.resourceWrapper.GetString("LOG_ERR_FontManagerService_UpdateFontsList"), filePath));
-                    }
+                    throw new InvalidOperationException(this.resourceWrapper.GetString("LOG_ERR_FontManagerService_UpdateFontsList_InvalidOperationException"));
                 }
 
-                // 保存
-                this.userFontsSettingRepository.SaveUserFontsSetting(new UserFontsSetting() { Fonts = updateFonts });
-            }
-            catch (System.IO.DirectoryNotFoundException)
-            {
-                return;
+                if (!Directory.Exists(userFontsDir))
+                {
+                    return;
+                }
+
+                // フォント一覧の取得
+                var fonts = this.userFontsSettingRepository.GetUserFontsSetting().Fonts;
+
+                // フォルダ配下のファイルをすべて取得する
+                try
+                {
+                    IEnumerable<string> files = Directory.EnumerateFiles(userFontsDir, "*", SearchOption.TopDirectoryOnly);
+
+                    var updateFonts = new List<Font>();
+                    foreach (string filePath in files)
+                    {
+                        try
+                        {
+                            var savedFont = fonts.FirstOrDefault(f => f.Path == filePath);
+                            updateFonts.Add((savedFont != null) ? this.UpdateSavedFont(filePath, savedFont) : this.CreateFont(filePath));
+                        }
+                        catch (Exception ex)
+                        {
+                            // フォント情報取得時に例外が発生しましたが、本フォントは {0} は対象外として扱い処理を継続します
+                            Logger.Error(ex, string.Format(this.resourceWrapper.GetString("LOG_ERR_FontManagerService_UpdateFontsList"), filePath));
+                        }
+                    }
+
+                    // 保存
+                    this.userFontsSettingRepository.SaveUserFontsSetting(new UserFontsSetting() { Fonts = updateFonts });
+                }
+                catch (System.IO.DirectoryNotFoundException)
+                {
+                    return;
+                }
             }
         }
 
@@ -677,22 +723,40 @@ namespace ApplicationService.Fonts
                             this.fontActivationService.Deactivate(userFont); // ディアクティベート実行
                         }
 
-                        // フォント情報を更新する
-                        this.UpdateFontInfo(installFont);
-
                         /*
                          *  [フォントバージョンアップ要否]
                          *      インストール対象フォント | 保持しているフォント | 処理
                          *       true                    | -                    | インストール対象フォントに加える
+                         *                               |                      | or 削除フラグ=TRUE & レジストリ削除
                          */
+                        if (installFont.NeedFontVersionUpdate || !matchVersion)
+                        {
+                            if (!this.FontExitsInUserFonts(installFont.FileName))
+                            {
+                                // ユーザーフォントフォルダにフォントファイルがない場合、インストール対象に加える
+                                Logger.Warn($"[Ph.2] CollectInstallTargetFontFromFontInfomations(NeedFontVersionUpdate): install font={installFont.FileName}");
+                                this.volatileSettingRepository.GetVolatileSetting().InstallTargetFonts.Add(installFont);
 
-                        // if (installFont.NeedFontVersionUpdate && !didUninstall)
-                        // {
-                        //    if (!this.volatileSettingRepository.GetVolatileSetting().InstallTargetFonts.Contains(installFont))
-                        //    {
-                        //        this.volatileSettingRepository.GetVolatileSetting().InstallTargetFonts.Add(installFont);
-                        //    }
-                        // }
+                                // 削除フラグを落とす
+                                this.fontActivationService.RemoveTargetSettings(userFont, false);
+                            }
+                            else
+                            {
+                                Logger.Warn($"[Ph.2] CollectInstallTargetFontFromFontInfomations(NeedFontVersionUpdate): remove font={installFont.FileName}");
+
+                                // フォントレジストリ削除
+                                this.fontActivationService.DelRegistory(userFont);
+
+                                // 削除フラグを立てる
+                                this.fontActivationService.RemoveTargetSettings(userFont);
+
+                                // フォントダウンロード中断メッセージ
+                                this.FontDownloadCancelledEvent(installFont);
+                            }
+                        }
+
+                        // フォント情報を更新する
+                        this.UpdateFontInfo(installFont);
                     }
                 }
                 else
@@ -701,13 +765,30 @@ namespace ApplicationService.Fonts
                     // 「アクティベート状態」がTrueかつ(有効な契約ありまたはフリーミアム)であればインストール対象フォントに追加
                     if (installFont.ActivateFlg && (installFont.ContractIds.Count > 0 || installFont.IsFreemium))
                     {
-                        // すでに同じファイル名のフォントがユーザーフォントフォルダにあれば、ダウンロードしない
                         if (!this.FontExitsInUserFonts(installFont.FileName))
                         {
                             if (!this.volatileSettingRepository.GetVolatileSetting().InstallTargetFonts.Contains(installFont))
                             {
+                                // ユーザーフォントフォルダにフォントファイルがない場合、インストール対象に加える
+                                Logger.Warn($"[Ph.2] CollectInstallTargetFontFromFontInfomations:DiffID: install font={installFont.FileName}");
                                 this.volatileSettingRepository.GetVolatileSetting().InstallTargetFonts.Add(installFont);
+
+                                // 削除フラグを落とす
+                                this.fontActivationService.RemoveTargetSettings(userFont, false);
                             }
+                        }
+                        else
+                        {
+                            Logger.Warn($"[Ph.2] CollectInstallTargetFontFromFontInfomations:DiffID:remove font={installFont.FileName}");
+
+                            // フォントレジストリ削除
+                            this.fontActivationService.DelRegistory(userFont);
+
+                            // 削除フラグを立てる
+                            this.fontActivationService.RemoveTargetSettings(userFont);
+
+                            // フォントダウンロード中断メッセージ
+                            this.FontDownloadCancelledEvent(installFont);
                         }
                     }
                 }

@@ -511,6 +511,7 @@ namespace ApplicationService.Startup
         /// <returns>起動時チェック処理を続行する場合はtrue、起動時チェック処理を終了する場合はfalse</returns>
         public bool FontCopyCheck(DetectionFontCopyEvent detectionFontCopyEvent)
         {
+            Logger.Warn($"[INFO] FontCopyCheck");
             // ユーザID取得APIを呼び出し、ユーザIDを取得する
             string userId = null;
             try

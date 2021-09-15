@@ -1,5 +1,9 @@
 ﻿using System;
 using System.IO;
+using System.Net.Http;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Json;
+using System.Text;
 using System.Windows;
 
 namespace Updater
@@ -19,8 +23,9 @@ namespace Updater
                 try
                 {
                     //  プログラムアップデートロジックを実行して終了
-                    if (args.Length < 2)
+                    if(args.Length == 1)
                     {
+                        logoutLETS();
                         Environment.Exit(0);
                     }
 
@@ -115,6 +120,115 @@ namespace Updater
                 }
             }
 
+        }
+
+        private static void logoutLETS()
+        {
+            try
+            {
+                string baseurl = "https://delivery-lets.fontworks.co.jp";
+                string appsettingpath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Fontworks", "LETS", "config", "appsettings.json");
+                if (File.Exists(appsettingpath))
+                {
+                    try
+                    {
+                        string appsettingtext = File.ReadAllText(appsettingpath);
+                        var appSettig = new AppSetting();
+                        var ms = new MemoryStream(Encoding.UTF8.GetBytes(appsettingtext));
+                        var ser = new DataContractJsonSerializer(appSettig.GetType());
+                        appSettig = ser.ReadObject(ms) as AppSetting;
+                        baseurl = appSettig.FontDeliveryServerUri;
+                    }
+                    catch (Exception)
+                    {
+                        return;
+                    }
+
+                }
+
+                string infopath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Fontworks", "LETS", "status.dat");
+
+                if (File.Exists(infopath))
+                {
+                    // 内容を複合化する
+                    DecryptFile decryptFile = new DecryptFile();
+                    string decryptText = string.Empty;
+                    try
+                    {
+                        decryptText = decryptFile.ReadAll(infopath);
+                        var statusDat = new StatusDat();
+                        var ms = new MemoryStream(Encoding.UTF8.GetBytes(decryptText));
+                        var ser = new DataContractJsonSerializer(statusDat.GetType());
+                        statusDat = ser.ReadObject(ms) as StatusDat;
+
+                        Logout(baseurl, statusDat.DeviceId, statusDat.RefreshToken);
+                    }
+                    catch (Exception)
+                    {
+                        return;
+                    }
+
+                }
+            }
+            catch (Exception)
+            {
+                // NOP
+            }
+        }
+
+        static void Logout(string serverbase, string devid, string refreshkey)
+        {
+            try
+            {
+                var refreshbody = $@"{{""refreshToken"":""{refreshkey}""}}";
+
+                using (HttpClient client = new HttpClient())
+                {
+                    var request = new HttpRequestMessage(HttpMethod.Post, $"{serverbase}/api/v1/token");
+                    request.Headers.Add("X-LETS-DEVICEID", $"{devid}");
+                    var content = new StringContent(refreshbody, Encoding.UTF8, "application/json");
+                    request.Content = content;
+                    using (System.Net.Http.HttpResponseMessage response = client.SendAsync(request).Result)
+                    {
+                        string responseBody = response.Content.ReadAsStringAsync().Result;
+                        if (responseBody.Contains("succeeded"))
+                        {
+                            string res = responseBody.Substring(responseBody.IndexOf("accessToken"));
+                            string accesstoken = res.Replace("accessToken", "").Replace(@"""", "").Replace("}", "").Replace(":", "");
+
+                            var logoutreq = new HttpRequestMessage(HttpMethod.Post, $"{serverbase}/api/v1/logout");
+                            logoutreq.Headers.Add("X-LETS-DEVICEID", $"{devid}");
+                            logoutreq.Headers.Add("Authorization", $"Bearer {accesstoken}");
+                            var logoutbody = $@"{{}}";
+                            var logoutcontent = new StringContent(logoutbody, Encoding.UTF8, "application/json");
+                            logoutreq.Content = logoutcontent;
+                            using (System.Net.Http.HttpResponseMessage logoutresponse = client.SendAsync(logoutreq).Result)
+                            {
+                                string logoutresponseBody = logoutresponse.Content.ReadAsStringAsync().Result;
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                // NOP
+            }
+        }
+
+        static private void SetHidden(string filepath, bool isHidden)
+        {
+            FileAttributes fa = System.IO.File.GetAttributes(filepath);
+            if (isHidden)
+            {
+                fa = fa | FileAttributes.Hidden;
+            }
+            else
+            {
+                fa = fa & ~FileAttributes.Hidden;
+            }
+
+            System.IO.File.SetAttributes(filepath, fa);
         }
 
         public class VerCompare : System.Collections.IComparer
@@ -286,5 +400,35 @@ namespace Updater
             System.Runtime.InteropServices.Marshal.FinalReleaseComObject(shortcut);
             System.Runtime.InteropServices.Marshal.FinalReleaseComObject(shell);
         }
+    }
+
+    [DataContract]
+    internal class StatusDat
+    {
+        [DataMember]
+        public string DeviceKey { get; set; }
+        [DataMember]
+        public string DeviceId { get; set; }
+        [DataMember]
+        public bool IsLoggingIn { get; set; }
+        [DataMember]
+        public string RefreshToken { get; set; }
+        [DataMember]
+        public string LastEventId { get; set; }
+    }
+
+    [DataContract]
+    internal class AppSetting
+    {
+        [DataMember]
+        public string FontDeliveryServerUri { get; set; }
+        [DataMember]
+        public string NotificationServerUri { get; set; }
+        [DataMember]
+        public int CommunicationRetryCount { get; set; }
+        [DataMember]
+        public int FixedTermConfirmationInterval { get; set; }
+        [DataMember]
+        public int FontCalculationFactor { get; set; }
     }
 }

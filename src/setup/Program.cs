@@ -10,6 +10,13 @@ namespace setup
     {
         static void Main(string[] args)
         {
+            // ホームドライブの取得
+            string winDir = System.Environment.GetFolderPath(Environment.SpecialFolder.Windows);
+            string homedrive = winDir.Substring(0, winDir.IndexOf("\\"));
+
+            // LETSフォルダ
+            string letsfolder = $@"{homedrive}\ProgramData\Fontworks\LETS";
+
             System.Diagnostics.Process pro = new System.Diagnostics.Process();
 
             pro.StartInfo.FileName = System.Environment.GetEnvironmentVariable("ComSpec");
@@ -43,47 +50,103 @@ namespace setup
                     // NOP
                 }
             }
-            //var os = Environment.OSVersion;
-            //if (os.Version.Major < 10)
-            //{
-            //    System.Windows.Forms.MessageBox.Show("Windows10 未満の OS では LETS をご利用できません。");
-            //    return;
-            //}
-
-            // ホームドライブの取得
-            string winDir = System.Environment.GetFolderPath(Environment.SpecialFolder.Windows);
-            string homedrive = winDir.Substring(0, winDir.IndexOf("\\"));
-
-            // ショートカットにバッチがあるか確認
-            // LETSアプリの起動(ショートカットを実行する)
-            string uninstshortcut = $@"{homedrive}\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\uninstallfonts.bat";
-            if (File.Exists(uninstshortcut))
-            {
-                System.Windows.Forms.MessageBox.Show("アンインストール処理が完了していません。");
-                return;
-            }
-
-            // 実行ファイルパスの取得(圧縮フォルダ内でも取得できる)
-            System.Reflection.Assembly executionAsm = System.Reflection.Assembly.GetExecutingAssembly();
-            string actualPath = System.IO.Path.GetDirectoryName(executionAsm.Location);
 
             // インストーラ開始日時を取得する
             DateTime inststt = DateTime.Now;
 
-            // インストーラの起動
-            string installer = actualPath + @"\LETS-Installer.msi";
-            Process p1 = Process.Start(installer);
-            p1.WaitForExit();
+            // Setupプログラムから実行していることを示す一時ファイル
+            string tmpfile = $@"{homedrive}\ProgramData\.runfromletssetup";
 
-            // LETSアプリの起動(ショートカットを実行する)
-            string shortcut = $@"{homedrive}\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\LETS デスクトップアプリ.lnk";
-
-            // ショートカットの作成日時を確認する
-            DateTime dtCreate = File.GetCreationTime(shortcut);
-
-            // ショートカット作成日時がインストーラ起動日時より後ならば、起動を行う
-            if (inststt.CompareTo(dtCreate) <= 0)
+            try
             {
+                //  一時ファイルを作成する
+                FileStream s = File.Create(tmpfile);
+                s.Close();
+
+                //  LETSがインストールされているか確認
+                //  レジストリ「コンピューター\HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\{805BF39F-7BBE-445F-B56B-A6FD34C4D817}」
+                Microsoft.Win32.RegistryKey rkey = Microsoft.Win32.Registry.LocalMachine.OpenSubKey(@"SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\{805BF39F-7BBE-445F-B56B-A6FD34C4D817}");
+                if (rkey != null)
+                {
+                    //  存在する場合
+                    // ユーザ情報クリアバッチを削除
+                    // ・clearuserdata*.bat
+                    string[] batfiles = Directory.GetFiles(letsfolder, "clearuserdata*.bat");
+                    if(batfiles != null && batfiles.Length > 0)
+                    {
+                        foreach(string batfile in batfiles)
+                        {
+                            File.Delete(batfile);
+                        }
+                    }
+                    // ・uninstallfonts*.bat
+                    batfiles = Directory.GetFiles(letsfolder, "uninstallfonts*.bat");
+                    if (batfiles != null && batfiles.Length > 0)
+                    {
+                        foreach (string batfile in batfiles)
+                        {
+                            File.Delete(batfile);
+                        }
+                    }
+                    // ・uninstreg*.bat
+                    batfiles = Directory.GetFiles(letsfolder, "uninstreg*.bat");
+                    if (batfiles != null && batfiles.Length > 0)
+                    {
+                        foreach (string batfile in batfiles)
+                        {
+                            File.Delete(batfile);
+                        }
+                    }
+
+                    // アンインストーラ実行
+                    Process pu = Process.Start("MsiExec.exe", "/X{805BF39F-7BBE-445F-B56B-A6FD34C4D817} /passive");
+                    pu.WaitForExit();
+
+                    if(pu.ExitCode != 0)
+                    {
+                        // アンインストーラが(UAC)キャンセルされたら終了
+                        return;
+                    }
+
+                    // ショートカット(uninstallfonts.bat)の削除
+                    string uninstbat = $@"{homedrive}\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\uninstallfonts.bat";
+                    if (File.Exists(uninstbat))
+                    {
+                        File.Delete(uninstbat);
+                    }
+                }
+
+                // ショートカットにバッチ(uninstallfonts.bat)があるか確認
+                string uninstshortcut = $@"{homedrive}\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\uninstallfonts.bat";
+                if (File.Exists(uninstshortcut))
+                {
+                    System.Windows.Forms.MessageBox.Show("アンインストール処理が完了していません。");
+                    return;
+                }
+
+                // 実行ファイルパスの取得(圧縮フォルダ内でも取得できる)
+                System.Reflection.Assembly executionAsm = System.Reflection.Assembly.GetExecutingAssembly();
+                string actualPath = System.IO.Path.GetDirectoryName(executionAsm.Location);
+
+                // インストーラの起動
+                string installer = actualPath + @"\LETS-Installer.msi";
+                Process p1 = Process.Start(installer);
+                p1.WaitForExit();
+
+                if(p1.ExitCode != 0)
+                {
+                    // インストーラがキャンセルされたら終了
+                    return;
+                }
+
+                // LETSアプリの起動(ショートカットを実行する)
+                string shortcut = $@"{homedrive}\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\LETS デスクトップアプリ.lnk";
+                if(!File.Exists(shortcut))
+                {
+                    // ショートカットがなければ終了する
+                    return;
+                }
+
                 Process p2 = Process.Start(shortcut);
 
                 // チュートリアル画面の起動
@@ -91,6 +154,14 @@ namespace setup
                 string updator = $@"{homedrive}\ProgramData\Fontworks\LETS\LETSUpdater.exe";
                 Process p3 = Process.Start(updator);
             }
+            finally
+            {
+                //System.Windows.Forms.MessageBox.Show("finally Delete："+tmpfile);
+                File.Delete(tmpfile);
+            }
         }
+
     }
+
+
 }

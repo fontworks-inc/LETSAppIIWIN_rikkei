@@ -11,6 +11,7 @@ namespace OS.Interfaces
         /// フォントをインストールする
         /// </summary>
         /// <param name="font">対象フォント</param>
+        /// <returns>true:インストール成功、false:インストール失敗</returns>
         bool Install(Font font);
 
         /// <summary>
@@ -28,7 +29,8 @@ namespace OS.Interfaces
         /// フォントを削除する
         /// </summary>
         /// <param name="font">対象フォント</param>
-        void Delete(Font font);
+        /// <returns>実削除を行ったらtrueを返す</returns>
+        bool Delete(Font font);
 
         /// <summary>
         /// フォントをアクティベートする
@@ -42,5 +44,18 @@ namespace OS.Interfaces
         /// </summary>
         /// <param name="font">対象フォント</param>
         void Deactivate(Font font);
+
+        /// <summary>
+        /// フォントレジストリを削除する
+        /// </summary>
+        /// <param name="font">対象フォント</param>
+        void DelRegistory(Font font);
+
+        /// <summary>
+        /// フォント設定ファイルの対象フォントを削除対象にする
+        /// </summary>
+        /// <param name="font">対象フォント</param>
+        /// <param name="isRemove">true:削除対象</param>
+        void RemoveTargetSettings(Font font, bool isRemove = true);
     }
 }
