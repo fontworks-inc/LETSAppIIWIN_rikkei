@@ -140,7 +140,7 @@ namespace ApplicationService.Authentication
         /// <returns>認証情報</returns>
         public AuthenticationInformationResponse Login(string mailAddress, string password)
         {
-            Logger.Debug("AuthenticationService:Login Enter");
+            Logger.Info("AuthenticationService:Login Enter");
             if (this.devicesRepository == null)
             {
                 throw new InvalidOperationException(this.resourceWrapper.GetString("LOG_ERR_AuthenticationService_Login_InvalidOperationException"));
@@ -150,7 +150,7 @@ namespace ApplicationService.Authentication
             this.volatileSettingRepository.GetVolatileSetting().IsConnected = true;
 
             // ユーザ別保存：デバイスIDを取得
-            Logger.Debug("AuthenticationService:Login ユーザ別保存：デバイスIDを取得");
+            Logger.Info("AuthenticationService:Login ユーザ別保存：デバイスIDを取得");
             var userStatus = this.userStatusRepository.GetStatus();
             var deviceId = userStatus.DeviceId;
             var deviceKey = userStatus.DeviceKey;
@@ -165,7 +165,7 @@ namespace ApplicationService.Authentication
             }
 
             // 配信サービスよりデバイスIDを発行
-            Logger.Debug("AuthenticationService:Login 配信サービスよりデバイスIDを発行");
+            Logger.Info("AuthenticationService:Login 配信サービスよりデバイスIDを発行");
             var user = new User()
             {
                 MailAddress = mailAddress,
@@ -197,12 +197,12 @@ namespace ApplicationService.Authentication
             }
 
             // ユーザ別保存：デバイスIDに保存
-            Logger.Debug("AuthenticationService:Login ユーザ別保存：デバイスIDに保存");
+            Logger.Info("AuthenticationService:Login ユーザ別保存：デバイスIDに保存");
             userStatus.DeviceId = deviceId;
             this.userStatusRepository.SaveStatus(userStatus);
 
             // ログイン処理を実行
-            Logger.Debug("AuthenticationService:Login ログイン処理を実行");
+            Logger.Info("AuthenticationService:Login ログイン処理を実行");
             return this.authenticationInformationRepository.Login(
                     deviceId, mailAddress, password);
         }

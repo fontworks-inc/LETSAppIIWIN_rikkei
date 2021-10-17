@@ -52,6 +52,7 @@ namespace InstallerUtil
             {
                 string updator = $@"{homedrive}\ProgramData\Fontworks\LETS\LETSUpdater.exe";
                 Process upd = Process.Start(updator, "Logout");
+                upd.WaitForExit();
             }
             catch(Exception)
             {

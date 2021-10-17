@@ -90,10 +90,10 @@ namespace OS.Services
 
             try
             {
-                Logger.Debug("Install:Path(Source)=" + font.Path);
+                Logger.Info($"Install:Path(Source)={font.Path}" );
                 var destFileName = this.MoveFile(font.Path);
                 font.Path = destFileName;
-                Logger.Debug("Install:Path(Dest)=" + font.Path);
+                Logger.Info($"Install:Path(Dest)={font.Path}");
 
                 // アクティベート実施
                 bool activate = this.Activate(font);

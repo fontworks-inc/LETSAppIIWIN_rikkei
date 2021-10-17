@@ -772,20 +772,11 @@ namespace ApplicationService.Fonts
                                 // ユーザーフォントフォルダにフォントファイルがない場合、インストール対象に加える
                                 Logger.Warn($"[Ph.2] CollectInstallTargetFontFromFontInfomations:DiffID: install font={installFont.FileName}");
                                 this.volatileSettingRepository.GetVolatileSetting().InstallTargetFonts.Add(installFont);
-
-                                // 削除フラグを落とす
-                                this.fontActivationService.RemoveTargetSettings(userFont, false);
                             }
                         }
                         else
                         {
-                            Logger.Warn($"[Ph.2] CollectInstallTargetFontFromFontInfomations:DiffID:remove font={installFont.FileName}");
-
-                            // フォントレジストリ削除
-                            this.fontActivationService.DelRegistory(userFont);
-
-                            // 削除フラグを立てる
-                            this.fontActivationService.RemoveTargetSettings(userFont);
+                            Logger.Warn($"[Ph.2] CollectInstallTargetFontFromFontInfomations:DiffID:already exist font={installFont.FileName}");
 
                             // フォントダウンロード中断メッセージ
                             this.FontDownloadCancelledEvent(installFont);

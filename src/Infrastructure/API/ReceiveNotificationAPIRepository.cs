@@ -315,15 +315,15 @@ namespace Infrastructure.API
                 switch (sseMessage.EventType)
                 {
                     case "font-activate":
-                        Logger.Debug("font-activate");
+                        Logger.Info($"font-activate:{font.FontId}:{font.DisplayFontName}");
                         this.fontNotificationService.Activate(font);
                         break;
                     case "font-deactivate":
-                        Logger.Debug("font-deactivate");
+                        Logger.Info($"font-deactivate:{font.FontId}");
                         this.fontNotificationService.Deactivate(font.FontId);
                         break;
                     case "font-all-uninstall":
-                        Logger.Debug("font-all-uninstall");
+                        Logger.Info("font-all-uninstall");
                         this.fontNotificationService.AllUninstall();
                         break;
                     default:

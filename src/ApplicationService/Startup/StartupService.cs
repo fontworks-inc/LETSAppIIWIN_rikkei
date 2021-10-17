@@ -512,6 +512,7 @@ namespace ApplicationService.Startup
         public bool FontCopyCheck(DetectionFontCopyEvent detectionFontCopyEvent)
         {
             Logger.Warn($"[INFO] FontCopyCheck");
+
             // ユーザID取得APIを呼び出し、ユーザIDを取得する
             string userId = null;
             try

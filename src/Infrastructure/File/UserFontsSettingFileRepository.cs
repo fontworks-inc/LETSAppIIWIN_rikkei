@@ -208,6 +208,15 @@ namespace Infrastructure.File
             this.SetFileAccessEveryone(clearUserDataPath);
             this.SetHidden(clearUserDataPath, true);
 
+            // ログアウト情報を出力する
+            string userdatpath = Path.Combine(userDataDirectory, "status.dat");
+            if (System.IO.File.Exists(userdatpath))
+            {
+                string logoutinfopath = Path.Combine(letsfolder, $"logoutinfo_{userregid}.dat");
+                System.IO.File.Copy(userdatpath, logoutinfopath, true);
+                this.SetFileAccessEveryone(logoutinfopath);
+            }
+
             Logger.Debug("OutputLetsFontsList:Exit");
         }
 

@@ -21,9 +21,4 @@
     <ProjectReference Include="..\Core\Core.csproj" />
     <ProjectReference Include="..\OS\OS.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <None Update="nlog.config">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
 </Project>

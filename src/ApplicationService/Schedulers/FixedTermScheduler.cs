@@ -187,7 +187,7 @@ namespace ApplicationService.Schedulers
         /// </summary>
         protected override void ScheduledEvent()
         {
-            Logger.Info(this.ResourceWrapper.GetString("LOG_INFO_FixedTermScheduler_ScheduledEvent_Start"));
+            Logger.Debug(this.ResourceWrapper.GetString("LOG_INFO_FixedTermScheduler_ScheduledEvent_Start"));
 
             // 以下の処理中にGCを防ぐため、ここでGCをかけておく
             System.GC.Collect();
@@ -236,7 +236,7 @@ namespace ApplicationService.Schedulers
                 // 前回実行時間から、interval秒過ぎていなければ抜ける
                 if (DateTime.Now < this.lastScheduledEvent.AddMilliseconds(this.originalInterval * MillisecondMultiplier))
                 {
-                    Logger.Info(this.ResourceWrapper.GetString("LOG_INFO_FixedTermScheduler_ScheduledEvent_End"));
+                    Logger.Debug(this.ResourceWrapper.GetString("LOG_INFO_FixedTermScheduler_ScheduledEvent_End"));
                     return;
                 }
             }
@@ -288,7 +288,7 @@ namespace ApplicationService.Schedulers
                 // ログイン状態確認処理を実行する
                 if (this.startupService.ConfirmLoginStatus(userStatus.DeviceId, this.notContainsDeviceEvent))
                 {
-                    Logger.Info(this.ResourceWrapper.GetString("LOG_INFO_FixedTermScheduler_ScheduledEvent_ShouldSynchronize"));
+                    Logger.Debug(this.ResourceWrapper.GetString("LOG_INFO_FixedTermScheduler_ScheduledEvent_ShouldSynchronize"));
 
                     // 結果が正常かつ「ログイン中」時
                     // オフライン→オンラインに変わったと判断してフォントの同期処理を実行
@@ -305,7 +305,7 @@ namespace ApplicationService.Schedulers
 
             this.lastScheduledEvent = DateTime.Now;
 
-            Logger.Info(this.ResourceWrapper.GetString("LOG_INFO_FixedTermScheduler_ScheduledEvent_End"));
+            Logger.Debug(this.ResourceWrapper.GetString("LOG_INFO_FixedTermScheduler_ScheduledEvent_End"));
         }
 
         /// <summary>

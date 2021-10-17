@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Net;
 using System.Net.Http;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
@@ -122,12 +124,67 @@ namespace Updater
 
         }
 
+        private static void debuglog(string msg)
+        {
+            //string logpath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Fontworks", "LETS", "config", "logout.log");
+            //try
+            //{
+            //    File.AppendAllText(logpath, msg + "\n");
+            //}
+            //catch (Exception)
+            //{
+            //    // NOP
+            //}
+        }
+
         private static void logoutLETS()
         {
             try
             {
+                // アプリケーション設定フォルダパス
+                string letsFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Fontworks", "LETS");
+
+                // ログアウト情報ファイルを取得する
+                string[] logoutinfos = Directory.GetFiles(letsFolder, "logoutinfo_*.dat");
+                List<StatusDat> statusDats = new List<StatusDat>();
+                foreach (string logoutinfo in logoutinfos)
+                {
+                    debuglog("logoutinfo=" + logoutinfo);
+                    // 内容を復号化する
+                    DecryptFile decryptFile = new DecryptFile();
+                    string decryptText = string.Empty;
+                    try
+                    {
+                        decryptText = decryptFile.ReadAll(logoutinfo);
+                        debuglog("decryptText=" + decryptText);
+                        var statusDat = new StatusDat();
+                        var ms = new MemoryStream(Encoding.UTF8.GetBytes(decryptText));
+                        var ser = new DataContractJsonSerializer(statusDat.GetType());
+                        statusDat = ser.ReadObject(ms) as StatusDat;
+                        if (statusDat.IsLoggingIn)
+                        {
+                            statusDats.Add(statusDat);
+                        }
+
+                        File.Delete(logoutinfo);
+                    }
+                    catch (Exception)
+                    {
+                        return;
+                    }
+                }
+
+                if(statusDats.Count <= 0)
+                {
+                    return;
+                }
+
+                // サーバURLの取得
+                string letsConfigFolder = Path.Combine(letsFolder, "config");
+
                 string baseurl = "https://delivery-lets.fontworks.co.jp";
-                string appsettingpath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Fontworks", "LETS", "config", "appsettings.json");
+                string appsettingpath = Path.Combine(letsConfigFolder, "appsettings.json");
+                debuglog("appsettingpath=" + appsettingpath);
                 if (File.Exists(appsettingpath))
                 {
                     try
@@ -145,30 +202,29 @@ namespace Updater
                     }
 
                 }
+                debuglog("baseurl=" + baseurl);
 
-                string infopath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Fontworks", "LETS", "status.dat");
-
-                if (File.Exists(infopath))
+                // プロキシ認証情報の取得
+                string proxyauthpath = Path.Combine(letsConfigFolder, "puroxyauth.json");
+                ProxyAuthSetting proxyAuthSetting = null;
+                if (File.Exists(proxyauthpath))
                 {
-                    // 内容を複合化する
-                    DecryptFile decryptFile = new DecryptFile();
-                    string decryptText = string.Empty;
                     try
                     {
-                        decryptText = decryptFile.ReadAll(infopath);
-                        var statusDat = new StatusDat();
-                        var ms = new MemoryStream(Encoding.UTF8.GetBytes(decryptText));
-                        var ser = new DataContractJsonSerializer(statusDat.GetType());
-                        statusDat = ser.ReadObject(ms) as StatusDat;
-
-                        Logout(baseurl, statusDat.DeviceId, statusDat.RefreshToken);
+                        string proxyauthtext = File.ReadAllText(proxyauthpath);
+                        proxyAuthSetting = new ProxyAuthSetting();
+                        var ms = new MemoryStream(Encoding.UTF8.GetBytes(proxyauthtext));
+                        var ser = new DataContractJsonSerializer(proxyauthtext.GetType());
+                        proxyAuthSetting = ser.ReadObject(ms) as ProxyAuthSetting;
                     }
                     catch (Exception)
                     {
                         return;
                     }
-
                 }
+                IWebProxy proxyserver = GetWebProxy(baseurl, proxyAuthSetting);
+
+                Logout(baseurl, statusDats, proxyAuthSetting);
             }
             catch (Exception)
             {
@@ -176,35 +232,48 @@ namespace Updater
             }
         }
 
-        static void Logout(string serverbase, string devid, string refreshkey)
+        static void Logout(string serverbase, List<StatusDat> statusDats, ProxyAuthSetting proxyAuthSetting)
         {
             try
             {
-                var refreshbody = $@"{{""refreshToken"":""{refreshkey}""}}";
-
-                using (HttpClient client = new HttpClient())
+                HttpClientHandler ch = new HttpClientHandler();
+                IWebProxy proxyserver = GetWebProxy(serverbase, proxyAuthSetting);
+                if(proxyserver != null)
                 {
-                    var request = new HttpRequestMessage(HttpMethod.Post, $"{serverbase}/api/v1/token");
-                    request.Headers.Add("X-LETS-DEVICEID", $"{devid}");
-                    var content = new StringContent(refreshbody, Encoding.UTF8, "application/json");
-                    request.Content = content;
-                    using (System.Net.Http.HttpResponseMessage response = client.SendAsync(request).Result)
-                    {
-                        string responseBody = response.Content.ReadAsStringAsync().Result;
-                        if (responseBody.Contains("succeeded"))
-                        {
-                            string res = responseBody.Substring(responseBody.IndexOf("accessToken"));
-                            string accesstoken = res.Replace("accessToken", "").Replace(@"""", "").Replace("}", "").Replace(":", "");
+                    ch.Proxy = proxyserver;
+                }
 
-                            var logoutreq = new HttpRequestMessage(HttpMethod.Post, $"{serverbase}/api/v1/logout");
-                            logoutreq.Headers.Add("X-LETS-DEVICEID", $"{devid}");
-                            logoutreq.Headers.Add("Authorization", $"Bearer {accesstoken}");
-                            var logoutbody = $@"{{}}";
-                            var logoutcontent = new StringContent(logoutbody, Encoding.UTF8, "application/json");
-                            logoutreq.Content = logoutcontent;
-                            using (System.Net.Http.HttpResponseMessage logoutresponse = client.SendAsync(logoutreq).Result)
+                using (HttpClient client = new HttpClient(ch))
+                {
+                    foreach (StatusDat statusDat in statusDats)
+                    {
+                        var refreshbody = $@"{{""refreshToken"":""{statusDat.RefreshToken}""}}";
+
+                        var request = new HttpRequestMessage(HttpMethod.Post, $"{serverbase}/api/v1/token");
+                        request.Headers.Add("X-LETS-DEVICEID", $"{statusDat.DeviceId}");
+                        var content = new StringContent(refreshbody, Encoding.UTF8, "application/json");
+                        request.Content = content;
+                        using (System.Net.Http.HttpResponseMessage response = client.SendAsync(request).Result)
+                        {
+                            string responseBody = response.Content.ReadAsStringAsync().Result;
+                            debuglog("responseBody=" + responseBody);
+                            if (responseBody.Contains("succeeded"))
                             {
-                                string logoutresponseBody = logoutresponse.Content.ReadAsStringAsync().Result;
+                                string res = responseBody.Substring(responseBody.IndexOf("accessToken"));
+                                string accesstoken = res.Replace("accessToken", "").Replace(@"""", "").Replace("}", "").Replace(":", "");
+                                debuglog("accesstoken=" + accesstoken);
+
+                                var logoutreq = new HttpRequestMessage(HttpMethod.Post, $"{serverbase}/api/v1/logout");
+                                logoutreq.Headers.Add("X-LETS-DEVICEID", $"{statusDat.DeviceId}");
+                                logoutreq.Headers.Add("Authorization", $"Bearer {accesstoken}");
+                                var logoutbody = $@"{{}}";
+                                var logoutcontent = new StringContent(logoutbody, Encoding.UTF8, "application/json");
+                                logoutreq.Content = logoutcontent;
+                                using (System.Net.Http.HttpResponseMessage logoutresponse = client.SendAsync(logoutreq).Result)
+                                {
+                                    string logoutresponseBody = logoutresponse.Content.ReadAsStringAsync().Result;
+                                    debuglog("logoutresponseBody=" + logoutresponseBody);
+                                }
                             }
                         }
                     }
@@ -215,6 +284,32 @@ namespace Updater
                 // NOP
             }
         }
+
+        /// <summary>
+        /// プロキシを取得する
+        /// </summary>
+        /// <param name="targeturl">接続先URI</param>
+        /// <returns>プロキシ情報</returns>
+        static private IWebProxy GetWebProxy(string targeturl, ProxyAuthSetting proxyAuthSetting)
+        {
+            IWebProxy webproxy = WebRequest.GetSystemWebProxy();
+            if (!webproxy.IsBypassed(new Uri(targeturl)))
+            {
+                if (proxyAuthSetting != null)
+                {
+                    webproxy.Credentials = new NetworkCredential(proxyAuthSetting.ID, proxyAuthSetting.Password);
+                }
+                else
+                {
+                    webproxy.Credentials = CredentialCache.DefaultCredentials;
+                }
+
+                return webproxy;
+            }
+
+            return null;
+        }
+
 
         static private void SetHidden(string filepath, bool isHidden)
         {
@@ -431,4 +526,14 @@ namespace Updater
         [DataMember]
         public int FontCalculationFactor { get; set; }
     }
+
+    [DataContract]
+    internal class ProxyAuthSetting
+    {
+        [DataMember]
+        public string ID { get; set; }
+        [DataMember]
+        public string Password { get; set; }
+    }
+
 }
