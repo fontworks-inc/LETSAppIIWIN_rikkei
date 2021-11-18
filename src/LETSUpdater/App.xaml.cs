@@ -25,9 +25,11 @@ namespace Updater
                 try
                 {
                     //  プログラムアップデートロジックを実行して終了
-                    if(args.Length == 1)
+                    if (args.Length == 1)
                     {
-                        logoutLETS();
+                        DebugLog("LETSUpdater:Before logoutLETS");
+                        LogoutLETS();
+                        DebugLog("LETSUpdater:After logoutLETS");
                         Environment.Exit(0);
                     }
 
@@ -124,20 +126,23 @@ namespace Updater
 
         }
 
-        private static void debuglog(string msg)
+        private static void DebugLog(string msg)
         {
-            //string logpath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Fontworks", "LETS", "config", "logout.log");
-            //try
-            //{
-            //    File.AppendAllText(logpath, msg + "\n");
-            //}
-            //catch (Exception)
-            //{
-            //    // NOP
-            //}
+#if DEBUGLOG
+            try
+            {
+                string logpath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Fontworks", "LETS", "config", "logout.log");
+                File.AppendAllText(logpath, msg + "\n");
+            }
+            catch (Exception)
+            {
+                // NOP
+            }
+
+#endif
         }
 
-        private static void logoutLETS()
+        private static void LogoutLETS()
         {
             try
             {
@@ -149,14 +154,14 @@ namespace Updater
                 List<StatusDat> statusDats = new List<StatusDat>();
                 foreach (string logoutinfo in logoutinfos)
                 {
-                    debuglog("logoutinfo=" + logoutinfo);
+                    DebugLog("logoutinfo=" + logoutinfo);
                     // 内容を復号化する
                     DecryptFile decryptFile = new DecryptFile();
                     string decryptText = string.Empty;
                     try
                     {
                         decryptText = decryptFile.ReadAll(logoutinfo);
-                        debuglog("decryptText=" + decryptText);
+                        DebugLog("decryptText=" + decryptText);
                         var statusDat = new StatusDat();
                         var ms = new MemoryStream(Encoding.UTF8.GetBytes(decryptText));
                         var ser = new DataContractJsonSerializer(statusDat.GetType());
@@ -184,7 +189,7 @@ namespace Updater
 
                 string baseurl = "https://delivery-lets.fontworks.co.jp";
                 string appsettingpath = Path.Combine(letsConfigFolder, "appsettings.json");
-                debuglog("appsettingpath=" + appsettingpath);
+                DebugLog("appsettingpath=" + appsettingpath);
                 if (File.Exists(appsettingpath))
                 {
                     try
@@ -202,7 +207,7 @@ namespace Updater
                     }
 
                 }
-                debuglog("baseurl=" + baseurl);
+                DebugLog("baseurl=" + baseurl);
 
                 // プロキシ認証情報の取得
                 string proxyauthpath = Path.Combine(letsConfigFolder, "puroxyauth.json");
@@ -256,12 +261,12 @@ namespace Updater
                         using (System.Net.Http.HttpResponseMessage response = client.SendAsync(request).Result)
                         {
                             string responseBody = response.Content.ReadAsStringAsync().Result;
-                            debuglog("responseBody=" + responseBody);
+                            DebugLog("responseBody=" + responseBody);
                             if (responseBody.Contains("succeeded"))
                             {
                                 string res = responseBody.Substring(responseBody.IndexOf("accessToken"));
                                 string accesstoken = res.Replace("accessToken", "").Replace(@"""", "").Replace("}", "").Replace(":", "");
-                                debuglog("accesstoken=" + accesstoken);
+                                DebugLog("accesstoken=" + accesstoken);
 
                                 var logoutreq = new HttpRequestMessage(HttpMethod.Post, $"{serverbase}/api/v1/logout");
                                 logoutreq.Headers.Add("X-LETS-DEVICEID", $"{statusDat.DeviceId}");
@@ -272,7 +277,7 @@ namespace Updater
                                 using (System.Net.Http.HttpResponseMessage logoutresponse = client.SendAsync(logoutreq).Result)
                                 {
                                     string logoutresponseBody = logoutresponse.Content.ReadAsStringAsync().Result;
-                                    debuglog("logoutresponseBody=" + logoutresponseBody);
+                                    DebugLog("logoutresponseBody=" + logoutresponseBody);
                                 }
                             }
                         }
