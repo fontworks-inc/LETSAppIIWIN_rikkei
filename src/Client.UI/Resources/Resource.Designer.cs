@@ -126,7 +126,7 @@ namespace Client.UI.Resources {
         }
         
         /// <summary>
-        ///   ログイン に類似しているローカライズされた文字列を検索します。
+        ///   認証 に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string APP_04_01_BTN_LOGIN {
             get {
@@ -207,7 +207,7 @@ namespace Client.UI.Resources {
         }
         
         /// <summary>
-        ///   ログイン に類似しているローカライズされた文字列を検索します。
+        ///   アカウント認証 に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string APP_04_01_PROC_TITLE {
             get {

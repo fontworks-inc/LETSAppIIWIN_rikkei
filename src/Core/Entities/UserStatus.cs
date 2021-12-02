@@ -30,5 +30,12 @@
         /// SSE接続時に使用するLast-Event-ID
         /// </summary>
         public int? LastEventId { get; set; } = null;
+
+        /// <summary>
+        /// デバイスモード
+        /// </summary>
+        /// <remarks>デバイスモードの時にtrueを返す</remarks>
+        public bool IsDeviceMode { get; set; } = false;
+
     }
 }

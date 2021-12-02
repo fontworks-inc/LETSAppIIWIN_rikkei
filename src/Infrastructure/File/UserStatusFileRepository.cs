@@ -92,29 +92,36 @@ namespace Infrastructure.File
         {
             Logger.Info("CopyUserStatusInfo:Enter");
 
-            // ユーザレジストリIDを取得する
-            string userregid = this.GetUserRegID();
-
-            string userDataDirectory = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Fontworks", "LETS");
-
-            // ホームドライブの取得
-            string appPath = AppDomain.CurrentDomain.BaseDirectory;
-            string homedrive = appPath.Substring(0, appPath.IndexOf("\\"));
-
-            // LETSフォルダ
-            string letsfolder = $@"{homedrive}\ProgramData\Fontworks\LETS";
-
-            // ログアウト情報を出力する
-            Logger.Info("CopyUserStatusInfo:OutputUninstInfo:ログアウト情報を出力する");
-            string userdatpath = Path.Combine(userDataDirectory, "status.dat");
-            if (System.IO.File.Exists(userdatpath))
+            try
             {
-                string logoutinfopath = Path.Combine(letsfolder, $"logoutinfo_{userregid}.dat");
-                Logger.Info($"OutputUninstInfo:{logoutinfopath}");
-                System.IO.File.Copy(userdatpath, logoutinfopath, true);
-                Logger.Info($"CopyUserStatusInfo:Copy {userdatpath}→{logoutinfopath}");
-                this.SetFileAccessEveryone(logoutinfopath);
+                // ユーザレジストリIDを取得する
+                string userregid = this.GetUserRegID();
+
+                string userDataDirectory = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Fontworks", "LETS");
+
+                // ホームドライブの取得
+                string appPath = AppDomain.CurrentDomain.BaseDirectory;
+                string homedrive = appPath.Substring(0, appPath.IndexOf("\\"));
+
+                // LETSフォルダ
+                string letsfolder = $@"{homedrive}\ProgramData\Fontworks\LETS";
+
+                // ログアウト情報を出力する
+                Logger.Info("CopyUserStatusInfo:OutputUninstInfo:ログアウト情報を出力する");
+                string userdatpath = Path.Combine(userDataDirectory, "status.dat");
+                if (System.IO.File.Exists(userdatpath))
+                {
+                    string logoutinfopath = Path.Combine(letsfolder, $"logoutinfo_{userregid}.dat");
+                    Logger.Info($"OutputUninstInfo:{logoutinfopath}");
+                    System.IO.File.Copy(userdatpath, logoutinfopath, true);
+                    Logger.Info($"CopyUserStatusInfo:Copy {userdatpath}→{logoutinfopath}");
+                    this.SetFileAccessEveryone(logoutinfopath);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Error(ex.StackTrace);
             }
 
             Logger.Info("CopyUserStatusInfo:Exit");

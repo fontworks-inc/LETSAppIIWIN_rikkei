@@ -168,8 +168,21 @@ namespace Client.UI
             var fontInfoRepository = new FontFileRepository(resourceWrapper);
             containerRegistry.Register<IFontFileRepository, FontFileRepository>();
 
+            // デバイスモード時設定ファイル
+            // 設定情報(デバイスモード時)
+            var deviceModeSettingRepository = new DeviceModeSettingRepository(Path.Combine(ApplicationSettingFolder, "dev-setting.dat"));
+            containerRegistry.RegisterInstance<IDeviceModeSettingRepository>(deviceModeSettingRepository);
+
+            // フォント情報(デバイスモード時)
+            var deviceModeFontListRepository = new DeviceModeFontListRepository(Path.Combine(ApplicationSettingFolder, "dev-fonts.dat"));
+            containerRegistry.RegisterInstance<IDeviceModeFontListRepository>(deviceModeFontListRepository);
+
+            // ライセンス情報(デバイスモード時)
+            var deviceModeLicenseInfoRepository = new DeviceModeLicenseInfoRepository(Path.Combine(ApplicationSettingFolder, "dev-license.dat"));
+            containerRegistry.RegisterInstance<IDeviceModeLicenseInfoRepository>(deviceModeLicenseInfoRepository);
+
             // フォントのアクティベートサービス
-            var fontActivationService = new FontActivationService(userFontsSettingFileRepository, userStatusFileRepository, fontInfoRepository);
+            var fontActivationService = new FontActivationService(userFontsSettingFileRepository, userStatusFileRepository, fontInfoRepository, deviceModeSettingRepository, deviceModeFontListRepository, deviceModeLicenseInfoRepository);
             containerRegistry.Register<IFontActivationService, FontActivationService>();
 
             // 未読お知らせ情報

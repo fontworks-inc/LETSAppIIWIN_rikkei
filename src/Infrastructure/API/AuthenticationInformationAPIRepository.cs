@@ -148,6 +148,54 @@ namespace Infrastructure.API
         }
 
         /// <summary>
+        /// オンライン利用／オフライン利用を判定する
+        /// </summary>
+        /// <param name="mailAddress">メールアドレス</param>
+        /// <param name="password">パスワード</param>
+        /// <returns>認証情報</returns>
+        /// <remarks>FUNCTION_08_01_13(アカウント認証API)</remarks>
+        public AuthenticationInformationResponse AuthenticateAccount(string mailAddress, string password)
+        {
+            AuthenticationInformationResponse response = new AuthenticationInformationResponse();
+
+            Logger.Info(string.Format(
+                "AuthenticationInformationAPIRepository:AuthenticateAccount Enter", string.Empty));
+
+            // APIの引数の値をセット(個別処理)
+            Logger.Debug("AuthenticationInformationAPIRepository:AuthenticateAccount APIの引数の値をセット(個別処理)");
+
+            this.ApiParam[APIParam.MailAddress] = mailAddress;
+            this.ApiParam[APIParam.Password] = password;
+
+            // API通信を行う(リトライ込み)を行う（共通処理）
+            try
+            {
+                Logger.Info(string.Format(
+                    "AuthenticationInformationAPIRepository:AuthenticateAccount API通信を行う(リトライ込み)を行う（共通処理）", string.Empty));
+                this.Invoke(this.CallAuthenticateAccountApi);
+
+                // 戻り値のセット（個別処理）
+                Logger.Info(string.Format("AuthenticationInformationAPIRepository:AuthenticateAccount 戻り値のセット（個別処理）", string.Empty));
+                var ret = (AccessTokenRefreshTokenResponse)this.ApiResponse;
+                response.Code = ret.Code;
+                response.Message = ret.Message;
+                if (response.Code == (int)ResponseCode.Succeeded || response.Code == (int)ResponseCode.MaximumNumberOfDevicesInUse)
+                {
+                    response.Data = new AuthenticationInformation(ret.Data.AccessToken, ret.Data.RefreshToken);
+                }
+            }
+            catch (ApiException)
+            {
+                // 通信に失敗or通信しなかった
+                Logger.Debug("AuthenticationInformationAPIRepository:AuthenticateAccount 通信に失敗or通信しなかった");
+                throw;
+            }
+
+            Logger.Debug("AuthenticationInformationAPIRepository:AuthenticateAccount return");
+            return response;
+        }
+
+        /// <summary>
         /// ログインの呼び出し
         /// </summary>
         private void CallLoginApi()
@@ -195,5 +243,25 @@ namespace Infrastructure.API
             var body = new InlineObject1((string)this.ApiParam[APIParam.TwoFactCode]);
             this.ApiResponse = apiInstance.Auth2fact((string)this.ApiParam[APIParam.DeviceId], config.UserAgent, body);
         }
+
+        /// <summary>
+        /// ログインの呼び出し
+        /// </summary>
+        private void CallAuthenticateAccountApi()
+        {
+            Logger.Debug("AuthenticationInformationAPIRepository:CallAuthenticateAccountApi Enter");
+            Configuration config = new Configuration();
+            config.BasePath = this.BasePath;
+            config.UserAgent = (string)this.ApiParam[APIParam.UserAgent];
+            config.WebProxy = this.APIConfiguration.GetWebProxy(this.BasePath);
+            LoginApi apiInstance = new LoginApi(config);
+            var body = new InlineObject(
+                (string)this.ApiParam[APIParam.MailAddress],
+                (string)this.ApiParam[APIParam.Password]);
+            Logger.Debug("AuthenticationInformationAPIRepository:CallAuthenticateAccountApi apiInstance.AuthenticateAccount:Before");
+            this.ApiResponse = apiInstance.AuthenticateAccount(config.UserAgent, body);
+            Logger.Debug("AuthenticationInformationAPIRepository:CallAuthenticateAccountApi apiInstance.AuthenticateAccount:After");
+        }
+
     }
 }

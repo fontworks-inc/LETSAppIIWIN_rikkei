@@ -43,6 +43,18 @@ namespace Core.Interfaces
         /// </summary>
         [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 17)]
         public string DeviceId;
+
+        /// <summary>
+        /// ユーザーフォントの種類
+        /// </summary>
+        [MarshalAs(UnmanagedType.I4)]
+        public int UserFontVers;
+
+        /// <summary>
+        /// LETS種別
+        /// </summary>
+        [MarshalAs(UnmanagedType.I4)]
+        public int LetsKind;
     }
 
     /// <summary>

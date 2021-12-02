@@ -8,7 +8,7 @@ using Org.OpenAPITools.Model;
 namespace Infrastructure.API
 {
     /// <summary>
-    /// 契約情報を格納するAPIリポジトリモック
+    /// 契約情報を格納するAPIリポジトリ
     /// </summary>
     /// <remarks>FUNCTION_08_03_02(契約情報取得API)</remarks>
     public class ContractsAggregateAPIRepository : APIRepositoryBase, IContractsAggregateRepository

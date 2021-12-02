@@ -2016,5 +2016,134 @@ namespace Org.OpenAPITools.Api
             return localVarResponse;
         }
 
+        /// <summary>
+        /// アカウント認証API オンライン利用／オフライン利用を判定する。オフライン利用の場合はオフラインデバイスID等を返却する。 
+        /// </summary>
+        /// <exception cref="Org.OpenAPITools.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
+        /// <param name="inlineObject"></param>
+        /// <returns>AuthenticateAccountResponse</returns>
+        public AuthenticateAccountResponse AuthenticateAccount(string userAgent, InlineObject inlineObject)
+        {
+            Org.OpenAPITools.Client.ApiResponse<AuthenticateAccountResponse> localVarResponse = AuthenticateAccountWithHttpInfo(userAgent, inlineObject);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// アカウント認証API オンライン利用／オフライン利用を判定する。オフライン利用の場合はオフラインデバイスID等を返却する。 
+        /// </summary>
+        /// <exception cref="Org.OpenAPITools.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
+        /// <param name="inlineObject"></param>
+        /// <returns>ApiResponse of AuthenticateAccountResponse</returns>
+        public Org.OpenAPITools.Client.ApiResponse<AuthenticateAccountResponse> AuthenticateAccountWithHttpInfo(string userAgent, InlineObject inlineObject)
+        {
+            // verify the required parameter 'userAgent' is set
+            if (userAgent == null)
+                throw new Org.OpenAPITools.Client.ApiException(400, "Missing required parameter 'userAgent' when calling LoginApi->PostAuthenticateAccount");
+
+            // verify the required parameter 'inlineObject4' is set
+            if (inlineObject == null)
+                throw new Org.OpenAPITools.Client.ApiException(400, "Missing required parameter 'inlineObject4' when calling LoginApi->PostAuthenticateAccount");
+
+            Org.OpenAPITools.Client.RequestOptions localVarRequestOptions = new Org.OpenAPITools.Client.RequestOptions();
+
+            String[] _contentTypes = new String[] {
+                "application/json; charset=utf-8"
+            };
+
+            // to determine the Accept header
+            String[] _accepts = new String[] {
+                "application/json; charset=utf-8"
+            };
+
+            var localVarContentType = Org.OpenAPITools.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = Org.OpenAPITools.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.HeaderParameters.Add("User-Agent", Org.OpenAPITools.Client.ClientUtils.ParameterToString(userAgent)); // header parameter
+            localVarRequestOptions.Data = inlineObject;
+
+
+            // make the HTTP request
+            var localVarResponse = this.Client.Post<AuthenticateAccountResponse>("/api/v1/authenticate-account", localVarRequestOptions, this.Configuration);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("PostAuthenticateAccount", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// アカウント認証API オンライン利用／オフライン利用を判定する。オフライン利用の場合はオフラインデバイスID等を返却する。 
+        /// </summary>
+        /// <exception cref="Org.OpenAPITools.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
+        /// <param name="inlineObject4"></param>
+        /// <returns>Task of AuthenticateAccountResponse</returns>
+        public async System.Threading.Tasks.Task<AuthenticateAccountResponse> PostAuthenticateAccountAsync(string userAgent, InlineObject4 inlineObject4)
+        {
+            Org.OpenAPITools.Client.ApiResponse<AuthenticateAccountResponse> localVarResponse = await PostAuthenticateAccountAsyncWithHttpInfo(userAgent, inlineObject4);
+            return localVarResponse.Data;
+
+        }
+
+        /// <summary>
+        /// アカウント認証API オンライン利用／オフライン利用を判定する。オフライン利用の場合はオフラインデバイスID等を返却する。 
+        /// </summary>
+        /// <exception cref="Org.OpenAPITools.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
+        /// <param name="inlineObject4"></param>
+        /// <returns>Task of ApiResponse (AuthenticateAccountResponse)</returns>
+        public async System.Threading.Tasks.Task<Org.OpenAPITools.Client.ApiResponse<AuthenticateAccountResponse>> PostAuthenticateAccountAsyncWithHttpInfo(string userAgent, InlineObject4 inlineObject4)
+        {
+            // verify the required parameter 'userAgent' is set
+            if (userAgent == null)
+                throw new Org.OpenAPITools.Client.ApiException(400, "Missing required parameter 'userAgent' when calling LoginApi->PostAuthenticateAccount");
+
+            // verify the required parameter 'inlineObject4' is set
+            if (inlineObject4 == null)
+                throw new Org.OpenAPITools.Client.ApiException(400, "Missing required parameter 'inlineObject4' when calling LoginApi->PostAuthenticateAccount");
+
+
+            Org.OpenAPITools.Client.RequestOptions localVarRequestOptions = new Org.OpenAPITools.Client.RequestOptions();
+
+            String[] _contentTypes = new String[] {
+                "application/json; charset=utf-8"
+            };
+
+            // to determine the Accept header
+            String[] _accepts = new String[] {
+                "application/json; charset=utf-8"
+            };
+
+            foreach (var _contentType in _contentTypes)
+                localVarRequestOptions.HeaderParameters.Add("Content-Type", _contentType);
+
+            foreach (var _accept in _accepts)
+                localVarRequestOptions.HeaderParameters.Add("Accept", _accept);
+
+            localVarRequestOptions.HeaderParameters.Add("User-Agent", Org.OpenAPITools.Client.ClientUtils.ParameterToString(userAgent)); // header parameter
+            localVarRequestOptions.Data = inlineObject4;
+
+
+            // make the HTTP request
+
+            var localVarResponse = await this.AsynchronousClient.PostAsync<AuthenticateAccountResponse>("/api/v1/authenticate-account", localVarRequestOptions, this.Configuration);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("PostAuthenticateAccount", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
     }
 }

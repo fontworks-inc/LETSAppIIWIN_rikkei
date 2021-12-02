@@ -521,5 +521,133 @@ namespace Org.OpenAPITools.Api
             return localVarResponse;
         }
 
+        /// <summary>
+        /// ライセンス更新API 対象オフラインデバイスのライセンスキーを取得する。
+        /// </summary>
+        /// <exception cref="Org.OpenAPITools.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
+        /// <param name="inlineObject"></param>
+        /// <returns>UpdateLicenseResponse</returns>
+        public UpdateLicenseResponse UpdateLicense(string userAgent, InlineObject inlineObject)
+        {
+            Org.OpenAPITools.Client.ApiResponse<UpdateLicenseResponse> localVarResponse = UpdateLicenseWithHttpInfo(userAgent, inlineObject);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// ライセンス更新API 対象オフラインデバイスのライセンスキーを取得する。 
+        /// </summary>
+        /// <exception cref="Org.OpenAPITools.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
+        /// <param name="inlineObject"></param>
+        /// <returns>ApiResponse of UpdateLicenseResponse</returns>
+        public Org.OpenAPITools.Client.ApiResponse<UpdateLicenseResponse> UpdateLicenseWithHttpInfo(string userAgent, InlineObject inlineObject)
+        {
+            // verify the required parameter 'userAgent' is set
+            if (userAgent == null)
+                throw new Org.OpenAPITools.Client.ApiException(400, "Missing required parameter 'userAgent' when calling LoginApi->PostUpdateLicense");
+
+            // verify the required parameter 'inlineObject4' is set
+            if (inlineObject == null)
+                throw new Org.OpenAPITools.Client.ApiException(400, "Missing required parameter 'inlineObject4' when calling LoginApi->PostUpdateLicense");
+
+            Org.OpenAPITools.Client.RequestOptions localVarRequestOptions = new Org.OpenAPITools.Client.RequestOptions();
+
+            String[] _contentTypes = new String[] {
+                "application/json; charset=utf-8"
+            };
+
+            // to determine the Accept header
+            String[] _accepts = new String[] {
+                "application/json; charset=utf-8"
+            };
+
+            var localVarContentType = Org.OpenAPITools.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = Org.OpenAPITools.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.HeaderParameters.Add("User-Agent", Org.OpenAPITools.Client.ClientUtils.ParameterToString(userAgent)); // header parameter
+            localVarRequestOptions.Data = inlineObject;
+
+
+            // make the HTTP request
+            var localVarResponse = this.Client.Post<UpdateLicenseResponse>("/api/v1/update-license", localVarRequestOptions, this.Configuration);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("PostUpdateLicense", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// ライセンス更新API 対象オフラインデバイスのライセンスキーを取得する。 
+        /// </summary>
+        /// <exception cref="Org.OpenAPITools.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
+        /// <param name="inlineObject4"></param>
+        /// <returns>Task of UpdateLicenseResponse</returns>
+        public async System.Threading.Tasks.Task<UpdateLicenseResponse> PostUpdateLicenseAsync(string userAgent, InlineObject4 inlineObject4)
+        {
+            Org.OpenAPITools.Client.ApiResponse<UpdateLicenseResponse> localVarResponse = await PostUpdateLicenseAsyncWithHttpInfo(userAgent, inlineObject4);
+            return localVarResponse.Data;
+
+        }
+
+        /// <summary>
+        /// ライセンス更新API 対象オフラインデバイスのライセンスキーを取得する。 
+        /// </summary>
+        /// <exception cref="Org.OpenAPITools.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
+        /// <param name="inlineObject4"></param>
+        /// <returns>Task of ApiResponse (UpdateLicenseResponse)</returns>
+        public async System.Threading.Tasks.Task<Org.OpenAPITools.Client.ApiResponse<UpdateLicenseResponse>> PostUpdateLicenseAsyncWithHttpInfo(string userAgent, InlineObject4 inlineObject4)
+        {
+            // verify the required parameter 'userAgent' is set
+            if (userAgent == null)
+                throw new Org.OpenAPITools.Client.ApiException(400, "Missing required parameter 'userAgent' when calling LoginApi->PostUpdateLicense");
+
+            // verify the required parameter 'inlineObject4' is set
+            if (inlineObject4 == null)
+                throw new Org.OpenAPITools.Client.ApiException(400, "Missing required parameter 'inlineObject4' when calling LoginApi->PostUpdateLicense");
+
+
+            Org.OpenAPITools.Client.RequestOptions localVarRequestOptions = new Org.OpenAPITools.Client.RequestOptions();
+
+            String[] _contentTypes = new String[] {
+                "application/json; charset=utf-8"
+            };
+
+            // to determine the Accept header
+            String[] _accepts = new String[] {
+                "application/json; charset=utf-8"
+            };
+
+            foreach (var _contentType in _contentTypes)
+                localVarRequestOptions.HeaderParameters.Add("Content-Type", _contentType);
+
+            foreach (var _accept in _accepts)
+                localVarRequestOptions.HeaderParameters.Add("Accept", _accept);
+
+            localVarRequestOptions.HeaderParameters.Add("User-Agent", Org.OpenAPITools.Client.ClientUtils.ParameterToString(userAgent)); // header parameter
+            localVarRequestOptions.Data = inlineObject4;
+
+
+            // make the HTTP request
+
+            var localVarResponse = await this.AsynchronousClient.PostAsync<UpdateLicenseResponse>("/api/v1/update-license", localVarRequestOptions, this.Configuration);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("PostUpdateLicense", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
     }
 }

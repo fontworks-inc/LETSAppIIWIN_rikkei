@@ -1,0 +1,93 @@
+﻿<Page x:Class="Client.UI.Views.DeviceModeApp"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+        xmlns:behaviors="clr-namespace:Client.UI.Behaviors"
+        mc:Ignorable="d"
+        xmlns:prism="http://prismlibrary.com/"
+      prism:ViewModelLocator.AutoWireViewModel="True" Width="753">
+
+    <DockPanel>
+        <Grid DockPanel.Dock="Left" Width="298">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="11*"/>
+                <RowDefinition Height="10*"/>
+            </Grid.RowDefinitions>
+            <!--<Rectangle HorizontalAlignment="Left" Height="89" Width="82" 
+                       Margin="35,50,0,0" VerticalAlignment="Top">
+                <Rectangle.Fill>
+                    <ImageBrush ImageSource="{Binding ImageLogo}"/>
+                </Rectangle.Fill>
+            </Rectangle>-->
+            <Button x:Name="LicenseRegistButton" Content="ラインセンス情報登録　　" HorizontalAlignment="Left" Width="150" Margin="30,30,0,0" VerticalAlignment="Top" BorderThickness="0" Background="LightGray" Click="LicenseRegistButton_Click"/>
+            <Button x:Name="FontInstallButton" Content="フォントインストール　　" HorizontalAlignment="Left" Width="150" Margin="30,60,0,0" VerticalAlignment="Top" BorderThickness="0" Background="White" Click="FontInstallButton_Click"/>
+            <Button x:Name="FontUninstallButton" Content="フォントアンインストール" HorizontalAlignment="Left" Width="150" Margin="30,90,0,0" VerticalAlignment="Top" BorderThickness="0" Background="White" Click="FontUninstallButton_Click"/>
+            <Button x:Name="HelpButton" Content="ヘルプ" HorizontalAlignment="Left" Height="24" Margin="30,160,0,0" VerticalAlignment="Top" Width="75" Grid.Row="1" Click="HelpButton_Click"/>
+            <Label Content="ライセンス有効期限" HorizontalAlignment="Left" Margin="30,184,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
+            <RichTextBox x:Name="LicenseTerm" HorizontalAlignment="Left" Margin="30,210,0,0" VerticalAlignment="Top" Width="250" Height="147" Grid.RowSpan="2" IsReadOnly="True" FontFamily="Yu Gothic">
+                <FlowDocument/>
+            </RichTextBox>
+        </Grid>
+        <Grid DockPanel.Dock="Right" Width="300">
+            <StackPanel x:Name="LicenseRegistPanel" Margin="0,1,0,-1" Visibility="Visible">
+                <Label Content="ライセンス情報登録" FontSize="16pt" Margin="10,45,0,10" HorizontalAlignment="Left"/>
+                <TextBox Text="LETSウェブサイト上で契約・更新したライセンス情報を、" Margin="10,0,0,0" HorizontalAlignment="Left" TextWrapping="Wrap" Width="268" BorderThickness="0" />
+                <TextBox Text="LETSオフライン専用アプリに登録します。" Margin="10,0,0,0" HorizontalAlignment="Left" TextWrapping="Wrap" Width="268" BorderThickness="0" />
+                <Label Content="オンラインで登録する" Margin="10,30,0,10" HorizontalAlignment="Left"/>
+                <StackPanel Orientation="Horizontal">
+                    <TextBox Text="オンラインでライセンス情報を取得します。" Margin="10,10,0,10" TextWrapping="Wrap" BorderThickness="0" Width="147" />
+                    <Button x:Name="LicenseOnlineButton" Content="ラインセス情報を取得" Height="24" Width="140" Click="LicenseOnlineButton_Click"/>
+                </StackPanel>
+                <Rectangle HorizontalAlignment="Stretch" Fill="Blue" Height="1"/>
+                <Label Content="オフラインで登録する" Margin="10,20,0,10" HorizontalAlignment="Left"/>
+                <StackPanel Orientation="Horizontal">
+                    <TextBox Text="ライセンスキーファイルからライセンス情報を登録します。" Margin="10,10,0,10" TextWrapping="Wrap" BorderThickness="0" Width="147" />
+                    <Button x:Name="LicenseKeyFileButton" Content="ラインセスキーを選択" Height="24" Width="140" HorizontalAlignment="Right" Click="LicenseKeyFileButton_Click"/>
+                </StackPanel>
+                <Label x:Name="LicenseKeyFilePath" Content="ファイル名" HorizontalAlignment="Right"/>
+                <TextBlock Text="{Binding ErrorMessage}" FontSize="10pt" Margin="5,10,0,0"
+                           VerticalAlignment="Top" HorizontalAlignment="Left" Foreground="Red"
+                           Visibility="{Binding ErrorMessageVisibility}"/>
+                <Button x:Name="RegistButton" Content="登録" Height="24" Width="76" HorizontalAlignment="Right" RenderTransformOrigin="0.52,1.743" Click="RegistButton_Click"/>
+                <TextBlock Text="{Binding ErrorMessage}" FontSize="10pt" Margin="5,10,0,0"
+                           VerticalAlignment="Top" HorizontalAlignment="Left" Foreground="Red"
+                           Visibility="{Binding ErrorMessageVisibility}"/>
+                <Grid Height="100"/>
+            </StackPanel>
+            <StackPanel x:Name="FontInstallPanel" Margin="0,1,0,-1" Visibility="Hidden">
+                <Label Content="フォントインストール" FontSize="16pt" Margin="10,45,0,10" HorizontalAlignment="Left"/>
+                <TextBox Text="選択したフォントをインストールします。" Margin="10,0,0,0" HorizontalAlignment="Left" TextWrapping="Wrap" Width="268" BorderThickness="0" />
+                <Button x:Name="SelectFontFileButton" Content="フォントを選択" Height="24" Width="120" Margin="0,80,0,0" HorizontalAlignment="Center" Click="SelectFontFileButton_Click"/>
+                <Label x:Name="FontFilePath" Content="ファイル名" HorizontalAlignment="Center"/>
+                <Button x:Name="InstallButton" Content="インストール" Height="24" Width="76" Margin="0,30,0,0" HorizontalAlignment="Center" Click="InstallButton_Click"/>
+                <TextBlock Text="{Binding ErrorMessage}" FontSize="10pt" Margin="5,10,0,0"
+                           VerticalAlignment="Top" HorizontalAlignment="Left" Foreground="Red"
+                           Visibility="{Binding ErrorMessageVisibility}"/>
+                <Grid Height="100"/>
+            </StackPanel>
+            <StackPanel x:Name="FontUninstallPanel" Margin="0,1,0,-1" Visibility="Hidden">
+                <Label Content="フォントアンインストール" FontSize="16pt" Margin="10,45,0,10" HorizontalAlignment="Left"/>
+                <TextBox Text="アンインストール対象のLETSに収録されているフォントをすべて削除します。" Margin="10,0,0,0" HorizontalAlignment="Left" TextWrapping="Wrap" Width="268" BorderThickness="0" />
+                <TextBox Text="複数のLETSに収録されているフォントは削除される場合があります。" Margin="10,0,0,0" HorizontalAlignment="Left" TextWrapping="Wrap" Width="268" BorderThickness="0" />
+                <!--<Label Content="{Binding ProcessTitle}" FontSize="16pt" Margin="0,45,0,10"
+                       VerticalAlignment="Top" HorizontalAlignment="Left"/>-->
+                <Label Content="アンインストール対象を選択" HorizontalAlignment="Center"/>
+                <ListBox x:Name="UninstallListBox" Height="139">
+                    <CheckBox Content="フォントワークス LETS"/>
+                    <CheckBox Content="Monotype LETS"/>
+                    <CheckBox Content="昭和書体 LETS"/>
+                    <CheckBox Content="イワタ LETS"/>
+                    <CheckBox Content="モトヤ LETS"/>
+                    <CheckBox Content="YOON LETS"/>
+                    <CheckBox Content="方正 LETS"/>
+                </ListBox>
+                <Button x:Name="UninstallButton" Content="アンインストール" Height="24" Width="76" Click="UninstallButton_Click"/>
+                <TextBlock Text="{Binding ErrorMessage}" FontSize="10pt" Margin="5,10,0,0"
+                           VerticalAlignment="Top" HorizontalAlignment="Left" Foreground="Red"
+                           Visibility="{Binding ErrorMessageVisibility}"/>
+            </StackPanel>
+        </Grid>
+    </DockPanel>
+</Page>

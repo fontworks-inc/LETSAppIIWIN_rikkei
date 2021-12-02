@@ -30,5 +30,13 @@ namespace Core.Interfaces
         /// <param name="twoFactCode">認証コード</param>
         /// <returns>認証情報</returns>
         AuthenticationInformationResponse TwoFactAuthentication(string deviceId, string twoFactCode);
+
+        /// <summary>
+        /// オンライン利用／オフライン利用を判定する
+        /// </summary>
+        /// <param name="mailAddress">メールアドレス</param>
+        /// <param name="password">パスワード</param>
+        /// <returns>認証情報</returns>
+        AuthenticationInformationResponse AuthenticateAccount(string mailAddress, string password);
     }
 }

@@ -34,6 +34,11 @@ namespace ApplicationService.Authentication
         private readonly IAuthenticationInformationRepository authenticationInformationRepository = null;
 
         /// <summary>
+        /// 設定情報(デバイスモード)を格納するリポジトリ
+        /// </summary>
+        private readonly IDeviceModeSettingRepository deviceModeSettingRepository = null;
+
+        /// <summary>
         /// 端末情報を格納するリポジトリ
         /// </summary>
         private readonly IDevicesRepository devicesRepository = null;
@@ -78,6 +83,7 @@ namespace ApplicationService.Authentication
             this.volatileSettingRepository = containerProvider.Resolve<IVolatileSettingRepository>();
             this.customerRepository = containerProvider.Resolve<ICustomerRepository>();
             this.fontManagerService = containerProvider.Resolve<IFontManagerService>();
+            this.deviceModeSettingRepository = containerProvider.Resolve<IDeviceModeSettingRepository>();
         }
 
         /// <summary>
@@ -88,19 +94,22 @@ namespace ApplicationService.Authentication
         /// <param name="devicesRepository">端末情報を格納するリポジトリ</param>
         /// <param name="userStatusRepository">ユーザ別ステータス情報を格納するリポジトリ</param>
         /// <param name="volatileSettingRepository">メモリ上で保持する情報のリポジトリ</param>
+        /// <param name="deviceModeSettingRepository">設定情報(デバイスモード)のリポジトリ</param>
         /// <remarks>ログイン処理用</remarks>
         public AuthenticationService(
             IResourceWrapper resourceWrapper,
             IAuthenticationInformationRepository authenticationInformationRepository,
             IDevicesRepository devicesRepository,
             IUserStatusRepository userStatusRepository,
-            IVolatileSettingRepository volatileSettingRepository)
+            IVolatileSettingRepository volatileSettingRepository,
+            IDeviceModeSettingRepository deviceModeSettingRepository)
         {
             this.resourceWrapper = resourceWrapper;
             this.authenticationInformationRepository = authenticationInformationRepository;
             this.devicesRepository = devicesRepository;
             this.userStatusRepository = userStatusRepository;
             this.volatileSettingRepository = volatileSettingRepository;
+            this.deviceModeSettingRepository = deviceModeSettingRepository;
         }
 
         /// <summary>
@@ -113,6 +122,7 @@ namespace ApplicationService.Authentication
         /// <param name="volatileSettingRepository">メモリ上で保持する情報のリポジトリ</param>
         /// <param name="customerRepository">お客様情報のリポジトリ</param>
         /// <param name="fontManagerService">フォント管理サービス</param>
+        /// <param name="deviceModeSettingRepository">設定情報(デバイスモード)のリポジトリ</param>
         /// <remarks>ログアウト処理用</remarks>
         public AuthenticationService(
             IResourceWrapper resourceWrapper,
@@ -121,7 +131,8 @@ namespace ApplicationService.Authentication
             IReceiveNotificationRepository receiveNotificationRepository,
             IVolatileSettingRepository volatileSettingRepository,
             ICustomerRepository customerRepository,
-            IFontManagerService fontManagerService)
+            IFontManagerService fontManagerService,
+            IDeviceModeSettingRepository deviceModeSettingRepository)
         {
             this.resourceWrapper = resourceWrapper;
             this.authenticationInformationRepository = authenticationInformationRepository;
@@ -130,6 +141,7 @@ namespace ApplicationService.Authentication
             this.volatileSettingRepository = volatileSettingRepository;
             this.customerRepository = customerRepository;
             this.fontManagerService = fontManagerService;
+            this.deviceModeSettingRepository = deviceModeSettingRepository;
         }
 
         /// <summary>
@@ -145,6 +157,10 @@ namespace ApplicationService.Authentication
             {
                 throw new InvalidOperationException(this.resourceWrapper.GetString("LOG_ERR_AuthenticationService_Login_InvalidOperationException"));
             }
+
+            // アカウント認証を行う
+            //AuthenticationInformationResponse authenticationInformationResponse = this.authenticationInformationRepository.AuthenticateAccount(mailAddress, password);
+            // グループ区分を判定し、デバイスモードならば、ここで終了
 
             // ログインするときは、接続状態をONにしておく
             this.volatileSettingRepository.GetVolatileSetting().IsConnected = true;

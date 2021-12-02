@@ -57,5 +57,18 @@ namespace OS.Interfaces
         /// <param name="font">対象フォント</param>
         /// <param name="isRemove">true:削除対象</param>
         void RemoveTargetSettings(Font font, bool isRemove = true);
+
+        /// <summary>
+        /// フォントをインストールする(デバイスモード)
+        /// </summary>
+        /// <param name="fontPath">対象フォント</param>
+        /// <returns>true:インストール成功、false:インストール失敗</returns>
+        DeviceModeFontInfo InstallDeviceMode(string fontPath);
+
+        /// <summary>
+        /// フォントをアンインストールする(デバイスモード)
+        /// </summary>
+        /// <param name="letsKind">削除対象LETS種別</param>
+        void UninstallDeviceMode(int letsKind);
     }
 }

@@ -148,7 +148,7 @@
     <comment>２要素認証画面　処理タイトル</comment>
   </data>
   <data name="APP_04_01_BTN_LOGIN" xml:space="preserve">
-    <value>ログイン</value>
+    <value>認証</value>
     <comment>ログイン画面　ログインボタン</comment>
   </data>
   <data name="APP_04_01_ERR_01" xml:space="preserve">
@@ -184,7 +184,7 @@
     <comment>ログイン画面　パスワード再設定画面案内　ラベル</comment>
   </data>
   <data name="APP_04_01_PROC_TITLE" xml:space="preserve">
-    <value>ログイン</value>
+    <value>アカウント認証</value>
     <comment>ログイン画面　処理タイトル</comment>
   </data>
   <data name="APP_04_ERR_EXCEPTION" xml:space="preserve">

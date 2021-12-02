@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Windows;
 using Client.UI.Interfaces;
 using Client.UI.Views.Helper;
+using Core.Interfaces;
 using Prism.Ioc;
 using Prism.Unity;
 
@@ -68,7 +69,36 @@ namespace Client.UI.Views
             // 認証情報を初期化
             this.loginWindowWrapper.SetAuthenticationInformation(null);
 
-            this.MainFrame.NavigationService.Navigate(new Login());
+            // デバイスモード判定を行う
+            IContainerProvider container = (System.Windows.Application.Current as PrismApplication).Container;
+            var userStatusRepository = container.Resolve<IUserStatusRepository>();
+
+            bool isDeviceMode = false;
+
+            if (userStatusRepository.GetStatus().IsDeviceMode)
+            {
+                isDeviceMode = true;
+            }
+            else
+            {
+                var deviceModeSettingRepository = container.Resolve<IDeviceModeSettingRepository>();
+                if (!string.IsNullOrEmpty(deviceModeSettingRepository.GetDeviceModeSetting().OfflineDeviceID))
+                {
+                    isDeviceMode = true;
+                }
+            }
+
+            //isDeviceMode = true;    //DEVICEMODE DEBUG
+            if (isDeviceMode)
+            {
+                // デバイスモード
+                this.MainFrame.NavigationService.Navigate(new DeviceModeApp());
+            }
+            else
+            {
+                this.MainFrame.NavigationService.Navigate(new Login());
+            }
+
             base.ShowDialog();
         }
 
