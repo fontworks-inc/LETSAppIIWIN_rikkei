@@ -21,5 +21,7 @@ namespace Core.Interfaces
         /// </summary>
         /// <param name="setting">設定情報(デバイスモード時)</param>
         void SaveDeviceModeSetting(DeviceModeSetting setting);
+
+        bool Exists();
     }
 }

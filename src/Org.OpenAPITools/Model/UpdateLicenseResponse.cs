@@ -30,7 +30,7 @@ namespace Org.OpenAPITools.Model
         /// <param name="code">code.</param>
         /// <param name="message">message.</param>
         /// <param name="data">data.</param>
-        public UpdateLicenseResponse(int code = default(int), string message = default(string), AccessTokenData data = default(AccessTokenData))
+        public UpdateLicenseResponse(int code = default(int), string message = default(string), UpdateLicenseData data = default(UpdateLicenseData))
         {
             this.Code = code;
             this.Message = message;
@@ -53,7 +53,7 @@ namespace Org.OpenAPITools.Model
         /// Gets or Sets Data
         /// </summary>
         [DataMember(Name = "data", EmitDefaultValue = false)]
-        public AccessTokenData Data { get; set; }
+        public UpdateLicenseData Data { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object

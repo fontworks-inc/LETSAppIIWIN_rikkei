@@ -15,6 +15,12 @@
     {
         "Entry"
         {
+        "MsmKey" = "8:_017DC68BD86899A31B2B4FD273E05B7F"
+        "OwnerKey" = "8:_B94B4FBB8E83400C975603B2D05F8EBA"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_02F80D864BC9FA6B7D2B60CB03DD2E88"
         "OwnerKey" = "8:_B94B4FBB8E83400C975603B2D05F8EBA"
         "MsmSig" = "8:_UNDEFINED"
@@ -693,6 +699,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_F3D98DD4EC47401CA58CD1FB27154A96"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_F73A4BEADBCE104A789D27AE2B0F05C3"
         "OwnerKey" = "8:_B94B4FBB8E83400C975603B2D05F8EBA"
         "MsmSig" = "8:_UNDEFINED"
@@ -725,6 +737,12 @@
         {
         "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_DB370F86B3784D5FAADC87599EE857EC"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_017DC68BD86899A31B2B4FD273E05B7F"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -1518,6 +1536,37 @@
         }
         "File"
         {
+            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_017DC68BD86899A31B2B4FD273E05B7F"
+            {
+            "AssemblyRegister" = "3:1"
+            "AssemblyIsInGAC" = "11:FALSE"
+            "AssemblyAsmDisplayName" = "8:System.Net.Http, Version=4.2.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"
+                "ScatterAssemblies"
+                {
+                    "_017DC68BD86899A31B2B4FD273E05B7F"
+                    {
+                    "Name" = "8:System.Net.Http.dll"
+                    "Attributes" = "3:512"
+                    }
+                }
+            "SourcePath" = "8:System.Net.Http.dll"
+            "TargetName" = "8:"
+            "Tag" = "8:"
+            "Folder" = "8:_3622654BA3D449C487917B74E5BA7656"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:TRUE"
+            "IsolateTo" = "8:"
+            }
             "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_02F80D864BC9FA6B7D2B60CB03DD2E88"
             {
             "AssemblyRegister" = "3:1"
@@ -3684,7 +3733,7 @@
             "SharedLegacy" = "11:FALSE"
             "PackageAs" = "3:1"
             "Register" = "3:1"
-            "Exclude" = "11:TRUE"
+            "Exclude" = "11:FALSE"
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
@@ -4793,6 +4842,26 @@
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_F3D98DD4EC47401CA58CD1FB27154A96"
+            {
+            "SourcePath" = "8:..\\Client.UI\\LETS-for-Device-help.pdf"
+            "TargetName" = "8:LETS-for-Device-help.pdf"
+            "Tag" = "8:"
+            "Folder" = "8:_EB4B8C933F7A4DA0A488C71BA50A1C14"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_F73A4BEADBCE104A789D27AE2B0F05C3"
             {
             "AssemblyRegister" = "3:1"
@@ -5006,7 +5075,7 @@
         "Product"
         {
         "Name" = "8:Microsoft Visual Studio"
-        "ProductName" = "8:LETS-Ver2.0.0"
+        "ProductName" = "8:LETS-Ver2.2.0"
         "ProductCode" = "8:{805BF39F-7BBE-445F-B56B-A6FD34C4D817}"
         "PackageCode" = "8:{E7FCABEB-2BB9-4243-A952-CE06C4F1DC65}"
         "UpgradeCode" = "8:{D06420E7-C210-4085-A03E-05BA8DF52137}"
@@ -5015,7 +5084,7 @@
         "RemovePreviousVersions" = "11:FALSE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:TRUE"
-        "ProductVersion" = "8:2.0.0"
+        "ProductVersion" = "8:2.2.0"
         "Manufacturer" = "8:Fontworks"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:https://fontworks.co.jp/"

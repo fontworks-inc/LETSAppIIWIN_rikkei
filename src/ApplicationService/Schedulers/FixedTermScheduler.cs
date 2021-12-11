@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net.NetworkInformation;
 using System.Security.AccessControl;
@@ -50,6 +51,11 @@ namespace ApplicationService.Schedulers
         /// フォント管理に関する処理を行うサービス
         /// </summary>
         private IFontManagerService fontManagerService;
+
+        /// <summary>
+        /// フォント管理に関する処理を行うサービス
+        /// </summary>
+        private IDeviceModeService deviceModeService;
 
         /// <summary>
         /// 契約情報を格納するリポジトリ
@@ -143,6 +149,7 @@ namespace ApplicationService.Schedulers
             IStartupService startupService,
             IReceiveNotificationRepository receiveNotificationRepository,
             IFontManagerService fontManagerService,
+            IDeviceModeService deviceModeService,
             IContractsAggregateRepository contractsAggregateRepository,
             ApplicationSetting applicationSetting,
             ShutdownClientApplicationRequiredEvent shutdownClientApplicationRequiredEvent,
@@ -162,6 +169,7 @@ namespace ApplicationService.Schedulers
             this.startupService = startupService;
             this.receiveNotificationRepository = receiveNotificationRepository;
             this.fontManagerService = fontManagerService;
+            this.deviceModeService = deviceModeService;
             this.contractsAggregateRepository = contractsAggregateRepository;
             this.applicationSetting = applicationSetting;
 
@@ -245,6 +253,20 @@ namespace ApplicationService.Schedulers
             if (!volatileSetting.IsCheckedStartup
                 || ((DateTime)volatileSetting.CheckedStartupAt).AddHours(ElapsedHours).CompareTo(DateTime.Now) <= 0)
             {
+                if (this.userStatusRepository.GetStatus().IsDeviceMode)
+                {
+                    IList<string> messageList = this.deviceModeService.FixedTermCheck(false);
+                    if (messageList.Count > 0)
+                    {
+                        foreach (string message in messageList)
+                        {
+                            Logger.Warn(message);
+                        }
+                    }
+
+                    return;
+                }
+
                 // 起動時チェック処理を実行する
                 if (this.startupService.IsCheckedStartup(
                     this.shutdownClientApplicationRequiredEvent,

@@ -7,7 +7,6 @@ namespace Core.Entities
     /// <summary>
     /// ライセンス(デバイスモード時)を表すクラス
     /// </summary>
-
     public class DeviceModeLicense
     {
         /// <summary>
@@ -24,6 +23,5 @@ namespace Core.Entities
         /// 有効期限
         /// </summary>
         public DateTime ExpireDate { get; set; }
-
     }
 }

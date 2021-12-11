@@ -7,7 +7,6 @@ namespace Core.Entities
     /// <summary>
     /// ライセンス情報(デバイスモード時)を表すクラス
     /// </summary>
-
     public class DeviceModeLicenseInfo
     {
         /// <summary>

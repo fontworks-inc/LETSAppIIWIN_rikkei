@@ -7,6 +7,7 @@ using System.Security.Principal;
 using System.Threading;
 using System.Windows;
 using ApplicationService.Authentication;
+using ApplicationService.DeviceMode;
 using ApplicationService.Fonts;
 using ApplicationService.Interfaces;
 using ApplicationService.Schedulers;
@@ -178,11 +179,12 @@ namespace Client.UI
             containerRegistry.RegisterInstance<IDeviceModeFontListRepository>(deviceModeFontListRepository);
 
             // ライセンス情報(デバイスモード時)
-            var deviceModeLicenseInfoRepository = new DeviceModeLicenseInfoRepository(Path.Combine(ApplicationSettingFolder, "dev-license.dat"));
+            var deviceModeLicenseInfoAPIRepository = new DeviceModeLisenceInfoAPIRepository(apiConfiguration);
+            var deviceModeLicenseInfoRepository = new DeviceModeLicenseInfoRepository(Path.Combine(ApplicationSettingFolder, "dev-license.dat"), deviceModeLicenseInfoAPIRepository);
             containerRegistry.RegisterInstance<IDeviceModeLicenseInfoRepository>(deviceModeLicenseInfoRepository);
 
             // フォントのアクティベートサービス
-            var fontActivationService = new FontActivationService(userFontsSettingFileRepository, userStatusFileRepository, fontInfoRepository, deviceModeSettingRepository, deviceModeFontListRepository, deviceModeLicenseInfoRepository);
+            var fontActivationService = new FontActivationService(userFontsSettingFileRepository, userStatusFileRepository, fontInfoRepository);
             containerRegistry.Register<IFontActivationService, FontActivationService>();
 
             // 未読お知らせ情報
@@ -249,6 +251,10 @@ namespace Client.UI
             // プログラムアップデートサービス
             var applicationUpdateService = new ApplicationUpdateService(resourceWrapper, volatileSettingMemoryRepository, clientApplicationVersionFileRepository, applicationRuntimeRepository, startProcessService);
             containerRegistry.RegisterInstance<IApplicationUpdateService>(applicationUpdateService);
+
+            // デバイスモードサービス
+            var deviceModeService = new DeviceModeService(deviceModeSettingRepository, deviceModeFontListRepository, deviceModeLicenseInfoRepository, deviceModeLicenseInfoAPIRepository, startProcessService, fontInfoRepository);
+            containerRegistry.RegisterInstance<IDeviceModeService>(deviceModeService);
 
             // アプリケーションコンポーネントを生成
             this.componentManager = new ComponentManager();
@@ -332,6 +338,7 @@ namespace Client.UI
                     startupService,
                     receiveNotificationRepository,
                     fontManagerService,
+                    deviceModeService,
                     contractsAggregateFileRepository,
                     applicationSetting,
                     () =>
@@ -378,9 +385,50 @@ namespace Client.UI
             // フォント管理
             var fontService = container.Resolve<IFontManagerService>();
 
+            var userStatusRepository = container.Resolve<IUserStatusRepository>();
+
+            // [ユーザー別保存：デバイスモード]を取得する
+            if (userStatusRepository.GetStatus().IsDeviceMode)
+            {
+                // コンテナに登録したオブジェクトを取得する
+                var deviceModeService = container.Resolve<IDeviceModeService>();
+                try
+                {
+                    //{ //DEBUG
+                    //    var deviceModeSettingRepository = container.Resolve<IDeviceModeSettingRepository>();
+                    //    var deviceModeSetting = deviceModeSettingRepository.GetDeviceModeSetting();
+                    //    deviceModeSetting.OfflineDeviceID = "486e9dea-1512-4911-ae60-5101a357f1f0";
+                    //    deviceModeSetting.IndefiniteAccessToken = "0d4277129ef74d5bbb723f007d84d270";
+                    //    deviceModeSettingRepository.SaveDeviceModeSetting(deviceModeSetting);
+                    //}
+
+                    IList<string> messageList = deviceModeService.FixedTermCheck(true);
+                    if (messageList.Count > 0)
+                    {
+                        foreach (string message in messageList)
+                        {
+                            ToastNotificationWrapper.Show("LETSオフライン専用アプリ", message);
+                        }
+                    }
+                }
+                catch (InvalidOperationException invalidEx)
+                {
+                    // アプリケーションを終了する
+                    Logger.Debug(invalidEx.StackTrace);
+                    ToastNotificationWrapper.Show("LETSオフライン専用アプリ", invalidEx.Message);
+                    Shell shell = (Shell)(System.Windows.Application.Current as PrismApplication);
+                    shell.Shutdown();
+                }
+                catch (Exception ex)
+                {
+                    Logger.Debug(ex.StackTrace);
+                }
+
+                return;
+            }
+
             // [ユーザー別保存：ログイン状態]を取得する
             Logger.Debug(string.Format("OnStartup:[ユーザー別保存：ログイン状態]を取得する", string.Empty));
-            var userStatusRepository = container.Resolve<IUserStatusRepository>();
             if (userStatusRepository.GetStatus().IsLoggingIn)
             {
                 // 状態表示：ログイン中を表示する

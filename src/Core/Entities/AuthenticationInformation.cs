@@ -26,6 +26,21 @@ namespace Core.Entities
         }
 
         /// <summary>
+        /// インスタンスの初期化を行う
+        /// </summary>
+        /// <param name="groupType">アクセストークン</param>
+        /// <param name="offlineDeviceId">リフレッシュトークン</param>
+        /// <param name="licenseDecryptionKey">リフレッシュトークン</param>
+        /// <param name="indefiniteAccessToken">リフレッシュトークン</param>
+        public AuthenticationInformation(int groupType, string offlineDeviceId, string licenseDecryptionKey, string indefiniteAccessToken)
+        {
+            this.GroupType = groupType;
+            this.OfflineDeviceId = offlineDeviceId;
+            this.LicenseDecryptionKey = licenseDecryptionKey;
+            this.IndefiniteAccessToken = indefiniteAccessToken;
+        }
+
+        /// <summary>
         /// アクセストークン
         /// </summary>
         public string AccessToken { get; set; } = string.Empty;
@@ -34,6 +49,26 @@ namespace Core.Entities
         /// リフレッシュトークン
         /// </summary>
         public string RefreshToken { get; set; } = string.Empty;
+
+        /// <summary>
+        /// リフレッシュトークン
+        /// </summary>
+        public int GroupType { get; set; } = 0;
+
+        /// <summary>
+        /// リフレッシュトークン
+        /// </summary>
+        public string OfflineDeviceId { get; set; } = string.Empty;
+
+        /// <summary>
+        /// リフレッシュトークン
+        /// </summary>
+        public string LicenseDecryptionKey { get; set; } = string.Empty;
+
+        /// <summary>
+        /// リフレッシュトークン
+        /// </summary>
+        public string IndefiniteAccessToken { get; set; } = string.Empty;
 
         /// <summary>
         /// このオブジェクトが指定されたオブジェクトと等しいかどうかを判定する

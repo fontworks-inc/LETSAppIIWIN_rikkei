@@ -2,7 +2,11 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Security.Claims;
+using System.Security.Principal;
 using System.Text;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -12,6 +16,8 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using ApplicationService.Interfaces;
+using Client.UI.Wrappers;
 using Core.Entities;
 using Core.Interfaces;
 using NLog;
@@ -40,6 +46,13 @@ namespace Client.UI.Views
 
         private IFontActivationService fontActivationService = null;
 
+        private IDeviceModeService deviceModeService = null;
+
+        /// <summary>
+        /// 指定のプロセスを実施するサービス
+        /// </summary>
+        private IStartProcessService startProcessService;
+
         private IFontFileRepository fontInfoRepository = null;
 
         private Paragraph paragraph;
@@ -62,6 +75,8 @@ namespace Client.UI.Views
             this.deviceModeLicenseInfoRepository = container.Resolve<IDeviceModeLicenseInfoRepository>();
             this.fontActivationService = container.Resolve<IFontActivationService>();
             this.fontInfoRepository = container.Resolve<IFontFileRepository>();
+            this.deviceModeService = container.Resolve<IDeviceModeService>();
+            this.startProcessService = container.Resolve<IStartProcessService>();
 
             // ライセンスキーファイルパス初期表示
             if (this.deviceModeSettingRepository != null)
@@ -93,17 +108,25 @@ namespace Client.UI.Views
         /// <summary>
         /// ライセンス情報表示
         /// </summary>
-        private void LicenseInfoDisp()
+        private string LicenseInfoDisp()
         {
+            List<string> letsKindList = new List<string>();
+            string letsKinds = string.Empty;
             this.paragraph = new Paragraph();
             this.LicenseTerm.Document = new FlowDocument(this.paragraph);
             if (this.deviceModeLicenseInfoRepository != null)
             {
                 var now = DateTime.Now;
                 DeviceModeLicenseInfo deviceModeLicenseInfo = this.deviceModeLicenseInfoRepository.GetDeviceModeLicenseInfo();
+                if (this.letsKindMap != null)
+                {
+                    this.letsKindMap.Clear();
+                }
+
                 foreach (DeviceModeLicense deviceModeLicense in deviceModeLicenseInfo.DeviceModeLicenceList)
                 {
                     this.letsKindMap.Add((int)deviceModeLicense.LetsKind, deviceModeLicense.LetsKindName);
+                    letsKindList.Add(deviceModeLicense.LetsKindName);
                     if (now > deviceModeLicense.ExpireDate)
                     {
                         this.paragraph.Inlines.Add(new Run($"{deviceModeLicense.LetsKindName}     期限切れ") { Foreground = new SolidColorBrush(Colors.Red) });
@@ -117,6 +140,8 @@ namespace Client.UI.Views
                     this.paragraph.Inlines.Add(new LineBreak());
                 }
             }
+
+            return string.Join("、", letsKindList);
         }
 
         /// <summary>
@@ -131,12 +156,20 @@ namespace Client.UI.Views
                 DeviceModeFontList deviceModeFontList = this.deviceModeFontListRepository.GetDeviceModeFontList();
                 foreach (DeviceModeFontInfo fontInfo in deviceModeFontList.Fonts)
                 {
+                    if ((bool)fontInfo.IsRemove)
+                    {
+                        continue;
+                    }
+
                     if (!letsKindList.Contains((int)fontInfo.LetsKind))
                     {
                         var chkitem = new CheckBox();
-                        chkitem.Content = this.letsKindMap[(int)fontInfo.LetsKind];
-                        this.UninstallListBox.Items.Add(chkitem);
-                        letsKindList.Add((int)fontInfo.LetsKind);
+                        if (this.letsKindMap.ContainsKey((int)fontInfo.LetsKind))
+                        {
+                            chkitem.Content = this.letsKindMap[(int)fontInfo.LetsKind];
+                            this.UninstallListBox.Items.Add(chkitem);
+                            letsKindList.Add((int)fontInfo.LetsKind);
+                        }
                     }
                 }
             }
@@ -204,15 +237,41 @@ namespace Client.UI.Views
         private void LicenseOnlineButton_Click(object sender, RoutedEventArgs e)
         {
             // オンラインでライセンス情報を取得する
-            // ファイルを所定の場所に保存する
             var deviceModeSetting = this.deviceModeSettingRepository.GetDeviceModeSetting();
-            string filePath = deviceModeSetting.LicenceFileKeyPath;
-            if (string.IsNullOrEmpty(filePath))
+            this.ErrorMessage.Text = string.Empty;
+            this.ErrorMessage.Visibility = Visibility.Hidden;
+
+            try
             {
-                filePath = System.IO.Path.Combine(this.applicationSettingFolder, "LicenseKeFile.dat");
-                this.LicenseKeyFilePath.Content = System.IO.Path.GetFileName(filePath);
-                deviceModeSetting.LicenceFileKeyPath = filePath;
-                this.deviceModeSettingRepository.SaveDeviceModeSetting(deviceModeSetting);
+                string filePath = deviceModeSetting.LicenceFileKeyPath;
+                if (string.IsNullOrEmpty(filePath))
+                {
+                    filePath = System.IO.Path.Combine(this.applicationSettingFolder, "LicenseKeFile.dat");
+                    this.LicenseKeyFilePath.Content = System.IO.Path.GetFileName(filePath);
+                    deviceModeSetting.LicenceFileKeyPath = filePath;
+                    this.deviceModeSettingRepository.SaveDeviceModeSetting(deviceModeSetting);
+                }
+
+                DeviceModeLicenseInfo deviceModeLicenseInfo = this.deviceModeLicenseInfoRepository.GetDeviceModeLicenseInfo(true, deviceModeSetting.OfflineDeviceID, deviceModeSetting.IndefiniteAccessToken, deviceModeSetting.LicenceFileKeyPath);
+
+                this.deviceModeLicenseInfoRepository.SaveDeviceModeLicenseInfo(deviceModeLicenseInfo);
+
+                // ライセンス情報を表示する。
+                string letsKinds = this.LicenseInfoDisp();
+                if (string.IsNullOrEmpty(letsKinds))
+                {
+                    ToastNotificationWrapper.Show("ラインセンス登録", "デバイスに対応するライセンスがありません。ライセンスキーファイルが適切であるか確認してください。");
+                }
+                else
+                {
+                    ToastNotificationWrapper.Show("ラインセンス登録", "ライセンスを更新しました。 LETS種別：{letsKinds}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Debug(ex.StackTrace);
+                this.ErrorMessage.Text = "通信エラーが発生しました。";
+                this.ErrorMessage.Visibility = Visibility.Visible;
             }
         }
 
@@ -248,17 +307,32 @@ namespace Client.UI.Views
             var deviceModeSetting = this.deviceModeSettingRepository.GetDeviceModeSetting();
             string filePath = deviceModeSetting.LicenceFileKeyPath;
 
-            if (!string.IsNullOrEmpty(filePath))
+            try
             {
-                DeviceModeLicenseInfo licenseInfo = new DeviceModeLicenseInfo();
+                if (!string.IsNullOrEmpty(filePath))
+                {
+                    // ファイルからライセンス情報を作成する
+                    string jsonText = File.ReadAllText(filePath);
+                    DeviceModeLicenseInfo licenseInfo = this.deviceModeLicenseInfoRepository.CreateLicenseInfoFromJsonText(jsonText);
 
-                // ファイルからライセンス情報を作成する
+                    // [デバイスモードライセンス]に保存する
+                    this.deviceModeLicenseInfoRepository.SaveDeviceModeLicenseInfo(licenseInfo);
 
-                // [デバイスモードライセンス]に保存する
-                this.deviceModeLicenseInfoRepository.SaveDeviceModeLicenseInfo(licenseInfo);
-
-                // ライセンス情報を再表示する
-                this.LicenseInfoDisp();
+                    // ライセンス情報を表示する。
+                    string letsKinds = this.LicenseInfoDisp();
+                    if (string.IsNullOrEmpty(letsKinds))
+                    {
+                        ToastNotificationWrapper.Show("ラインセンス登録", "デバイスに対応するライセンスがありません。ライセンスキーファイルが適切であるか確認してください。");
+                    }
+                    else
+                    {
+                        ToastNotificationWrapper.Show("ラインセンス登録", "ライセンスを更新しました。 LETS種別：{letsKinds}");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Debug(ex.StackTrace);
             }
         }
 
@@ -306,81 +380,42 @@ namespace Client.UI.Views
                     try
                     {
                         // フォントファイルをUNZIPする
-                        System.IO.Compression.ZipFile.ExtractToDirectory(zipPassword, tempPath);
-
-                        IDictionary<int, DateTime> fontExpireMap = new Dictionary<int, DateTime>();
-                        DateTime now = DateTime.Now;
-
-                        // 展開されたフォルダ(/font/device, /font/windows/device)にあるフォントをインストールする
-                        DeviceModeLicenseInfo deviceModeLicenseInfo = this.deviceModeLicenseInfoRepository.GetDeviceModeLicenseInfo();
-                        string commonFontPath = System.IO.Path.Combine(tempPath, "/font/device");
-                        string[] commonFiles = Directory.GetFiles(commonFontPath, "*");
-                        foreach (string fontPath in commonFiles)
+                        try
                         {
-                            var fontIdInfo = this.fontInfoRepository.GetFontInfo(fontPath);
-                            DeviceModeFontInfo deviceModeFontInfo = this.FontInstall(deviceModeLicenseInfo, fontExpireMap, now, fontIdInfo, fontPath);
-                            if (deviceModeFontInfo != null)
-                            {
-                                DeviceModeFontList deviceModeFontList = this.deviceModeFontListRepository.GetDeviceModeFontList();
-                                deviceModeFontList.Fonts.Add(deviceModeFontInfo);
-                                this.deviceModeFontListRepository.SaveDeviceModeFontList(deviceModeFontList);
-                            }
+                            SZManager.ExtractWithPassword(filePath, tempPath, zipPassword);
+                        }
+                        catch (Exception ex)
+                        {
+                            Logger.Debug(ex.StackTrace);
+
+                            // 解凍に失敗した場合、通知を表示する。
+                            ToastNotificationWrapper.Show("フォントインストール失敗", "フォントのインストールに失敗しました。正しいフォントファイルを選択してください。");
+                            return;
                         }
 
-                        string winFontPath = System.IO.Path.Combine(tempPath, "/font/device");
-                        string[] winFiles = Directory.GetFiles(winFontPath, "*");
-                        foreach (string fontPath in winFiles)
+                        IList<string> messageList = this.deviceModeService.InstallFonts(tempPath);
+                        if (messageList.Count > 0)
                         {
-                            var fontIdInfo = this.fontInfoRepository.GetFontInfo(fontPath);
-                            DeviceModeFontInfo deviceModeFontInfo = this.FontInstall(deviceModeLicenseInfo, fontExpireMap, now, fontIdInfo, fontPath);
-                            if (deviceModeFontInfo != null)
+                            foreach (string message in messageList)
                             {
-                                DeviceModeFontList deviceModeFontList = this.deviceModeFontListRepository.GetDeviceModeFontList();
-                                deviceModeFontList.Fonts.Add(deviceModeFontInfo);
-                                this.deviceModeFontListRepository.SaveDeviceModeFontList(deviceModeFontList);
+                                ToastNotificationWrapper.Show("フォントインストール", message);
                             }
                         }
 
                         // アンインストール対象リストを更新する
                         this.UninstallListDisp();
                     }
+                    catch (Exception ex)
+                    {
+                        Logger.Debug(ex.StackTrace);
+                    }
                     finally
                     {
                         // 一時フォルダを削除する
-                        this.DeleteFolder(tempPath);
+                        this.deviceModeService.DeleteFolder(tempPath);
                     }
                 }
             }
-        }
-
-        private DeviceModeFontInfo FontInstall(DeviceModeLicenseInfo deviceModeLicenseInfo, IDictionary<int, DateTime> fontExpireMap, DateTime now, FontIdInfo fontIdInfo, string filePath)
-        {
-            int letsKind = fontIdInfo.LetsKind;
-            DateTime expireDate = DateTime.Now.AddDays(-1);
-
-            if (fontExpireMap.ContainsKey(letsKind))
-            {
-                expireDate = fontExpireMap[letsKind];
-            }
-            else
-            {
-                foreach (DeviceModeLicense deviceModeLicense in deviceModeLicenseInfo.DeviceModeLicenceList)
-                {
-                    if (deviceModeLicense.LetsKind == letsKind)
-                    {
-                        expireDate = deviceModeLicense.ExpireDate;
-                        fontExpireMap.Add(letsKind, expireDate);
-                    }
-                }
-            }
-
-            if (expireDate > now)
-            {
-                DeviceModeFontInfo deviceModeFontInfo = this.fontActivationService.InstallDeviceMode(filePath);
-                return deviceModeFontInfo;
-            }
-
-            return null;
         }
 
         /// <summary>
@@ -390,14 +425,11 @@ namespace Client.UI.Views
         {
             // ライセンス情報から、LEST種別名-LETS種別マップを作成する
             DeviceModeLicenseInfo deviceModeLicenseInfo = this.deviceModeLicenseInfoRepository.GetDeviceModeLicenseInfo();
-            IDictionary<string, int> letsNameKindMap = new Dictionary<string, int>();
-            foreach (DeviceModeLicense deviceModeLicense in deviceModeLicenseInfo.DeviceModeLicenceList)
-            {
-                letsNameKindMap.Add(deviceModeLicense.LetsKindName, (int)deviceModeLicense.LetsKind);
-            }
+            IDictionary<string, int> letsNameKindMap = this.deviceModeService.LetsNameKindMap();
 
             // アンインストール対象LETS種別をアンインストールする
             IList<int> uninstallLetsKindList = new List<int>();
+            List<string> uninstallFontList = new List<string>();
             var items = this.UninstallListBox.Items;
             foreach (CheckBox item in items)
             {
@@ -407,8 +439,35 @@ namespace Client.UI.Views
                     if (letsNameKindMap.ContainsKey(letsKindName))
                     {
                         int letsKind = letsNameKindMap[letsKindName];
-                        this.fontActivationService.UninstallDeviceMode(letsKind);
+                        DeviceModeFontList deviceModeFontList = this.deviceModeFontListRepository.GetDeviceModeFontList();
+
+                        // 削除対象フォントリストを作成する
+                        foreach (DeviceModeFontInfo deviceModeFontInfo in deviceModeFontList.Fonts)
+                        {
+                            if (deviceModeFontInfo.LetsKind == letsKind)
+                            {
+                                string filePath = deviceModeFontInfo.FontFilePath;
+                                string regkey = deviceModeFontInfo.RegistryKey;
+
+                                uninstallFontList.Add(string.Join("\t", filePath, regkey, letsKindName, "Uninstall"));
+                            }
+                        }
                     }
+                }
+            }
+
+            if (uninstallFontList.Count > 0)
+            {
+                IList<string> messageList = this.deviceModeService.UninstallFonts(uninstallFontList, "フォントのアンインストールに成功しました。");
+
+                if (messageList.Count > 0)
+                {
+                    foreach (string message in messageList)
+                    {
+                        ToastNotificationWrapper.Show("フォントアンインストール", message);
+                    }
+
+                    this.UninstallListDisp();
                 }
             }
         }
@@ -421,49 +480,6 @@ namespace Client.UI.Views
             string helpPath = System.IO.Path.Combine(this.applicationSettingFolder, "LETS-for-Device-help.pdf");
 
             Process.Start(new ProcessStartInfo("cmd", $"/c start {helpPath}") { CreateNoWindow = true });
-        }
-
-        /// <summary>
-        /// 指定したディレクトリとその中身を全て削除する
-        /// </summary>
-        private void DeleteFolder(string targetDirectoryPath)
-        {
-            if (!Directory.Exists(targetDirectoryPath))
-            {
-                return;
-            }
-
-            // ディレクトリ以外の全ファイルを削除
-            string[] filePaths = Directory.GetFiles(targetDirectoryPath);
-            foreach (string filePath in filePaths)
-            {
-                try
-                {
-                    System.IO.File.SetAttributes(filePath, FileAttributes.Normal);
-                    System.IO.File.Delete(filePath);
-                }
-                catch (Exception)
-                {
-                    // 消せないファイルは無視する
-                }
-            }
-
-            // ディレクトリの中のディレクトリも再帰的に削除
-            string[] directoryPaths = Directory.GetDirectories(targetDirectoryPath);
-            foreach (string directoryPath in directoryPaths)
-            {
-                this.DeleteFolder(directoryPath);
-            }
-
-            // 中が空になったらディレクトリ自身も削除
-            try
-            {
-                Directory.Delete(targetDirectoryPath, false);
-            }
-            catch (Exception)
-            {
-                // 消せないフォルダも無視する
-            }
         }
     }
 }

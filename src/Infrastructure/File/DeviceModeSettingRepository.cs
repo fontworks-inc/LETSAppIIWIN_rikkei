@@ -29,6 +29,11 @@ namespace Infrastructure.File
         {
         }
 
+        public bool Exists()
+        {
+            return System.IO.File.Exists(this.FilePath);
+        }
+
         /// <summary>
         /// 設定情報(デバイスモード時)を取得する
         /// </summary>

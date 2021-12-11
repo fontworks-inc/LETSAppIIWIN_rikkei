@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using ApplicationService.Interfaces;
 using Core.Interfaces;
@@ -37,7 +38,7 @@ namespace ApplicationService.Startup
         /// <param name="fileName">ファイル名</param>
         /// <param name="arg">コマンド引数(null可能)</param>
         /// <param name="runAdmin">管理者権限実行フラグ</param>
-        public void StartProcessAdministrator(string directoryPath, string fileName, string[] arg, bool runAdmin)
+        public Process StartProcessAdministrator(string directoryPath, string fileName, string[] arg, bool runAdmin)
         {
             var proc = new System.Diagnostics.Process();
 
@@ -63,6 +64,8 @@ namespace ApplicationService.Startup
                 Logger.Error(ex, this.resourceWrapper.GetString("LOG_ERR_StartProcessService_StartProcessAdministrator_Win32Exception") + proc.StartInfo.FileName);
                 throw new Win32Exception(this.resourceWrapper.GetString("LOG_ERR_StartProcessService_StartProcessAdministrator_Win32Exception") + proc.StartInfo.FileName);
             }
+
+            return proc;
         }
     }
 }

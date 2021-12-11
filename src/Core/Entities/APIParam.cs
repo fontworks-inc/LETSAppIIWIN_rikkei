@@ -52,5 +52,11 @@
 
         /// <summary>Detected</summary>
         Detected,
+
+        /// <summary>OfflineDeviceId</summary>
+        OfflineDeviceId,
+
+        /// <summary>IndefiniteAccessToken</summary>
+        IndefiniteAccessToken,
     }
 }

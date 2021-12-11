@@ -36,6 +36,5 @@
         /// </summary>
         /// <remarks>デバイスモードの時にtrueを返す</remarks>
         public bool IsDeviceMode { get; set; } = false;
-
     }
 }

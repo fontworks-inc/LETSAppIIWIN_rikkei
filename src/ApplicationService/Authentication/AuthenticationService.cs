@@ -159,8 +159,37 @@ namespace ApplicationService.Authentication
             }
 
             // アカウント認証を行う
-            //AuthenticationInformationResponse authenticationInformationResponse = this.authenticationInformationRepository.AuthenticateAccount(mailAddress, password);
-            // グループ区分を判定し、デバイスモードならば、ここで終了
+            try
+            {
+                AuthenticationInformationResponse authenticationInformationResponse = this.authenticationInformationRepository.AuthenticateAccount(mailAddress, password);
+                ResponseCode code = authenticationInformationResponse.GetResponseCode();
+                if (code == ResponseCode.Succeeded)
+                {
+                    if (authenticationInformationResponse.Data.GroupType == 1)
+                    {
+                        // グループ区分を判定し、デバイスモードならば、ここで終了
+                        System.Environment.SetEnvironmentVariable("LETS_DEVICE_MODE", "TRUE");
+                        AuthenticationInformation authenticationInformation = authenticationInformationResponse.Data;
+                        DeviceModeSetting deviceModeSetting = this.deviceModeSettingRepository.GetDeviceModeSetting();
+                        deviceModeSetting.OfflineDeviceID = authenticationInformation.OfflineDeviceId;
+                        deviceModeSetting.LicenseDecryptionKey = authenticationInformation.LicenseDecryptionKey;
+                        deviceModeSetting.IndefiniteAccessToken = authenticationInformation.IndefiniteAccessToken;
+                        this.deviceModeSettingRepository.SaveDeviceModeSetting(deviceModeSetting);
+                        UserStatus wuserStatus = this.userStatusRepository.GetStatus();
+                        wuserStatus.IsDeviceMode = true;
+                        this.userStatusRepository.SaveStatus(wuserStatus);
+                        return authenticationInformationResponse;
+                    }
+                }
+                else
+                {
+                    return authenticationInformationResponse;
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Debug(ex.StackTrace);
+            }
 
             // ログインするときは、接続状態をONにしておく
             this.volatileSettingRepository.GetVolatileSetting().IsConnected = true;

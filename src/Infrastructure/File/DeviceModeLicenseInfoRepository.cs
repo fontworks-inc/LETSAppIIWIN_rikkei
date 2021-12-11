@@ -20,13 +20,21 @@ namespace Infrastructure.File
 
         private static object saveLockObject = new object();
 
+        private IDeviceModeLicenseInfoRepository deviceModeLisenceInfoAPIRepository;
+
         /// <summary>
         /// インスタンスを初期化する
         /// </summary>
         /// <param name="filePath">ファイルパス</param>
-        public DeviceModeLicenseInfoRepository(string filePath)
+        public DeviceModeLicenseInfoRepository(string filePath, IDeviceModeLicenseInfoRepository deviceModeLisenceInfoAPIRepository)
             : base(filePath)
         {
+            this.deviceModeLisenceInfoAPIRepository = deviceModeLisenceInfoAPIRepository;
+        }
+
+        public DeviceModeLicenseInfo CreateLicenseInfoFromJsonText(string jsonText)
+        {
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -45,7 +53,7 @@ namespace Infrastructure.File
                 }
                 catch (Exception ex)
                 {
-                    Logger.Error("UserStatus:" + ex.StackTrace);
+                    Logger.Error("DeviceModeLicenseInfo:" + ex.StackTrace);
                     return new DeviceModeLicenseInfo();
                 }
             }
@@ -53,6 +61,28 @@ namespace Infrastructure.File
             {
                 // ファイルが存在しない場合、新規のオブジェクトを返す
                 return new DeviceModeLicenseInfo();
+            }
+        }
+
+        /// <summary>
+        /// 設定情報(デバイスモード時)を取得する
+        /// </summary>
+        /// <returns>設定情報(デバイスモード時)</returns>
+        public Core.Entities.DeviceModeLicenseInfo GetDeviceModeLicenseInfo(bool fromOnline, string offlineDeviceId, string indefiniteAccessToken, string licenceFileKeyPath)
+        {
+            if (fromOnline)
+            {
+                DeviceModeLicenseInfo deviceModeLicenseInfo = this.deviceModeLisenceInfoAPIRepository.GetDeviceModeLicenseInfo(true, offlineDeviceId, indefiniteAccessToken, licenceFileKeyPath);
+                if (deviceModeLicenseInfo != null)
+                {
+                    this.SaveDeviceModeLicenseInfo(deviceModeLicenseInfo);
+                }
+
+                return deviceModeLicenseInfo;
+            }
+            else
+            {
+                return this.GetDeviceModeLicenseInfo();
             }
         }
 

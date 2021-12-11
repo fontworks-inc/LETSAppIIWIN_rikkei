@@ -1,4 +1,6 @@
-﻿namespace ApplicationService.Interfaces
+﻿using System.Diagnostics;
+
+namespace ApplicationService.Interfaces
 {
     /// <summary>
     /// 指定のプロセスを実施するサービスのインターフェース
@@ -12,6 +14,6 @@
         /// <param name="fileName">ファイル名</param>
         /// <param name="arg">コマンド引数</param>
         /// <param name="runAdmin">管理者権限実行フラグ</param>
-        void StartProcessAdministrator(string directoryPath, string fileName, string[] arg, bool runAdmin = true);
+        Process StartProcessAdministrator(string directoryPath, string fileName, string[] arg, bool runAdmin = true);
     }
 }

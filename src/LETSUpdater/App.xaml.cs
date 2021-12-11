@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Http;
+using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 using System.Text;
@@ -27,16 +28,31 @@ namespace Updater
                     //  プログラムアップデートロジックを実行して終了
                     if (args.Length == 1)
                     {
+                        // LETSログアウト処理を行って終了
                         DebugLog("LETSUpdater:Before logoutLETS");
                         LogoutLETS();
                         DebugLog("LETSUpdater:After logoutLETS");
                         Environment.Exit(0);
                     }
 
-                    string updateVersion = args[0];
-                    string runVersion = args[1];
+                    //========================================
+                    // デバイスモードフォント操作対応
+                    string param0 = args[0];
+                    string param1 = args[1];
+                    if (param0 == "FontInstall")
+                    {
+                        FontInstallFromList(param1);
+                        Environment.Exit(0);
+                    }
 
-                    updateLETS(updateVersion, runVersion);
+                    if (param0 == "FontUninstall")
+                    {
+                        FontUninstallFromList(param1);
+                        Environment.Exit(0);
+                    }
+                    //========================================
+
+                    updateLETS(param0, param1);
                 }
                 catch (Exception e)
                 {
@@ -50,6 +66,266 @@ namespace Updater
             app.Run();
             WindowHelper.LoginLETS();
         }
+
+        private static void FontInstallFromList(string tempPath)
+        {
+            try
+            {
+                // インストールフォント一覧ファイルから情報を取得
+                string installFontListFile = Path.Combine(tempPath, "InstallFontInfo.lst");
+                string installResultListFile = Path.Combine(tempPath, "InstallFontInfoResult.lst");
+                string[] installFonts = File.ReadAllLines(installFontListFile, Encoding.GetEncoding("shift_jis"));
+                foreach (string installFont in installFonts)
+                {
+                    string[] installFontInfo = installFont.Split('\t');
+                    string fontPath = installFontInfo[0];
+                    string uniqName = installFontInfo[1];
+                    string letsKind = installFontInfo[2];
+                    List<string> resultList = FontInstall(fontPath, uniqName, letsKind);
+
+                    string resultLine = string.Join("\t", resultList);
+                    File.AppendAllText(installResultListFile, resultLine + Environment.NewLine, Encoding.GetEncoding("shift_jis"));
+                }
+            }
+            catch (Exception ex)
+            {
+                DebugLog(ex.StackTrace);
+            }
+        }
+
+        private static void FontUninstallFromList(string tempPath)
+        {
+            try
+            {
+                // インストールフォント一覧ファイルから情報を取得
+                string uninstallFontListFile = Path.Combine(tempPath, "UninstallFontInfo.lst");
+                string uninstallResultListFile = Path.Combine(tempPath, "UninstallFontInfoResult.lst");
+                string[] uninstallFonts = File.ReadAllLines(uninstallFontListFile, Encoding.GetEncoding("shift_jis"));
+                foreach (string uninstallFont in uninstallFonts)
+                {
+                    string[] uninstallFontInfo = uninstallFont.Split('\t');
+                    string fontPath = uninstallFontInfo[0];
+                    string uniqName = uninstallFontInfo[1];
+                    string letsKind = uninstallFontInfo[2];
+                    string opeKind = uninstallFontInfo[3];
+                    List<string> resultList = FontUninstall(fontPath, uniqName, letsKind, opeKind);
+
+                    string resultLine = string.Join("\t", resultList);
+                    File.AppendAllText(uninstallResultListFile, resultLine + Environment.NewLine, Encoding.GetEncoding("shift_jis"));
+                }
+            }
+            catch (Exception ex)
+            {
+                DebugLog(ex.StackTrace);
+            }
+        }
+
+        private static List<string> FontUninstall(string filePath, string regkey, string letsKind, string opeKind)
+        {
+            List<string> resultInfo = new List<string>();
+            resultInfo.Add(filePath);
+            resultInfo.Add(regkey);
+            resultInfo.Add(letsKind);
+
+            if (!string.IsNullOrEmpty(regkey))
+            {
+                ReleaseRegistry(regkey);
+            }
+
+            var result = RemoveFontResource(filePath);
+
+            if (opeKind == "Deactivate")
+            {
+                // Deactivateだけのときはここまで
+                resultInfo.Add("OK");
+                return resultInfo;
+            }
+
+            // フォントファイルの削除を試みる
+            try
+            {
+                if (File.Exists(filePath))
+                {
+                    File.Delete(filePath);
+                    resultInfo.Add("OK");  // ファイルが削除出来た場合
+                }
+            }
+            catch (UnauthorizedAccessException)
+            {
+                resultInfo.Add("NG");  // ファイルが削除できなかった場合
+            }
+            catch (Exception ex)
+            {
+                DebugLog("FontUninstall:" + ex.StackTrace);
+                resultInfo.Add("ERR");  // 想定外のエラーが起きた場合
+                resultInfo.Add(ex.Message);
+            }
+
+            return resultInfo;
+        }
+
+        private static List<string> FontInstall(string fontPath, string uniqName, string letsKind)
+        {
+            List<string> resultInfo = new List<string>();
+            resultInfo.Add(fontPath);
+            resultInfo.Add(uniqName);
+            try
+            {
+                // インストール先パスを取得
+                string appPath = AppDomain.CurrentDomain.BaseDirectory;
+                string homedrive = appPath.Substring(0, appPath.IndexOf("\\"));
+                string sysFontFolder = $@"{homedrive}\Windows\Fonts";
+
+                // フォントファイル名を取得
+                string fontFileName = System.IO.Path.GetFileName(fontPath);
+
+                // インストールファイルのフルパスを作成
+                string targetFullPath = System.IO.Path.Combine(sysFontFolder, fontFileName);
+
+                // 既にファイルがあるか確認
+                if (File.Exists(targetFullPath))
+                {
+                    // ログを出力して、スキップ
+                    DebugLog($"同名フォントが存在したため、インストールを中断しました。:{uniqName}");
+                    resultInfo.Add("NG");
+                    resultInfo.Add($"同名フォントが存在したため、インストールを中断しました。:{uniqName}");
+                    return resultInfo;
+                }
+
+                try
+                {
+                    File.Copy(fontPath, targetFullPath);
+
+                    string regKey = GetFontName(targetFullPath, uniqName);
+
+                    AddRegistry(regKey, targetFullPath);
+
+                    AddFontResource(targetFullPath);
+
+                    resultInfo.Add("OK");
+                    resultInfo.Add(targetFullPath);
+                    resultInfo.Add(regKey);
+                    resultInfo.Add(letsKind);
+                }
+                catch (Exception ex)
+                {
+                    DebugLog(ex.StackTrace);
+                    resultInfo.Add("ERR");
+                    resultInfo.Add(ex.Message);
+                    return null;
+                }
+
+                return resultInfo;
+            }
+            catch (Exception ex)
+            {
+                DebugLog(ex.StackTrace);
+                resultInfo.Add("ERR");
+                resultInfo.Add(ex.Message);
+                return resultInfo;
+            }
+        }
+
+        /// <summary>
+        /// フォント名取得
+        /// </summary>
+        private static string GetFontName(string fontPath, string fontname)
+        {
+            try
+            {
+                // 識別子確認のDLLを介し、情報を取得する
+                string filepath = fontPath;
+                if (File.Exists(filepath))
+                {
+                    string ext = Path.GetExtension(fontPath).ToLower();
+                    if (ext.CompareTo(".ttc") == 0)
+                    {
+                        fontname += "(TTC)";
+                    }
+
+                    return fontname;
+                }
+            }
+            catch (Exception ex)
+            {
+                DebugLog(ex.StackTrace);
+            }
+
+            return string.Empty;
+        }
+
+        /// <summary>
+        /// Registryのフォントパス
+        /// </summary>
+        private static readonly string registryFontsPath = @"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts";
+
+        /// <summary>
+        /// レジストリに登録する
+        /// </summary>
+        /// <param name="key">キー：フォント名</param>
+        /// <param name="value">値：フォントファイルパス</param>
+        private static void AddRegistry(string key, string value)
+        {
+            var regkey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(registryFontsPath, true);
+
+            try
+            {
+                // 同じフォントパスに対して別のレジストリがあれば削除する
+                string[] keys = regkey.GetValueNames();
+                foreach (string k in keys)
+                {
+                    string v = (string)regkey.GetValue(k);
+                    if (!string.IsNullOrEmpty(v) && v.Equals(value))
+                    {
+                        if (!k.Equals(key))
+                        {
+                            regkey.DeleteValue(k);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                DebugLog(ex.StackTrace);
+            }
+
+            regkey.SetValue(key, value);
+            regkey.Close();
+        }
+
+        /// <summary>
+        /// レジストリから除外する
+        /// </summary>
+        /// <param name="key">キー：フォント名</param>
+        private static void ReleaseRegistry(string key)
+        {
+            try
+            {
+                var regkey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(registryFontsPath, true);
+                regkey.DeleteValue(key);
+            }
+            catch (Exception)
+            {
+                // 無視
+            }
+        }
+
+        /// <summary>
+        /// フォント追加
+        /// </summary>
+        /// <param name="lpFileName">フォント名称</param>
+        /// <returns>成功時：追加されたフォントの数、失敗時：0</returns>
+        [DllImport("gdi32.dll", EntryPoint = "AddFontResourceW", SetLastError = true)]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.OrderingRules", "SA1204:Static elements should appear before instance elements", Justification = "<保留中>")]
+        private static extern int AddFontResource([In][MarshalAs(UnmanagedType.LPWStr)] string lpFileName);
+
+        /// <summary>
+        /// フォント削除
+        /// </summary>
+        /// <param name="lpFileName">フォント名称</param>
+        /// <returns>成功時：0以外、失敗時：0</returns>
+        [DllImport("gdi32.dll", EntryPoint = "RemoveFontResourceW", SetLastError = true)]
+        private static extern int RemoveFontResource([In][MarshalAs(UnmanagedType.LPWStr)] string lpFileName);
 
         private static void updateLETS(string updateVersion, string runVersion)
         {

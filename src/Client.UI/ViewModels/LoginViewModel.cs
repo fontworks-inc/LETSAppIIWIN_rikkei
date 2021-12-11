@@ -446,13 +446,19 @@ namespace Client.UI.ViewModels
                 Logger.Info(string.Format(
                     this.resouceWrapper.GetString("LOG_INFO_LoginViewModel_ButtonClick"),
                     "ログイン処理を実行:After"));
-
                 var responseCode = authenticationInformationResponse.GetResponseCode();
                 var responseMessage = authenticationInformationResponse.Message;
 
                 switch (responseCode)
                 {
                     case ResponseCode.Succeeded:
+                        if (!string.IsNullOrEmpty(System.Environment.GetEnvironmentVariable("LETS_DEVICE_MODE")))
+                        {
+                            // デバイスアプリ画面に遷移
+                            this.loginWindow.NavigationService.Navigate(new DeviceModeApp());
+                            return;
+                        }
+
                         // ログイン完了処理を実行
                         this.componentManager.LoginCompleted(authenticationInformationResponse.Data);
 
@@ -468,7 +474,15 @@ namespace Client.UI.ViewModels
                     case ResponseCode.AuthenticationFailed:
                     case ResponseCode.InvalidArgument:
                         // 認証エラー
-                        this.ErrorMessage = this.resouceWrapper.GetString("APP_04_01_ERR_01");
+                        if (authenticationInformationResponse.Data.GroupType == 1)
+                        {
+                            this.ErrorMessage = "権限をお持ちのアカウントでログインしてください";
+                        }
+                        else
+                        {
+                            this.ErrorMessage = this.resouceWrapper.GetString("APP_04_01_ERR_01");
+                        }
+
                         this.ErrorMessageVisibility = Visibility.Visible;
                         Logger.Error(this.ErrorMessage);
                         break;

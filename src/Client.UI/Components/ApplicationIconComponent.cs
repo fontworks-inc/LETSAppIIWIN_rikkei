@@ -78,6 +78,11 @@ namespace Client.UI.Components
 
                 if (!this.userStatusRepository.GetStatus().IsLoggingIn)
                 {
+                    if (this.IsDeviceMode())
+                    {
+                        System.Environment.SetEnvironmentVariable("LETS_DEVICE_MODE", "TRUE");
+                    }
+
                     // (ログアウト時)ログイン画面を起動する
                     this.Manager.ShowLoginWindow();
                 }
@@ -157,6 +162,13 @@ namespace Client.UI.Components
 
             // メモリで保持する情報を取得
             VolatileSetting volatileSetting = this.volatileSettingRepository.GetVolatileSetting();
+
+            if (this.userStatusRepository.GetStatus().IsDeviceMode)
+            {
+                // 通常アイコン表示（デバイスモード）
+                this.SetStartupMode();
+                return;
+            }
 
             // 選択アイコン表示（クイックメニューの表示状態変更時処理内で切替え）
             if (selected)
@@ -329,6 +341,38 @@ namespace Client.UI.Components
             {
                 this.currentLoadingIconIndex = 0;
             }
+        }
+
+        /// <summary>
+        /// デバイスモード判定
+        /// </summary>
+        private bool IsDeviceMode()
+        {
+            if (!string.IsNullOrEmpty(System.Environment.GetEnvironmentVariable("LETS_DEVICE_MODE")))
+            {
+                return true;
+            }
+
+            // デバイスモード判定を行う
+            IContainerProvider container = (System.Windows.Application.Current as PrismApplication).Container;
+            var userStatusRepository = container.Resolve<IUserStatusRepository>();
+
+            bool isDeviceMode = false;
+
+            if (userStatusRepository.GetStatus().IsDeviceMode)
+            {
+                isDeviceMode = true;
+            }
+            else
+            {
+                var deviceModeSettingRepository = container.Resolve<IDeviceModeSettingRepository>();
+                if (!string.IsNullOrEmpty(deviceModeSettingRepository.GetDeviceModeSetting().OfflineDeviceID))
+                {
+                    isDeviceMode = true;
+                }
+            }
+
+            return isDeviceMode;
         }
     }
 }

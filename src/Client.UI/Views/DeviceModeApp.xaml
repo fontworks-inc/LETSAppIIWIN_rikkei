@@ -8,7 +8,7 @@
         mc:Ignorable="d"
         xmlns:prism="http://prismlibrary.com/"
       prism:ViewModelLocator.AutoWireViewModel="True" Width="753">
-
+    
     <DockPanel>
         <Grid DockPanel.Dock="Left" Width="298">
             <Grid.RowDefinitions>
@@ -47,7 +47,7 @@
                     <Button x:Name="LicenseKeyFileButton" Content="ラインセスキーを選択" Height="24" Width="140" HorizontalAlignment="Right" Click="LicenseKeyFileButton_Click"/>
                 </StackPanel>
                 <Label x:Name="LicenseKeyFilePath" Content="ファイル名" HorizontalAlignment="Right"/>
-                <TextBlock Text="{Binding ErrorMessage}" FontSize="10pt" Margin="5,10,0,0"
+                <TextBlock x:Name="ErrorMessage" Text="{Binding ErrorMessage}" FontSize="10pt" Margin="5,10,0,0"
                            VerticalAlignment="Top" HorizontalAlignment="Left" Foreground="Red"
                            Visibility="{Binding ErrorMessageVisibility}"/>
                 <Button x:Name="RegistButton" Content="登録" Height="24" Width="76" HorizontalAlignment="Right" RenderTransformOrigin="0.52,1.743" Click="RegistButton_Click"/>

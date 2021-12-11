@@ -42,6 +42,11 @@ namespace Client.UI.Views
                 this.OnClosing(e);
             };
 
+            this.Activated += (s, e) =>
+            {
+                this.WActivated(e);
+            };
+
             this.WindowState = WindowState.Normal;
             this.ShowInTaskbar = true;
 
@@ -70,33 +75,14 @@ namespace Client.UI.Views
             this.loginWindowWrapper.SetAuthenticationInformation(null);
 
             // デバイスモード判定を行う
-            IContainerProvider container = (System.Windows.Application.Current as PrismApplication).Container;
-            var userStatusRepository = container.Resolve<IUserStatusRepository>();
-
-            bool isDeviceMode = false;
-
-            if (userStatusRepository.GetStatus().IsDeviceMode)
+            if (string.IsNullOrEmpty(System.Environment.GetEnvironmentVariable("LETS_DEVICE_MODE")))
             {
-                isDeviceMode = true;
+                this.MainFrame.NavigationService.Navigate(new Login());
             }
             else
-            {
-                var deviceModeSettingRepository = container.Resolve<IDeviceModeSettingRepository>();
-                if (!string.IsNullOrEmpty(deviceModeSettingRepository.GetDeviceModeSetting().OfflineDeviceID))
-                {
-                    isDeviceMode = true;
-                }
-            }
-
-            //isDeviceMode = true;    //DEVICEMODE DEBUG
-            if (isDeviceMode)
             {
                 // デバイスモード
                 this.MainFrame.NavigationService.Navigate(new DeviceModeApp());
-            }
-            else
-            {
-                this.MainFrame.NavigationService.Navigate(new Login());
             }
 
             base.ShowDialog();
@@ -138,6 +124,14 @@ namespace Client.UI.Views
 
             // アイコン非表示
             WindowHelper.RemoveIcon(this);
+        }
+
+        private void WActivated(EventArgs e)
+        {
+            if (!string.IsNullOrEmpty(System.Environment.GetEnvironmentVariable("LETS_DEVICE_MODE")))
+            {
+                WindowHelper.SetWindowTitle(this, "LETSオフライン専用アプリ");
+            }
         }
     }
 }

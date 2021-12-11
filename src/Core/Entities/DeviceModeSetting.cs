@@ -17,12 +17,12 @@ namespace Core.Entities
         /// <summary>
         /// ライセンス復号キー
         /// </summary>
-        public string LicenseDecodeKey { get; set; } = string.Empty;
+        public string LicenseDecryptionKey { get; set; } = string.Empty;
 
         /// <summary>
         /// 無期限アクセストークン
         /// </summary>
-        public string EternalAccessToken { get; set; } = string.Empty;
+        public string IndefiniteAccessToken { get; set; } = string.Empty;
 
         /// <summary>
         /// ライセンスキーファイルパス

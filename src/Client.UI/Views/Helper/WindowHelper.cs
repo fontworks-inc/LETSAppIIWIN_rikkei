@@ -104,6 +104,12 @@ namespace Client.UI.Views.Helper
             SetWindowPos(hWnd, IntPtr.Zero, 0, 0, 0, 0, SWPNOMOVE | SWPNOSIZE | SWPNOZORDER | SWPNOACTIVATE | SWPFRAMECHANGED);
         }
 
+        public static void SetWindowTitle(Window window, string title)
+        {
+            var hWnd = new WindowInteropHelper(window).Handle;
+            SetWindowText(hWnd, title);
+        }
+
         /// <summary>
         /// フレームのボタンを削除する
         /// </summary>
@@ -179,5 +185,14 @@ namespace Client.UI.Views.Helper
         /// <returns>成否</returns>
         [DllImport("user32.dll")]
         private static extern bool RemoveMenu(IntPtr hMenu, uint uPosition, uint uFlags);
+
+        /// <summary>
+        /// ウィンドウタイトルの設定
+        /// </summary>
+        /// <param name="hWnd">ウィンドウのハンドル</param>
+        /// <param name="lpString">uPosition の値</param>
+        /// <returns>成否</returns>
+        [DllImport("user32.dll")]
+        private static extern bool SetWindowText(IntPtr hWnd, string lpString);
     }
 }

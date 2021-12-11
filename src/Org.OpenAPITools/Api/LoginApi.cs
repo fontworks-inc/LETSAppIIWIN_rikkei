@@ -2042,9 +2042,9 @@ namespace Org.OpenAPITools.Api
             if (userAgent == null)
                 throw new Org.OpenAPITools.Client.ApiException(400, "Missing required parameter 'userAgent' when calling LoginApi->PostAuthenticateAccount");
 
-            // verify the required parameter 'inlineObject4' is set
+            // verify the required parameter 'inlineObject' is set
             if (inlineObject == null)
-                throw new Org.OpenAPITools.Client.ApiException(400, "Missing required parameter 'inlineObject4' when calling LoginApi->PostAuthenticateAccount");
+                throw new Org.OpenAPITools.Client.ApiException(400, "Missing required parameter 'inlineObject' when calling LoginApi->PostAuthenticateAccount");
 
             Org.OpenAPITools.Client.RequestOptions localVarRequestOptions = new Org.OpenAPITools.Client.RequestOptions();
 
@@ -2084,11 +2084,11 @@ namespace Org.OpenAPITools.Api
         /// </summary>
         /// <exception cref="Org.OpenAPITools.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
-        /// <param name="inlineObject4"></param>
+        /// <param name="inlineObject"></param>
         /// <returns>Task of AuthenticateAccountResponse</returns>
-        public async System.Threading.Tasks.Task<AuthenticateAccountResponse> PostAuthenticateAccountAsync(string userAgent, InlineObject4 inlineObject4)
+        public async System.Threading.Tasks.Task<AuthenticateAccountResponse> PostAuthenticateAccountAsync(string userAgent, InlineObject inlineObject)
         {
-            Org.OpenAPITools.Client.ApiResponse<AuthenticateAccountResponse> localVarResponse = await PostAuthenticateAccountAsyncWithHttpInfo(userAgent, inlineObject4);
+            Org.OpenAPITools.Client.ApiResponse<AuthenticateAccountResponse> localVarResponse = await PostAuthenticateAccountAsyncWithHttpInfo(userAgent, inlineObject);
             return localVarResponse.Data;
 
         }
@@ -2098,17 +2098,17 @@ namespace Org.OpenAPITools.Api
         /// </summary>
         /// <exception cref="Org.OpenAPITools.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
-        /// <param name="inlineObject4"></param>
+        /// <param name="inlineObject"></param>
         /// <returns>Task of ApiResponse (AuthenticateAccountResponse)</returns>
-        public async System.Threading.Tasks.Task<Org.OpenAPITools.Client.ApiResponse<AuthenticateAccountResponse>> PostAuthenticateAccountAsyncWithHttpInfo(string userAgent, InlineObject4 inlineObject4)
+        public async System.Threading.Tasks.Task<Org.OpenAPITools.Client.ApiResponse<AuthenticateAccountResponse>> PostAuthenticateAccountAsyncWithHttpInfo(string userAgent, InlineObject inlineObject)
         {
             // verify the required parameter 'userAgent' is set
             if (userAgent == null)
                 throw new Org.OpenAPITools.Client.ApiException(400, "Missing required parameter 'userAgent' when calling LoginApi->PostAuthenticateAccount");
 
-            // verify the required parameter 'inlineObject4' is set
-            if (inlineObject4 == null)
-                throw new Org.OpenAPITools.Client.ApiException(400, "Missing required parameter 'inlineObject4' when calling LoginApi->PostAuthenticateAccount");
+            // verify the required parameter 'inlineObject' is set
+            if (inlineObject == null)
+                throw new Org.OpenAPITools.Client.ApiException(400, "Missing required parameter 'inlineObject' when calling LoginApi->PostAuthenticateAccount");
 
 
             Org.OpenAPITools.Client.RequestOptions localVarRequestOptions = new Org.OpenAPITools.Client.RequestOptions();
@@ -2129,7 +2129,7 @@ namespace Org.OpenAPITools.Api
                 localVarRequestOptions.HeaderParameters.Add("Accept", _accept);
 
             localVarRequestOptions.HeaderParameters.Add("User-Agent", Org.OpenAPITools.Client.ClientUtils.ParameterToString(userAgent)); // header parameter
-            localVarRequestOptions.Data = inlineObject4;
+            localVarRequestOptions.Data = inlineObject;
 
 
             // make the HTTP request

@@ -176,12 +176,12 @@ namespace Infrastructure.API
 
                 // 戻り値のセット（個別処理）
                 Logger.Info(string.Format("AuthenticationInformationAPIRepository:AuthenticateAccount 戻り値のセット（個別処理）", string.Empty));
-                var ret = (AccessTokenRefreshTokenResponse)this.ApiResponse;
+                var ret = (AuthenticateAccountResponse)this.ApiResponse;
                 response.Code = ret.Code;
                 response.Message = ret.Message;
                 if (response.Code == (int)ResponseCode.Succeeded || response.Code == (int)ResponseCode.MaximumNumberOfDevicesInUse)
                 {
-                    response.Data = new AuthenticationInformation(ret.Data.AccessToken, ret.Data.RefreshToken);
+                    response.Data = new AuthenticationInformation(ret.Data.GroupType, ret.Data.OfflineDeviceId, ret.Data.LicenseDecryptionKey, ret.Data.IndefiniteAccessToken);
                 }
             }
             catch (ApiException)

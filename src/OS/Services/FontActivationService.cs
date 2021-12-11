@@ -45,12 +45,6 @@ namespace OS.Services
         /// </summary>
         private readonly IUserFontsSettingRepository userFontsSettingRepository;
 
-        private readonly IDeviceModeSettingRepository deviceModeSettingRepository;
-
-        private readonly IDeviceModeFontListRepository deviceModeFontListRepository;
-
-        private readonly IDeviceModeLicenseInfoRepository deviceModeLicenseInfoRepository;
-
         /// <summary>
         /// ユーザ別ステータス情報を格納するリポジトリ
         /// </summary>
@@ -72,15 +66,14 @@ namespace OS.Services
         /// <param name="userFontsSettingRepository">ユーザ別フォント情報を格納するリポジトリ</param>
         /// <param name="userStatusRepository">ユーザ別ステータス情報を格納するリポジトリ</param>
         /// <param name="fontInfoRepository">フォント情報を格納するリポジトリ</param>
-        public FontActivationService(IUserFontsSettingRepository userFontsSettingRepository, IUserStatusRepository userStatusRepository, IFontFileRepository fontInfoRepository, IDeviceModeSettingRepository deviceModeSettingRepository, IDeviceModeFontListRepository deviceModeFontListRepository, IDeviceModeLicenseInfoRepository deviceModeLicenseInfoRepository
-)
+        public FontActivationService(
+            IUserFontsSettingRepository userFontsSettingRepository,
+            IUserStatusRepository userStatusRepository,
+            IFontFileRepository fontInfoRepository)
         {
             this.userFontsSettingRepository = userFontsSettingRepository;
             this.userStatusRepository = userStatusRepository;
             this.fontInfoRepository = fontInfoRepository;
-            this.deviceModeSettingRepository = deviceModeSettingRepository;
-            this.deviceModeFontListRepository = deviceModeFontListRepository;
-            this.deviceModeLicenseInfoRepository = deviceModeLicenseInfoRepository;
 
             // ユーザー配下のローカルフォルダ
             var local = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
@@ -320,123 +313,6 @@ namespace OS.Services
 
             // 保存
             this.userFontsSettingRepository.SaveUserFontsSetting(settings);
-        }
-
-        /// <summary>
-        /// フォントをインストールする(デバイスモード)
-        /// </summary>
-        /// <param name="fontPath">対象フォント</param>
-        /// <returns>true:インストール成功、false:インストール失敗</returns>
-        public DeviceModeFontInfo InstallDeviceMode(string fontPath)
-        {
-            try
-            {
-                DeviceModeFontInfo deviceModeFontInfo = new DeviceModeFontInfo();
-                var fontIdInfo = this.fontInfoRepository.GetFontInfo(fontPath);
-
-                // インストール先パスを取得
-                string appPath = AppDomain.CurrentDomain.BaseDirectory;
-                string homedrive = appPath.Substring(0, appPath.IndexOf("\\"));
-                string sysFontFolder = $@"{homedrive}\Windows\Fonts";
-
-                // フォントファイル名を取得
-                string fontFileName = System.IO.Path.GetFileName(fontPath);
-
-                // インストールファイルのフルパスを作成
-                string targetFullPath = System.IO.Path.Combine(sysFontFolder, fontFileName);
-
-                // 既にファイルがあるか確認
-                if (File.Exists(targetFullPath))
-                {
-                    // ログを出力して、スキップ
-                    return null;
-                }
-
-                try
-                {
-                    File.Copy(fontPath, targetFullPath);
-
-                    string regKey = this.GetFontName(targetFullPath);
-
-                    this.AddRegistry(regKey, targetFullPath);
-
-                    AddFontResource(targetFullPath);
-
-                    deviceModeFontInfo.FontFilePath = targetFullPath;
-                    deviceModeFontInfo.RegistryKey = regKey;
-                    deviceModeFontInfo.IsRemove = false;
-                    deviceModeFontInfo.LetsKind = fontIdInfo.LetsKind;
-                }
-                catch (Exception ex)
-                {
-                    //
-                    return null;
-                }
-
-                return deviceModeFontInfo;
-            }
-            catch (Exception ex)
-            {
-                //
-            }
-
-            return null;
-        }
-
-        /// <summary>
-        /// フォントをアンインストールする(デバイスモード)
-        /// </summary>
-        /// <param name="letsKind">削除対象LETS種別</param>
-        public void UninstallDeviceMode(int letsKind)
-        {
-            DeviceModeFontList deviceModeFontList = this.deviceModeFontListRepository.GetDeviceModeFontList();
-
-            IList<int> removeList = new List<int>();
-            int cnt = 0;
-            foreach (DeviceModeFontInfo deviceModeFontInfo in deviceModeFontList.Fonts)
-            {
-                if (deviceModeFontInfo.LetsKind == letsKind)
-                {
-                    string regkey = deviceModeFontInfo.RegistryKey;
-                    string filePath = deviceModeFontInfo.FontFilePath;
-
-                    if (!string.IsNullOrEmpty(regkey))
-                    {
-                        this.ReleaseRegistry(regkey);
-                    }
-
-                    var result = RemoveFontResource(filePath);
-
-                    // フォントファイルの削除を試みる
-                    try
-                    {
-                        if (File.Exists(filePath))
-                        {
-                            File.Delete(filePath);
-                            removeList.Insert(0, cnt);
-                        }
-                    }
-                    catch (UnauthorizedAccessException)
-                    {
-                        // 削除できなかったら削除対象をTRUEに設定
-                        deviceModeFontInfo.IsRemove = true;
-                    }
-                    catch (Exception ex)
-                    {
-                        Logger.Debug("FontActivationService:UninstallDeviceMode:" + ex.StackTrace);
-                    }
-                }
-
-                cnt++;
-            }
-
-            // ファイルを削除出来たフォントをリストから削除する
-            foreach (int idx in removeList)
-            {
-                deviceModeFontList.Fonts.RemoveAt(idx);
-            }
-
-            this.deviceModeFontListRepository.SaveDeviceModeFontList(deviceModeFontList);
         }
 
         private string GetFontName(Font font)

@@ -19,41 +19,33 @@ using System.Text;
 namespace Org.OpenAPITools.Model
 {
     /// <summary>
-    /// AuthenticateAccountResponse
+    /// InlineObject
     /// </summary>
     [DataContract]
-    public partial class AuthenticateAccountResponse : IEquatable<AuthenticateAccountResponse>, IValidatableObject
+    public partial class InlineObjectUpdateLicense : IEquatable<InlineObjectUpdateLicense>, IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="AuthenticateAccountResponse" /> class.
+        /// Initializes a new instance of the <see cref="InlineObjectUpdateLicense" /> class.
         /// </summary>
-        /// <param name="code">code.</param>
-        /// <param name="message">message.</param>
-        /// <param name="data">data.</param>
-        public AuthenticateAccountResponse(int code = default(int), string message = default(string), AuthenticateAccountData data = default(AuthenticateAccountData))
+        /// <param name="offlineDeviceId">mailAddress.</param>
+        /// <param name="indefiniteAccessToken">password.</param>
+        public InlineObjectUpdateLicense(string offlineDeviceId = default(string), string indefiniteAccessToken = default(string))
         {
-            this.Code = code;
-            this.Message = message;
-            this.Data = data;
+            this.OfflineDeviceId = offlineDeviceId;
+            this.IndefiniteAccessToken = indefiniteAccessToken;
         }
 
         /// <summary>
-        /// Gets or Sets Code
+        /// Gets or Sets MailAddress
         /// </summary>
-        [DataMember(Name = "code", EmitDefaultValue = false)]
-        public int Code { get; set; }
+        [DataMember(Name = "offlineDeviceId", EmitDefaultValue = false)]
+        public string OfflineDeviceId { get; set; }
 
         /// <summary>
-        /// Gets or Sets Message
+        /// Gets or Sets Password
         /// </summary>
-        [DataMember(Name = "message", EmitDefaultValue = false)]
-        public string Message { get; set; }
-
-        /// <summary>
-        /// Gets or Sets Data
-        /// </summary>
-        [DataMember(Name = "data", EmitDefaultValue = false)]
-        public AuthenticateAccountData Data { get; set; }
+        [DataMember(Name = "indefiniteAccessToken", EmitDefaultValue = false)]
+        public string IndefiniteAccessToken { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -62,10 +54,9 @@ namespace Org.OpenAPITools.Model
         public override string ToString()
         {
             var sb = new StringBuilder();
-            sb.Append("class AuthenticateAccountResponse {\n");
-            sb.Append("  Code: ").Append(Code).Append("\n");
-            sb.Append("  Message: ").Append(Message).Append("\n");
-            sb.Append("  Data: ").Append(Data).Append("\n");
+            sb.Append("class InlineObject {\n");
+            sb.Append("  OfflineDeviceId: ").Append(OfflineDeviceId).Append("\n");
+            sb.Append("  IndefiniteAccessToken: ").Append(IndefiniteAccessToken).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -86,33 +77,29 @@ namespace Org.OpenAPITools.Model
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as AuthenticateAccountResponse);
+            return this.Equals(input as InlineObjectUpdateLicense);
         }
 
         /// <summary>
-        /// Returns true if AuthenticateAccountResponse instances are equal
+        /// Returns true if InlineObject instances are equal
         /// </summary>
-        /// <param name="input">Instance of AuthenticateAccountResponse to be compared</param>
+        /// <param name="input">Instance of InlineObject to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(AuthenticateAccountResponse input)
+        public bool Equals(InlineObjectUpdateLicense input)
         {
             if (input == null)
                 return false;
 
             return
                 (
-                    this.Code == input.Code ||
-                    this.Code.Equals(input.Code)
+                    this.OfflineDeviceId == input.OfflineDeviceId ||
+                    (this.OfflineDeviceId != null &&
+                    this.OfflineDeviceId.Equals(input.OfflineDeviceId))
                 ) &&
                 (
-                    this.Message == input.Message ||
-                    (this.Message != null &&
-                    this.Message.Equals(input.Message))
-                ) &&
-                (
-                    this.Data == input.Data ||
-                    (this.Data != null &&
-                    this.Data.Equals(input.Data))
+                    this.IndefiniteAccessToken == input.IndefiniteAccessToken ||
+                    (this.IndefiniteAccessToken != null &&
+                    this.IndefiniteAccessToken.Equals(input.IndefiniteAccessToken))
                 );
         }
 
@@ -125,11 +112,10 @@ namespace Org.OpenAPITools.Model
             unchecked // Overflow is fine, just wrap
             {
                 int hashCode = 41;
-                hashCode = hashCode * 59 + this.Code.GetHashCode();
-                if (this.Message != null)
-                    hashCode = hashCode * 59 + this.Message.GetHashCode();
-                if (this.Data != null)
-                    hashCode = hashCode * 59 + this.Data.GetHashCode();
+                if (this.OfflineDeviceId != null)
+                    hashCode = hashCode * 59 + this.OfflineDeviceId.GetHashCode();
+                if (this.IndefiniteAccessToken != null)
+                    hashCode = hashCode * 59 + this.IndefiniteAccessToken.GetHashCode();
                 return hashCode;
             }
         }

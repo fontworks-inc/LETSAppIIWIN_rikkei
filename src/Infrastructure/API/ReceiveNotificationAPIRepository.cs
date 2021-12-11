@@ -210,6 +210,7 @@ namespace Infrastructure.API
                 this.subscribed = true;
                 this.subscribedTime = DateTime.Now;
                 var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+                Logger.Debug(response.ToString());
                 response.EnsureSuccessStatusCode();
                 Logger.Debug("response.EnsureSuccessStatusCode");
 

@@ -76,6 +76,7 @@ namespace Infrastructure.File
             lock (saveLockObject)
             {
                 this.WriteAll(JsonSerializer.Serialize(status));
+                this.SetFileAccessEveryone(this.FilePath);
                 Logger.Info($"status.IsLoggingIn={status.IsLoggingIn}");
                 if (status.IsLoggingIn)
                 {

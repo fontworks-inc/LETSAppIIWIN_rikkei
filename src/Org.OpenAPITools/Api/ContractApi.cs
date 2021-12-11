@@ -526,11 +526,11 @@ namespace Org.OpenAPITools.Api
         /// </summary>
         /// <exception cref="Org.OpenAPITools.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
-        /// <param name="inlineObject"></param>
+        /// <param name="inlineObjectUpdateLicense"></param>
         /// <returns>UpdateLicenseResponse</returns>
-        public UpdateLicenseResponse UpdateLicense(string userAgent, InlineObject inlineObject)
+        public UpdateLicenseResponse UpdateLicense(string userAgent, InlineObjectUpdateLicense inlineObjectUpdateLicense)
         {
-            Org.OpenAPITools.Client.ApiResponse<UpdateLicenseResponse> localVarResponse = UpdateLicenseWithHttpInfo(userAgent, inlineObject);
+            Org.OpenAPITools.Client.ApiResponse<UpdateLicenseResponse> localVarResponse = UpdateLicenseWithHttpInfo(userAgent, inlineObjectUpdateLicense);
             return localVarResponse.Data;
         }
 
@@ -539,17 +539,17 @@ namespace Org.OpenAPITools.Api
         /// </summary>
         /// <exception cref="Org.OpenAPITools.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
-        /// <param name="inlineObject"></param>
+        /// <param name="inlineObjectUpdateLicense"></param>
         /// <returns>ApiResponse of UpdateLicenseResponse</returns>
-        public Org.OpenAPITools.Client.ApiResponse<UpdateLicenseResponse> UpdateLicenseWithHttpInfo(string userAgent, InlineObject inlineObject)
+        public Org.OpenAPITools.Client.ApiResponse<UpdateLicenseResponse> UpdateLicenseWithHttpInfo(string userAgent, InlineObjectUpdateLicense inlineObjectUpdateLicense)
         {
             // verify the required parameter 'userAgent' is set
             if (userAgent == null)
                 throw new Org.OpenAPITools.Client.ApiException(400, "Missing required parameter 'userAgent' when calling LoginApi->PostUpdateLicense");
 
-            // verify the required parameter 'inlineObject4' is set
-            if (inlineObject == null)
-                throw new Org.OpenAPITools.Client.ApiException(400, "Missing required parameter 'inlineObject4' when calling LoginApi->PostUpdateLicense");
+            // verify the required parameter 'inlineObject' is set
+            if (inlineObjectUpdateLicense == null)
+                throw new Org.OpenAPITools.Client.ApiException(400, "Missing required parameter 'inlineObject' when calling LoginApi->PostUpdateLicense");
 
             Org.OpenAPITools.Client.RequestOptions localVarRequestOptions = new Org.OpenAPITools.Client.RequestOptions();
 
@@ -569,7 +569,7 @@ namespace Org.OpenAPITools.Api
             if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
 
             localVarRequestOptions.HeaderParameters.Add("User-Agent", Org.OpenAPITools.Client.ClientUtils.ParameterToString(userAgent)); // header parameter
-            localVarRequestOptions.Data = inlineObject;
+            localVarRequestOptions.Data = inlineObjectUpdateLicense;
 
 
             // make the HTTP request
@@ -589,11 +589,11 @@ namespace Org.OpenAPITools.Api
         /// </summary>
         /// <exception cref="Org.OpenAPITools.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
-        /// <param name="inlineObject4"></param>
+        /// <param name="inlineObjectUpdateLicense"></param>
         /// <returns>Task of UpdateLicenseResponse</returns>
-        public async System.Threading.Tasks.Task<UpdateLicenseResponse> PostUpdateLicenseAsync(string userAgent, InlineObject4 inlineObject4)
+        public async System.Threading.Tasks.Task<UpdateLicenseResponse> PostUpdateLicenseAsync(string userAgent, InlineObjectUpdateLicense inlineObjectUpdateLicense)
         {
-            Org.OpenAPITools.Client.ApiResponse<UpdateLicenseResponse> localVarResponse = await PostUpdateLicenseAsyncWithHttpInfo(userAgent, inlineObject4);
+            Org.OpenAPITools.Client.ApiResponse<UpdateLicenseResponse> localVarResponse = await PostUpdateLicenseAsyncWithHttpInfo(userAgent, inlineObjectUpdateLicense);
             return localVarResponse.Data;
 
         }
@@ -603,17 +603,17 @@ namespace Org.OpenAPITools.Api
         /// </summary>
         /// <exception cref="Org.OpenAPITools.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
-        /// <param name="inlineObject4"></param>
+        /// <param name="inlineObjectUpdateLicense"></param>
         /// <returns>Task of ApiResponse (UpdateLicenseResponse)</returns>
-        public async System.Threading.Tasks.Task<Org.OpenAPITools.Client.ApiResponse<UpdateLicenseResponse>> PostUpdateLicenseAsyncWithHttpInfo(string userAgent, InlineObject4 inlineObject4)
+        public async System.Threading.Tasks.Task<Org.OpenAPITools.Client.ApiResponse<UpdateLicenseResponse>> PostUpdateLicenseAsyncWithHttpInfo(string userAgent, InlineObjectUpdateLicense inlineObjectUpdateLicense)
         {
             // verify the required parameter 'userAgent' is set
             if (userAgent == null)
                 throw new Org.OpenAPITools.Client.ApiException(400, "Missing required parameter 'userAgent' when calling LoginApi->PostUpdateLicense");
 
-            // verify the required parameter 'inlineObject4' is set
-            if (inlineObject4 == null)
-                throw new Org.OpenAPITools.Client.ApiException(400, "Missing required parameter 'inlineObject4' when calling LoginApi->PostUpdateLicense");
+            // verify the required parameter 'inlineObjectUpdateLicense' is set
+            if (inlineObjectUpdateLicense == null)
+                throw new Org.OpenAPITools.Client.ApiException(400, "Missing required parameter 'inlineObjectUpdateLicense' when calling LoginApi->PostUpdateLicense");
 
 
             Org.OpenAPITools.Client.RequestOptions localVarRequestOptions = new Org.OpenAPITools.Client.RequestOptions();
@@ -634,7 +634,7 @@ namespace Org.OpenAPITools.Api
                 localVarRequestOptions.HeaderParameters.Add("Accept", _accept);
 
             localVarRequestOptions.HeaderParameters.Add("User-Agent", Org.OpenAPITools.Client.ClientUtils.ParameterToString(userAgent)); // header parameter
-            localVarRequestOptions.Data = inlineObject4;
+            localVarRequestOptions.Data = inlineObjectUpdateLicense;
 
 
             // make the HTTP request
