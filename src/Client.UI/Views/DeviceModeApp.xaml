@@ -50,7 +50,7 @@
                 <TextBlock x:Name="ErrorMessage" Text="{Binding ErrorMessage}" FontSize="10pt" Margin="5,10,0,0"
                            VerticalAlignment="Top" HorizontalAlignment="Left" Foreground="Red"
                            Visibility="{Binding ErrorMessageVisibility}"/>
-                <Button x:Name="RegistButton" Content="登録" Height="24" Width="76" HorizontalAlignment="Right" RenderTransformOrigin="0.52,1.743" Click="RegistButton_Click"/>
+                <Button x:Name="RegistButton" Content="登録" Height="24" Width="76" HorizontalAlignment="Right" Margin="0,0,5,0" RenderTransformOrigin="0.52,1.743" Click="RegistButton_Click"/>
                 <TextBlock Text="{Binding ErrorMessage}" FontSize="10pt" Margin="5,10,0,0"
                            VerticalAlignment="Top" HorizontalAlignment="Left" Foreground="Red"
                            Visibility="{Binding ErrorMessageVisibility}"/>

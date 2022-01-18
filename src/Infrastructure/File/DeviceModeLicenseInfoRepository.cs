@@ -34,7 +34,20 @@ namespace Infrastructure.File
 
         public DeviceModeLicenseInfo CreateLicenseInfoFromJsonText(string jsonText)
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
+            DeviceModeLicenceOfflineInfo deviceModeLicenceOfflineInfo = JsonSerializer.Deserialize<DeviceModeLicenceOfflineInfo>(jsonText);
+            DeviceModeLicenseInfo deviceModeLicenseInfo = new DeviceModeLicenseInfo();
+            foreach(DeviceModeLicenseOffline deviceModeLicenceOffline in deviceModeLicenceOfflineInfo.licenses)
+            {
+                var deviceModeLicense = new DeviceModeLicense();
+                deviceModeLicense.LetsKind = deviceModeLicenceOffline.lets_type_id;
+                deviceModeLicense.LetsKindName = deviceModeLicenceOffline.lets_type_name;
+                deviceModeLicense.ExpireDate = deviceModeLicenceOffline.expiration_date;
+                deviceModeLicenseInfo.DeviceModeLicenceList.Add(deviceModeLicense);
+            }
+            deviceModeLicenseInfo.ZipPassword = deviceModeLicenceOfflineInfo.zip_password;
+            return deviceModeLicenseInfo;
+            //return this.GetDeviceModeLicenseInfo();
         }
 
         /// <summary>
@@ -68,11 +81,11 @@ namespace Infrastructure.File
         /// 設定情報(デバイスモード時)を取得する
         /// </summary>
         /// <returns>設定情報(デバイスモード時)</returns>
-        public Core.Entities.DeviceModeLicenseInfo GetDeviceModeLicenseInfo(bool fromOnline, string offlineDeviceId, string indefiniteAccessToken, string licenceFileKeyPath)
+        public Core.Entities.DeviceModeLicenseInfo GetDeviceModeLicenseInfo(bool fromOnline, string offlineDeviceId, string indefiniteAccessToken, string licenceFileKeyPath, string licenseDecryptionKey)
         {
             if (fromOnline)
             {
-                DeviceModeLicenseInfo deviceModeLicenseInfo = this.deviceModeLisenceInfoAPIRepository.GetDeviceModeLicenseInfo(true, offlineDeviceId, indefiniteAccessToken, licenceFileKeyPath);
+                DeviceModeLicenseInfo deviceModeLicenseInfo = this.deviceModeLisenceInfoAPIRepository.GetDeviceModeLicenseInfo(true, offlineDeviceId, indefiniteAccessToken, licenceFileKeyPath, licenseDecryptionKey);
                 if (deviceModeLicenseInfo != null)
                 {
                     this.SaveDeviceModeLicenseInfo(deviceModeLicenseInfo);

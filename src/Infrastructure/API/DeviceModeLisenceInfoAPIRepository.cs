@@ -36,9 +36,9 @@ namespace Infrastructure.API
             throw new NotImplementedException();
         }
 
-        public DeviceModeLicenseInfo GetDeviceModeLicenseInfo(bool fromOnline, string offlineDeviceId, string indefiniteAccessToken, string licenceFileKeyPath)
+        public DeviceModeLicenseInfo GetDeviceModeLicenseInfo(bool fromOnline, string offlineDeviceId, string indefiniteAccessToken, string licenceFileKeyPath, string licenseDecryptionKey)
         {
-            return this.GetUpdateLicense(offlineDeviceId, indefiniteAccessToken, licenceFileKeyPath);
+            return this.GetUpdateLicense(offlineDeviceId, indefiniteAccessToken, licenceFileKeyPath, licenseDecryptionKey);
         }
 
         public void SaveDeviceModeLicenseInfo(DeviceModeLicenseInfo setting)
@@ -52,7 +52,7 @@ namespace Infrastructure.API
         /// <param name="deviceId">デバイスID</param>
         /// <param name="accessToken">アクセストークン</param>
         /// <returns>契約情報の集合体</returns>
-        public DeviceModeLicenseInfo GetUpdateLicense(string offlineDeviceId, string indefiniteAccessToken, string licenceFileKeyPath)
+        public DeviceModeLicenseInfo GetUpdateLicense(string offlineDeviceId, string indefiniteAccessToken, string licenceFileKeyPath, string licenseDecryptionKey)
         {
             UpdateLicenseResponse response = new UpdateLicenseResponse();
             DeviceModeLicenseInfo deviceModeLicenseInfo = new DeviceModeLicenseInfo();
@@ -88,7 +88,8 @@ namespace Infrastructure.API
                         aes.Padding = PaddingMode.Zeros;
                         aes.Mode = CipherMode.ECB;
                         //aes.Key = encrypted;
-                        aes.Key = Convert.FromBase64String("WCQIbAarS92xCjO5sL1JKcmHPu/DsUAXs5cYjSJ7AEs=");
+                        //aes.Key = Convert.FromBase64String("WCQIbAarS92xCjO5sL1JKcmHPu/DsUAXs5cYjSJ7AEs=");
+                        aes.Key = Convert.FromBase64String(licenseDecryptionKey);
 
                         ICryptoTransform decryptor = aes.CreateDecryptor();
 
@@ -100,8 +101,11 @@ namespace Infrastructure.API
                         cryptStream.Read(planeText, 0, planeText.Length);
                         string jsonText = System.Text.Encoding.UTF8.GetString(planeText);
 
-                        jsonText = jsonText.Replace("\f", string.Empty);
-                        System.IO.File.WriteAllText(licenceFileKeyPath, jsonText);
+                        int lastClosingParenthesis = jsonText.LastIndexOf('}');
+                        if (lastClosingParenthesis > 0)
+                        {
+                            jsonText = jsonText.Substring(0, lastClosingParenthesis + 1);
+                        }
 
                         deviceModeLicenseInfo = this.CreateLicenseInfoFromJsonText(jsonText);
                     }

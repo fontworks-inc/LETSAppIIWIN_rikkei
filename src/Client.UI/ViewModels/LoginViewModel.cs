@@ -474,7 +474,7 @@ namespace Client.UI.ViewModels
                     case ResponseCode.AuthenticationFailed:
                     case ResponseCode.InvalidArgument:
                         // 認証エラー
-                        if (authenticationInformationResponse.Data.GroupType == 1)
+                        if (authenticationInformationResponse.Data != null && authenticationInformationResponse.Data.GroupType == 1)
                         {
                             this.ErrorMessage = "権限をお持ちのアカウントでログインしてください";
                         }

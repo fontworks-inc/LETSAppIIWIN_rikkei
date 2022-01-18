@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Security.Principal;
 using System.Text;
 using System.Threading;
@@ -113,6 +114,7 @@ namespace Client.UI.Views
             List<string> letsKindList = new List<string>();
             string letsKinds = string.Empty;
             this.paragraph = new Paragraph();
+            this.paragraph.FontFamily = new FontFamily("ＭＳ ゴシック");
             this.LicenseTerm.Document = new FlowDocument(this.paragraph);
             if (this.deviceModeLicenseInfoRepository != null)
             {
@@ -127,14 +129,22 @@ namespace Client.UI.Views
                 {
                     this.letsKindMap.Add((int)deviceModeLicense.LetsKind, deviceModeLicense.LetsKindName);
                     letsKindList.Add(deviceModeLicense.LetsKindName);
+                    Encoding sjisEnc = Encoding.GetEncoding("Shift_JIS");
+                    string fontname = $"{deviceModeLicense.LetsKindName}";
+                    int bytes = sjisEnc.GetByteCount(fontname);
+                    for (int n = bytes; n < 24; n++)
+                    {
+                        fontname += " ";
+                    }
+
                     if (now > deviceModeLicense.ExpireDate)
                     {
-                        this.paragraph.Inlines.Add(new Run($"{deviceModeLicense.LetsKindName}     期限切れ") { Foreground = new SolidColorBrush(Colors.Red) });
+                        this.paragraph.Inlines.Add(new Run($"{fontname} 期限切れ") { Foreground = new SolidColorBrush(Colors.Red) });
                     }
                     else
                     {
                         string expireDate = deviceModeLicense.ExpireDate.ToString("yyyy.MM.dd");
-                        this.paragraph.Inlines.Add($"{deviceModeLicense.LetsKindName} {expireDate}まで");
+                        this.paragraph.Inlines.Add($"{fontname} {expireDate}まで");
                     }
 
                     this.paragraph.Inlines.Add(new LineBreak());
@@ -243,16 +253,17 @@ namespace Client.UI.Views
 
             try
             {
-                string filePath = deviceModeSetting.LicenceFileKeyPath;
-                if (string.IsNullOrEmpty(filePath))
-                {
-                    filePath = System.IO.Path.Combine(this.applicationSettingFolder, "LicenseKeFile.dat");
-                    this.LicenseKeyFilePath.Content = System.IO.Path.GetFileName(filePath);
-                    deviceModeSetting.LicenceFileKeyPath = filePath;
-                    this.deviceModeSettingRepository.SaveDeviceModeSetting(deviceModeSetting);
-                }
+                //string filePath = deviceModeSetting.LicenceFileKeyPath;
+                //if (string.IsNullOrEmpty(filePath))
+                //{
+                //    filePath = System.IO.Path.Combine(this.applicationSettingFolder, "LicenseKeFile.dat");
+                //    this.LicenseKeyFilePath.Content = System.IO.Path.GetFileName(filePath);
+                //    deviceModeSetting.LicenceFileKeyPath = filePath;
+                //    this.deviceModeSettingRepository.SaveDeviceModeSetting(deviceModeSetting);
+                //}
 
-                DeviceModeLicenseInfo deviceModeLicenseInfo = this.deviceModeLicenseInfoRepository.GetDeviceModeLicenseInfo(true, deviceModeSetting.OfflineDeviceID, deviceModeSetting.IndefiniteAccessToken, deviceModeSetting.LicenceFileKeyPath);
+                //DeviceModeLicenseInfo deviceModeLicenseInfo = this.deviceModeLicenseInfoRepository.GetDeviceModeLicenseInfo(true, deviceModeSetting.OfflineDeviceID, deviceModeSetting.IndefiniteAccessToken, deviceModeSetting.LicenceFileKeyPath, deviceModeSetting.LicenseDecryptionKey);
+                DeviceModeLicenseInfo deviceModeLicenseInfo = this.deviceModeLicenseInfoRepository.GetDeviceModeLicenseInfo(true, deviceModeSetting.OfflineDeviceID, deviceModeSetting.IndefiniteAccessToken, null, deviceModeSetting.LicenseDecryptionKey);
 
                 this.deviceModeLicenseInfoRepository.SaveDeviceModeLicenseInfo(deviceModeLicenseInfo);
 
@@ -260,11 +271,11 @@ namespace Client.UI.Views
                 string letsKinds = this.LicenseInfoDisp();
                 if (string.IsNullOrEmpty(letsKinds))
                 {
-                    ToastNotificationWrapper.Show("ラインセンス登録", "デバイスに対応するライセンスがありません。ライセンスキーファイルが適切であるか確認してください。");
+                   this.ToastShow("ラインセンス登録", "デバイスに対応するライセンスがありません。ライセンスキーファイルが適切であるか確認してください。");
                 }
                 else
                 {
-                    ToastNotificationWrapper.Show("ラインセンス登録", "ライセンスを更新しました。 LETS種別：{letsKinds}");
+                    this.ToastShow("ラインセンス登録", $"ライセンスを更新しました。 LETS種別：{letsKinds}");
                 }
             }
             catch (Exception ex)
@@ -281,7 +292,7 @@ namespace Client.UI.Views
         private void LicenseKeyFileButton_Click(object sender, RoutedEventArgs e)
         {
             var dialog = new OpenFileDialog();
-            dialog.Filter = "データファイル (*.dat)|*.dat|全てのファイル (*.*)|*.*";
+            dialog.Filter = "データファイル (*.csv)|*.csv|全てのファイル (*.*)|*.*";
             if (!string.IsNullOrEmpty(this.LicenseKeyFilePath.Content.ToString()))
             {
                 dialog.FileName = this.LicenseKeyFilePath.Content.ToString();
@@ -311,22 +322,71 @@ namespace Client.UI.Views
             {
                 if (!string.IsNullOrEmpty(filePath))
                 {
+                    string license = string.Empty;
+                    string jsonText = string.Empty;
+
                     // ファイルからライセンス情報を作成する
-                    string jsonText = File.ReadAllText(filePath);
-                    DeviceModeLicenseInfo licenseInfo = this.deviceModeLicenseInfoRepository.CreateLicenseInfoFromJsonText(jsonText);
+                    string[] csvLines = File.ReadAllLines(filePath);
 
-                    // [デバイスモードライセンス]に保存する
-                    this.deviceModeLicenseInfoRepository.SaveDeviceModeLicenseInfo(licenseInfo);
-
-                    // ライセンス情報を表示する。
-                    string letsKinds = this.LicenseInfoDisp();
-                    if (string.IsNullOrEmpty(letsKinds))
+                    string ownDevId = deviceModeSetting.OfflineDeviceID;
+                    foreach (string line in csvLines)
                     {
-                        ToastNotificationWrapper.Show("ラインセンス登録", "デバイスに対応するライセンスがありません。ライセンスキーファイルが適切であるか確認してください。");
+                        string[] fields = line.Split(",");
+                        string devid = fields[0].Trim(new char[] { '"' });
+
+                        if (devid == ownDevId)
+                        {
+                            string licenseBase64 = fields[1].Trim(new char[] { '"' });
+
+                            // ライセンスキーを解凍する
+                            byte[] encrypted = Convert.FromBase64String(licenseBase64);
+
+                            // AES復号化を行う
+                            RijndaelManaged aes = new RijndaelManaged();
+                            aes.BlockSize = 128;
+                            aes.KeySize = 128;
+                            aes.Padding = PaddingMode.Zeros;
+                            aes.Mode = CipherMode.ECB;
+                            aes.Key = Convert.FromBase64String(deviceModeSetting.LicenseDecryptionKey);
+
+                            ICryptoTransform decryptor = aes.CreateDecryptor();
+
+                            byte[] planeText = new byte[encrypted.Length];
+
+                            MemoryStream memoryStream = new MemoryStream(encrypted);
+                            CryptoStream cryptStream = new CryptoStream(memoryStream, decryptor, CryptoStreamMode.Read);
+
+                            cryptStream.Read(planeText, 0, planeText.Length);
+                            jsonText = System.Text.Encoding.UTF8.GetString(planeText);
+                            int lastClosingParenthesis = jsonText.LastIndexOf('}');
+                            if (lastClosingParenthesis > 0)
+                            {
+                                jsonText = jsonText.Substring(0, lastClosingParenthesis + 1);
+                            }
+                        }
+                    }
+
+                    if (!string.IsNullOrEmpty(jsonText))
+                    {
+                        DeviceModeLicenseInfo licenseInfo = this.deviceModeLicenseInfoRepository.CreateLicenseInfoFromJsonText(jsonText);
+
+                        // [デバイスモードライセンス]に保存する
+                        this.deviceModeLicenseInfoRepository.SaveDeviceModeLicenseInfo(licenseInfo);
+
+                        // ライセンス情報を表示する。
+                        string letsKinds = this.LicenseInfoDisp();
+                        if (string.IsNullOrEmpty(letsKinds))
+                        {
+                            this.ToastShow("ラインセンス登録", "デバイスに対応するライセンスがありません。ライセンスキーファイルが適切であるか確認してください。");
+                        }
+                        else
+                        {
+                            this.ToastShow("ラインセンス登録", $"ライセンスを更新しました。 LETS種別：{letsKinds}");
+                        }
                     }
                     else
                     {
-                        ToastNotificationWrapper.Show("ラインセンス登録", "ライセンスを更新しました。 LETS種別：{letsKinds}");
+                        this.ToastShow("ラインセンス登録", "デバイスに対応するライセンスがありません。ライセンスキーファイルが適切であるか確認してください。");
                     }
                 }
             }
@@ -389,7 +449,7 @@ namespace Client.UI.Views
                             Logger.Debug(ex.StackTrace);
 
                             // 解凍に失敗した場合、通知を表示する。
-                            ToastNotificationWrapper.Show("フォントインストール失敗", "フォントのインストールに失敗しました。正しいフォントファイルを選択してください。");
+                            this.ToastShow("フォントインストール失敗", "フォントのインストールに失敗しました。正しいフォントファイルを選択してください。");
                             return;
                         }
 
@@ -398,7 +458,7 @@ namespace Client.UI.Views
                         {
                             foreach (string message in messageList)
                             {
-                                ToastNotificationWrapper.Show("フォントインストール", message);
+                                this.ToastShow("フォントインストール", message);
                             }
                         }
 
@@ -464,12 +524,29 @@ namespace Client.UI.Views
                 {
                     foreach (string message in messageList)
                     {
-                        ToastNotificationWrapper.Show("フォントアンインストール", message);
+                        this.ToastShow("フォントアンインストール", message);
                     }
 
                     this.UninstallListDisp();
                 }
             }
+        }
+
+        /// <summary>
+        /// 通知表示処理
+        /// </summary>
+        private void ToastShow(string title, string message)
+        {
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+            Encoding enc = Encoding.GetEncoding("Shift_JIS");
+            int titleBytes = enc.GetByteCount(title);
+            int msgMax = 144 - titleBytes;
+            if (enc.GetByteCount(message) > msgMax)
+            {
+                message = message.Substring(0, enc.GetString(enc.GetBytes(message), 0, msgMax - 2).Length) + "…";
+            }
+
+            ToastNotificationWrapper.Show(title, message);
         }
 
         /// <summary>

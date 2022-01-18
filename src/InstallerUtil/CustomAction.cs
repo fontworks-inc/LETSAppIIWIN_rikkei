@@ -236,6 +236,9 @@ namespace InstallerUtil
                 //// configフォルダの削除
                 //Delete($@"{letsfolder}\config");
 
+                //デバイス情報ファイルの削除
+                DeleteDevInfo($@"{letsfolder}\config");
+
                 // LETS-Ver*フォルダを削除
                 string[] verFolders = Directory.GetDirectories(letsfolder, "LETS-Ver*");
                 foreach (string f in verFolders)
@@ -252,6 +255,24 @@ namespace InstallerUtil
                 catch(Exception)
                 {
                     // NOP
+                }
+            }
+        }
+
+        private void DeleteDevInfo(string configFolder)
+        {
+            // 指定フォルダ下のデバイス情報ファイルを削除
+            string[] filePaths = Directory.GetFiles(configFolder, "dev-*.*");
+            foreach (string filePath in filePaths)
+            {
+                try
+                {
+                    File.SetAttributes(filePath, FileAttributes.Normal);
+                    File.Delete(filePath);
+                }
+                catch (Exception)
+                {
+                    // 消せないファイルは無視する
                 }
             }
         }

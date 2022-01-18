@@ -20,7 +20,7 @@ namespace Core.Interfaces
         /// 設定情報(デバイスモード時)を取得する
         /// </summary>
         /// <returns>設定情報(デバイスモード時)</returns>
-        DeviceModeLicenseInfo GetDeviceModeLicenseInfo(bool fromOnline, string offlineDeviceId, string indefiniteAccessToken, string licenceFileKeyPath);
+        DeviceModeLicenseInfo GetDeviceModeLicenseInfo(bool fromOnline, string offlineDeviceId, string indefiniteAccessToken, string licenceFileKeyPath, string licenseDecryptionKey);
 
         /// <summary>
         /// 設定情報(デバイスモード時)を保存する
