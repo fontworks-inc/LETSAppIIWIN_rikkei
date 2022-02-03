@@ -79,6 +79,9 @@ namespace Client.UI.Views
             this.deviceModeService = container.Resolve<IDeviceModeService>();
             this.startProcessService = container.Resolve<IStartProcessService>();
 
+            // ファイルパスクリア
+            this.FilePathClear();
+
             // ライセンスキーファイルパス初期表示
             if (this.deviceModeSettingRepository != null)
             {
@@ -137,7 +140,7 @@ namespace Client.UI.Views
                         fontname += " ";
                     }
 
-                    if (now > deviceModeLicense.ExpireDate)
+                    if (now > deviceModeLicense.ExpireDate.AddDays(1))
                     {
                         this.paragraph.Inlines.Add(new Run($"{fontname} 期限切れ") { Foreground = new SolidColorBrush(Colors.Red) });
                     }
@@ -174,6 +177,7 @@ namespace Client.UI.Views
                     if (!letsKindList.Contains((int)fontInfo.LetsKind))
                     {
                         var chkitem = new CheckBox();
+
                         if (this.letsKindMap.ContainsKey((int)fontInfo.LetsKind))
                         {
                             chkitem.Content = this.letsKindMap[(int)fontInfo.LetsKind];
@@ -190,6 +194,8 @@ namespace Client.UI.Views
         /// </summary>
         private void LicenseRegistButton_Click(object sender, RoutedEventArgs e)
         {
+            this.FilePathClear();
+
             this.MenuButtonClear();
             this.LicenseRegistButton.Background = new SolidColorBrush(Colors.LightGray);
 
@@ -202,6 +208,8 @@ namespace Client.UI.Views
         /// </summary>
         private void FontInstallButton_Click(object sender, RoutedEventArgs e)
         {
+            this.FilePathClear();
+
             this.MenuButtonClear();
             this.FontInstallButton.Background = new SolidColorBrush(Colors.LightGray);
 
@@ -214,6 +222,8 @@ namespace Client.UI.Views
         /// </summary>
         private void FontUninstallButton_Click(object sender, RoutedEventArgs e)
         {
+            this.FilePathClear();
+
             this.MenuButtonClear();
             this.FontUninstallButton.Background = new SolidColorBrush(Colors.LightGray);
 
@@ -229,6 +239,22 @@ namespace Client.UI.Views
             this.LicenseRegistButton.Background = new SolidColorBrush(Colors.White);
             this.FontInstallButton.Background = new SolidColorBrush(Colors.White);
             this.FontUninstallButton.Background = new SolidColorBrush(Colors.White);
+        }
+
+        private void FilePathClear()
+        {
+            if (this.deviceModeSettingRepository == null)
+            {
+                return;
+            }
+
+            var deviceModeSetting = this.deviceModeSettingRepository.GetDeviceModeSetting();
+            deviceModeSetting.FontFilePath = string.Empty;
+            deviceModeSetting.LicenceFileKeyPath = string.Empty;
+            this.deviceModeSettingRepository.SaveDeviceModeSetting(deviceModeSetting);
+
+            this.FontFilePath.Content = string.Empty;
+            this.LicenseKeyFilePath.Content = string.Empty;
         }
 
         /// <summary>
@@ -253,16 +279,6 @@ namespace Client.UI.Views
 
             try
             {
-                //string filePath = deviceModeSetting.LicenceFileKeyPath;
-                //if (string.IsNullOrEmpty(filePath))
-                //{
-                //    filePath = System.IO.Path.Combine(this.applicationSettingFolder, "LicenseKeFile.dat");
-                //    this.LicenseKeyFilePath.Content = System.IO.Path.GetFileName(filePath);
-                //    deviceModeSetting.LicenceFileKeyPath = filePath;
-                //    this.deviceModeSettingRepository.SaveDeviceModeSetting(deviceModeSetting);
-                //}
-
-                //DeviceModeLicenseInfo deviceModeLicenseInfo = this.deviceModeLicenseInfoRepository.GetDeviceModeLicenseInfo(true, deviceModeSetting.OfflineDeviceID, deviceModeSetting.IndefiniteAccessToken, deviceModeSetting.LicenceFileKeyPath, deviceModeSetting.LicenseDecryptionKey);
                 DeviceModeLicenseInfo deviceModeLicenseInfo = this.deviceModeLicenseInfoRepository.GetDeviceModeLicenseInfo(true, deviceModeSetting.OfflineDeviceID, deviceModeSetting.IndefiniteAccessToken, null, deviceModeSetting.LicenseDecryptionKey);
 
                 this.deviceModeLicenseInfoRepository.SaveDeviceModeLicenseInfo(deviceModeLicenseInfo);
@@ -271,16 +287,16 @@ namespace Client.UI.Views
                 string letsKinds = this.LicenseInfoDisp();
                 if (string.IsNullOrEmpty(letsKinds))
                 {
-                   this.ToastShow("ラインセンス登録", "デバイスに対応するライセンスがありません。ライセンスキーファイルが適切であるか確認してください。");
+                   this.ToastShow("ライセンス登録", "デバイスに対応するライセンスがありません。ライセンスキーファイルが適切であるか確認してください。");
                 }
                 else
                 {
-                    this.ToastShow("ラインセンス登録", $"ライセンスを更新しました。 LETS種別：{letsKinds}");
+                    this.ToastShow("ライセンス登録", $"ライセンスを更新しました。 LETS種別：{letsKinds}");
                 }
             }
             catch (Exception ex)
             {
-                Logger.Debug(ex.StackTrace);
+                Logger.Error(ex.StackTrace);
                 this.ErrorMessage.Text = "通信エラーが発生しました。";
                 this.ErrorMessage.Visibility = Visibility.Visible;
             }
@@ -377,22 +393,22 @@ namespace Client.UI.Views
                         string letsKinds = this.LicenseInfoDisp();
                         if (string.IsNullOrEmpty(letsKinds))
                         {
-                            this.ToastShow("ラインセンス登録", "デバイスに対応するライセンスがありません。ライセンスキーファイルが適切であるか確認してください。");
+                            this.ToastShow("ライセンス登録", "デバイスに対応するライセンスがありません。ライセンスキーファイルが適切であるか確認してください。");
                         }
                         else
                         {
-                            this.ToastShow("ラインセンス登録", $"ライセンスを更新しました。 LETS種別：{letsKinds}");
+                            this.ToastShow("ライセンス登録", $"ライセンスを更新しました。 LETS種別：{letsKinds}");
                         }
                     }
                     else
                     {
-                        this.ToastShow("ラインセンス登録", "デバイスに対応するライセンスがありません。ライセンスキーファイルが適切であるか確認してください。");
+                        this.ToastShow("ライセンス登録", "デバイスに対応するライセンスがありません。ライセンスキーファイルが適切であるか確認してください。");
                     }
                 }
             }
             catch (Exception ex)
             {
-                Logger.Debug(ex.StackTrace);
+                Logger.Error(ex.StackTrace);
             }
         }
 
@@ -446,7 +462,7 @@ namespace Client.UI.Views
                         }
                         catch (Exception ex)
                         {
-                            Logger.Debug(ex.StackTrace);
+                            Logger.Error(ex.StackTrace);
 
                             // 解凍に失敗した場合、通知を表示する。
                             this.ToastShow("フォントインストール失敗", "フォントのインストールに失敗しました。正しいフォントファイルを選択してください。");
@@ -467,7 +483,7 @@ namespace Client.UI.Views
                     }
                     catch (Exception ex)
                     {
-                        Logger.Debug(ex.StackTrace);
+                        Logger.Error(ex.StackTrace);
                     }
                     finally
                     {

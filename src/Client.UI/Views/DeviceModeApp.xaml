@@ -21,7 +21,7 @@
                     <ImageBrush ImageSource="{Binding ImageLogo}"/>
                 </Rectangle.Fill>
             </Rectangle>-->
-            <Button x:Name="LicenseRegistButton" Content="ラインセンス情報登録　　" HorizontalAlignment="Left" Width="150" Margin="30,30,0,0" VerticalAlignment="Top" BorderThickness="0" Background="LightGray" Click="LicenseRegistButton_Click"/>
+            <Button x:Name="LicenseRegistButton" Content="ライセンス情報登録　　" HorizontalAlignment="Left" Width="150" Margin="30,30,0,0" VerticalAlignment="Top" BorderThickness="0" Background="LightGray" Click="LicenseRegistButton_Click"/>
             <Button x:Name="FontInstallButton" Content="フォントインストール　　" HorizontalAlignment="Left" Width="150" Margin="30,60,0,0" VerticalAlignment="Top" BorderThickness="0" Background="White" Click="FontInstallButton_Click"/>
             <Button x:Name="FontUninstallButton" Content="フォントアンインストール" HorizontalAlignment="Left" Width="150" Margin="30,90,0,0" VerticalAlignment="Top" BorderThickness="0" Background="White" Click="FontUninstallButton_Click"/>
             <Button x:Name="HelpButton" Content="ヘルプ" HorizontalAlignment="Left" Height="24" Margin="30,160,0,0" VerticalAlignment="Top" Width="75" Grid.Row="1" Click="HelpButton_Click"/>
@@ -38,13 +38,13 @@
                 <Label Content="オンラインで登録する" Margin="10,30,0,10" HorizontalAlignment="Left"/>
                 <StackPanel Orientation="Horizontal">
                     <TextBox Text="オンラインでライセンス情報を取得します。" Margin="10,10,0,10" TextWrapping="Wrap" BorderThickness="0" Width="147" />
-                    <Button x:Name="LicenseOnlineButton" Content="ラインセス情報を取得" Height="24" Width="140" Click="LicenseOnlineButton_Click"/>
+                    <Button x:Name="LicenseOnlineButton" Content="ライセンス情報を取得" Height="24" Width="140" Click="LicenseOnlineButton_Click"/>
                 </StackPanel>
                 <Rectangle HorizontalAlignment="Stretch" Fill="Blue" Height="1"/>
                 <Label Content="オフラインで登録する" Margin="10,20,0,10" HorizontalAlignment="Left"/>
                 <StackPanel Orientation="Horizontal">
                     <TextBox Text="ライセンスキーファイルからライセンス情報を登録します。" Margin="10,10,0,10" TextWrapping="Wrap" BorderThickness="0" Width="147" />
-                    <Button x:Name="LicenseKeyFileButton" Content="ラインセスキーを選択" Height="24" Width="140" HorizontalAlignment="Right" Click="LicenseKeyFileButton_Click"/>
+                    <Button x:Name="LicenseKeyFileButton" Content="ライセンスキーを選択" Height="24" Width="140" HorizontalAlignment="Right" Click="LicenseKeyFileButton_Click"/>
                 </StackPanel>
                 <Label x:Name="LicenseKeyFilePath" Content="ファイル名" HorizontalAlignment="Right"/>
                 <TextBlock x:Name="ErrorMessage" Text="{Binding ErrorMessage}" FontSize="10pt" Margin="5,10,0,0"
