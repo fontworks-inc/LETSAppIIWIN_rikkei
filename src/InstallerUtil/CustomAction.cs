@@ -56,7 +56,7 @@ namespace InstallerUtil
             }
             catch(Exception)
             {
-                   // NOP
+                // NOP
             }
 
             // uninstallfontバッチファイル名
@@ -121,6 +121,8 @@ namespace InstallerUtil
                 // NOP
             }
 
+            //デバイス情報ファイルの削除
+            DeleteDevInfo($@"{letsfolder}\config");
         }
 
         private string[] UninstallFontsAllUser(string letsfolder, string[] pids)
@@ -130,6 +132,22 @@ namespace InstallerUtil
             foreach (string pid in pids)
             {
                 string uninstfontbat = Path.Combine(letsfolder, $"uninstallfonts_{pid}.bat");
+                if (File.Exists(uninstfontbat))
+                {
+                    this.SetHidden(uninstfontbat, false);
+                    string[] lines = File.ReadAllLines(uninstfontbat);
+                    foreach (string l in lines)
+                    {
+                        if (l.StartsWith("DEL "))
+                        {
+                            alldellines.Add(l);
+                        }
+                    }
+                    Process.Start(new ProcessStartInfo(uninstfontbat) { CreateNoWindow = true, UseShellExecute = false });
+                }
+            }
+            {
+                string uninstfontbat = Path.Combine(letsfolder, "uninstallfonts_device.bat");
                 if (File.Exists(uninstfontbat))
                 {
                     this.SetHidden(uninstfontbat, false);
@@ -171,6 +189,14 @@ namespace InstallerUtil
             foreach (string pid in pids)
             {
                 string uninstregbat = Path.Combine(letsfolder, $"uninstreg_{pid}.bat");
+                if (File.Exists(uninstregbat))
+                {
+                    this.SetHidden(uninstregbat, false);
+                    Process.Start(new ProcessStartInfo(uninstregbat) { CreateNoWindow = true, UseShellExecute = false });
+                }
+            }
+            {
+                string uninstregbat = Path.Combine(letsfolder, "uninstreg_device.bat");
                 if (File.Exists(uninstregbat))
                 {
                     this.SetHidden(uninstregbat, false);
@@ -236,8 +262,8 @@ namespace InstallerUtil
                 //// configフォルダの削除
                 //Delete($@"{letsfolder}\config");
 
-                //デバイス情報ファイルの削除
-                DeleteDevInfo($@"{letsfolder}\config");
+                ////デバイス情報ファイルの削除
+                //DeleteDevInfo($@"{letsfolder}\config");
 
                 // LETS-Ver*フォルダを削除
                 string[] verFolders = Directory.GetDirectories(letsfolder, "LETS-Ver*");
@@ -337,6 +363,14 @@ namespace InstallerUtil
 
         private static bool IsRunFromSetup()
         {
+            {
+                // アンインストール時のユーザ一時フォルダ
+                string tempPath = Path.GetTempPath();
+                string logpath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.CommonDocuments), ".letsuninst.log");
+                File.AppendAllText(logpath, $"tempPath={tempPath}" + "\n");
+            }
+
+
             // ホームドライブの取得
             string winDir = System.Environment.GetFolderPath(Environment.SpecialFolder.Windows);
             string homedrive = winDir.Substring(0, winDir.IndexOf("\\"));

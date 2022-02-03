@@ -387,6 +387,8 @@ namespace Client.UI
 
             var userStatusRepository = container.Resolve<IUserStatusRepository>();
 
+            this.OutputClearUserData();
+
             // [ユーザー別保存：デバイスモード]を取得する
             if (userStatusRepository.GetStatus().IsDeviceMode)
             {
@@ -394,12 +396,9 @@ namespace Client.UI
                 var deviceModeService = container.Resolve<IDeviceModeService>();
                 try
                 {
-                    //{ //DEBUG
-                    //    var deviceModeSettingRepository = container.Resolve<IDeviceModeSettingRepository>();
-                    //    var deviceModeSetting = deviceModeSettingRepository.GetDeviceModeSetting();
-                    //    deviceModeSetting.OfflineDeviceID = "486e9dea-1512-4911-ae60-5101a357f1f0";
-                    //    deviceModeSetting.IndefiniteAccessToken = "0d4277129ef74d5bbb723f007d84d270";
-                    //    deviceModeSettingRepository.SaveDeviceModeSetting(deviceModeSetting);
+                    //if (!deviceModeService.IsAdministratorsMember())
+                    //{
+                    //    throw new InvalidOperationException("管理者ユーザーで起動してください。");
                     //}
 
                     IList<string> messageList = deviceModeService.FixedTermCheck(true);
@@ -414,14 +413,14 @@ namespace Client.UI
                 catch (InvalidOperationException invalidEx)
                 {
                     // アプリケーションを終了する
-                    Logger.Debug(invalidEx.StackTrace);
+                    Logger.Error(invalidEx.StackTrace);
                     ToastNotificationWrapper.Show("LETSオフライン専用アプリ", invalidEx.Message);
                     Shell shell = (Shell)(System.Windows.Application.Current as PrismApplication);
                     shell.Shutdown();
                 }
                 catch (Exception ex)
                 {
-                    Logger.Debug(ex.StackTrace);
+                    Logger.Error(ex.StackTrace);
                 }
 
                 return;
@@ -493,6 +492,153 @@ namespace Client.UI
             // 定期確認処理の開始
             var fixedTermScheduler = container.Resolve<IFixedTermScheduler>();
             fixedTermScheduler.Start();
+        }
+
+        private static bool isOutputClearUserData = false;
+        private static string userRegID = string.Empty;
+        private static string userProfileImagePath = string.Empty;
+
+        private void OutputClearUserData()
+        {
+            Logger.Info("OutputClearUserData:Enter");
+            try
+            {
+                if (isOutputClearUserData)
+                {
+                    Logger.Info("OutputClearUserData:Exit(Already Outputed");
+                    return;
+                }
+
+                // ユーザデータ削除バッチを出力する
+                // ユーザレジストリIDを取得する
+                string userregid = this.GetUserRegID();
+
+                // ホームドライブの取得
+                string appPath = AppDomain.CurrentDomain.BaseDirectory;
+                string homedrive = appPath.Substring(0, appPath.IndexOf("\\"));
+
+                // LETSフォルダ
+                string letsfolder = $@"{homedrive}\ProgramData\Fontworks\LETS";
+
+                string userDataDirectory = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Fontworks", "LETS");
+
+                string clearUserDataPath = Path.Combine(letsfolder, $"clearuserdata_{userregid}.bat");
+                if (System.IO.File.Exists(clearUserDataPath))
+                {
+                    this.SetHidden(clearUserDataPath, false);
+                }
+
+                System.IO.File.WriteAllText(clearUserDataPath, "REM ユーザー削除" + Environment.NewLine, System.Text.Encoding.GetEncoding("shift_jis"));
+                System.IO.File.AppendAllText(clearUserDataPath, $"rd /s /q {userDataDirectory}\n");
+                System.IO.File.AppendAllText(clearUserDataPath, @"Del /F ""%~dp0%~nx0""" + "\n");
+                this.SetFileAccessEveryone(clearUserDataPath);
+                this.SetHidden(clearUserDataPath, true);
+
+                isOutputClearUserData = true;
+            }
+            catch (Exception ex)
+            {
+                Logger.Error(ex.StackTrace);
+            }
+            Logger.Info("OutputClearUserData:Exit");
+        }
+
+        /// <summary>
+        /// ユーザのレジストリIDを取得する
+        /// </summary>
+        private string GetUserRegID()
+        {
+            string username = Environment.UserName;
+
+            if (string.IsNullOrEmpty(userRegID))
+            {
+                try
+                {
+                    Logger.Debug($"GetUserRegID:username={username}");
+                    string regpath = @"SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList";
+                    var regkey = Microsoft.Win32.Registry.LocalMachine.OpenSubKey(regpath);
+                    string[] subkeys = regkey.GetSubKeyNames();
+                    regkey.Close();
+                    foreach (string k in subkeys)
+                    {
+                        Logger.Debug($"GetUserRegID:subkey={k}");
+                        var subregkey = Microsoft.Win32.Registry.LocalMachine.OpenSubKey($@"{regpath}\{k}");
+                        string profileImagePath = (string)subregkey.GetValue("ProfileImagePath");
+                        subregkey.Close();
+                        if (!string.IsNullOrEmpty(profileImagePath))
+                        {
+                            string[] paths = profileImagePath.Split('\\');
+                            string uname = paths[paths.Length - 1];
+                            Logger.Debug($"GetUserRegID:uname={uname}");
+                            if (string.Compare(uname, username, true) == 0)
+                            {
+                                userRegID = k;
+                                userProfileImagePath = profileImagePath;
+                                Logger.Debug($"userProfileImagePath:{userProfileImagePath}");
+                                break;
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.Debug("GetUserRegID:" + ex.StackTrace);
+                }
+            }
+
+            if (string.IsNullOrEmpty(userRegID))
+            {
+                userRegID = username.Replace(' ', '_');
+            }
+
+            return userRegID;
+        }
+
+        /// <summary>
+        /// ファイルの隠し属性を設定/解除する
+        /// </summary>
+        /// <param name="filepath">ファイルパス</param>
+        /// <param name="isHidden">隠し属性フラグ</param>
+        private void SetHidden(string filepath, bool isHidden)
+        {
+            try
+            {
+                FileAttributes fa = System.IO.File.GetAttributes(filepath);
+                if (isHidden)
+                {
+                    fa = fa | FileAttributes.Hidden;
+                }
+                else
+                {
+                    fa = fa & ~FileAttributes.Hidden;
+                }
+
+                System.IO.File.SetAttributes(filepath, fa);
+            }
+            catch (Exception ex)
+            {
+                Logger.Debug("SetHidden:" + ex.StackTrace);
+            }
+        }
+
+        private void SetFileAccessEveryone(string path)
+        {
+            try
+            {
+                FileSystemAccessRule rule = new FileSystemAccessRule(
+                    new NTAccount("everyone"),
+                    FileSystemRights.FullControl,
+                    AccessControlType.Allow);
+
+                var sec = new FileSecurity();
+                sec.AddAccessRule(rule);
+                System.IO.FileSystemAclExtensions.SetAccessControl(new FileInfo(path), sec);
+            }
+            catch (Exception ex)
+            {
+                Logger.Debug("SetFileAccessEveryone:" + ex.StackTrace);
+            }
         }
 
         /// <summary>

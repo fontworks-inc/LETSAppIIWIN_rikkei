@@ -23,5 +23,7 @@ namespace ApplicationService.Interfaces
         IDictionary<int, string> LetsKindNameMap();
 
         void DeleteFolder(string targetDirectoryPath);
+
+        bool IsAdministratorsMember();
     }
 }

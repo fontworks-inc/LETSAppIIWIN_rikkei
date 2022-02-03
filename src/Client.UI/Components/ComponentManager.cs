@@ -580,7 +580,7 @@ namespace Client.UI.Components
                         case LParamType.LoadLoginWindow:
                             // ログインメッセージ
                             Logger.Warn("WndProc:LParamType.LoadLoginWindow");
-                            if (!this.userStatusRepository.GetStatus().IsLoggingIn)
+                            if (!this.userStatusRepository.GetStatus().IsLoggingIn && !this.userStatusRepository.GetStatus().IsDeviceMode)
                             {
                                 this.ShowLoginWindow();
                             }

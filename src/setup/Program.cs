@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.DirectoryServices.AccountManagement;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -10,6 +11,13 @@ namespace setup
     {
         static void Main(string[] args)
         {
+            // 管理者権限を持つユーザで実行されているか確認する
+            if (!IsAdministratorsMember())
+            {
+                System.Windows.Forms.MessageBox.Show("管理者権限を持つユーザで実行してください");
+                return;
+            }
+
             // ホームドライブの取得
             string winDir = System.Environment.GetFolderPath(Environment.SpecialFolder.Windows);
             string homedrive = winDir.Substring(0, winDir.IndexOf("\\"));
@@ -154,6 +162,10 @@ namespace setup
                 string updator = $@"{homedrive}\ProgramData\Fontworks\LETS\LETSUpdater.exe";
                 Process p3 = Process.Start(updator);
             }
+            catch (Exception ex)
+            {
+                System.Windows.Forms.MessageBox.Show($"{ex.Message}：{ex.StackTrace}");
+            }
             finally
             {
                 //System.Windows.Forms.MessageBox.Show("finally Delete："+tmpfile);
@@ -161,6 +173,42 @@ namespace setup
             }
         }
 
+        /// <summary>
+        /// 現在のユーザーがローカルAdministratorsグループのメンバーか調べる
+        /// </summary>
+        /// <returns>メンバーであればtrue。</returns>
+        public static bool IsAdministratorsMember()
+        {
+            ////現在のユーザーを表すWindowsIdentityオブジェクトを取得する
+            //System.Security.Principal.WindowsIdentity wi =
+            //    System.Security.Principal.WindowsIdentity.GetCurrent();
+            ////WindowsPrincipalオブジェクトを作成する
+            //System.Security.Principal.WindowsPrincipal wp =
+            //    new System.Security.Principal.WindowsPrincipal(wi);
+            ////Administratorsグループに属しているか調べる
+            //return wp.IsInRole(
+            //    System.Security.Principal.WindowsBuiltInRole.Administrator);
+
+            try
+            {
+                //ローカルコンピュータストアのPrincipalContextオブジェクトを作成する
+                using (PrincipalContext pc = new PrincipalContext(ContextType.Machine))
+                {
+                    //現在のユーザーのプリンシパルを取得する
+                    UserPrincipal up = UserPrincipal.Current;
+                    //ローカルAdministratorsグループを探す
+                    //"S-1-5-32-544"はローカルAdministratorsグループを示すSID
+                    GroupPrincipal gp = GroupPrincipal.FindByIdentity(pc, "S-1-5-32-544");
+                    //グループのメンバーであるか調べる
+                    return up.IsMemberOf(gp);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Windows.Forms.MessageBox.Show(ex.StackTrace);
+                return true;
+            }
+        }
     }
 
 

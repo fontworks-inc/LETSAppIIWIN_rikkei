@@ -43,6 +43,11 @@ namespace Client.UI.ViewModels
         private readonly IAuthenticationService authenticationService;
 
         /// <summary>
+        /// 認証サービス
+        /// </summary>
+        private readonly IDeviceModeService deviceModeService;
+
+        /// <summary>
         /// (メイン)ログイン画面
         /// </summary>
         private readonly ILoginWindowWrapper loginWindow;
@@ -130,6 +135,7 @@ namespace Client.UI.ViewModels
             IResourceWrapper resouceWrapper,
             IComponentManagerWrapper componentManagerWrapper,
             IAuthenticationService authenticationService,
+            IDeviceModeService deviceModeService,
             IUrlRepository urlRepository)
         {
             this.loginWindow = loginWindowWrapper;
@@ -137,6 +143,7 @@ namespace Client.UI.ViewModels
             this.componentManager = componentManagerWrapper.Manager;
 
             this.authenticationService = authenticationService;
+            this.deviceModeService = deviceModeService;
 
             this.urlRepository = urlRepository;
 
@@ -454,6 +461,14 @@ namespace Client.UI.ViewModels
                     case ResponseCode.Succeeded:
                         if (!string.IsNullOrEmpty(System.Environment.GetEnvironmentVariable("LETS_DEVICE_MODE")))
                         {
+                            //if (!this.deviceModeService.IsAdministratorsMember())
+                            //{
+                            //    this.ErrorMessage = "管理者ユーザーで起動してください。";
+                            //    this.ErrorMessageVisibility = Visibility.Visible;
+                            //    Logger.Error(this.ErrorMessage);
+                            //    return;
+                            //}
+
                             // デバイスアプリ画面に遷移
                             this.loginWindow.NavigationService.Navigate(new DeviceModeApp());
                             return;

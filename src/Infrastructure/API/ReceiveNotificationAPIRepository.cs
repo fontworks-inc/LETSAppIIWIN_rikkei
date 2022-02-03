@@ -167,7 +167,7 @@ namespace Infrastructure.API
             }
 
             this.subscribed = false;
-            Logger.Debug("SSE Stop:subscribed = false");
+            Logger.Warn("SSE Stop:subscribed = false");
         }
 
         /// <summary>
@@ -206,13 +206,13 @@ namespace Infrastructure.API
         {
             try
             {
-                Logger.Debug("Establishing connection");
+                Logger.Warn("Establishing connection");
                 this.subscribed = true;
                 this.subscribedTime = DateTime.Now;
                 var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
-                Logger.Debug(response.ToString());
+                Logger.Warn(response.ToString());
                 response.EnsureSuccessStatusCode();
-                Logger.Debug("response.EnsureSuccessStatusCode");
+                Logger.Warn("response.EnsureSuccessStatusCode");
 
                 // SSE サーバに対して GETリクエスト　(非同期stream)
                 using (this.streamReader = new StreamReader(await response.Content.ReadAsStreamAsync()))
@@ -242,7 +242,7 @@ namespace Infrastructure.API
                         }
                     }
 
-                    Logger.Debug("Connection Closed:subscribed = false");
+                    Logger.Warn("Connection Closed:subscribed = false");
                     this.subscribed = false;
                     messageList.Clear();
                     this.emitter(messageList);
@@ -250,12 +250,12 @@ namespace Infrastructure.API
             }
             catch (Exception ex)
             {
-                Logger.Debug($"Connection Error:subscribed = false {ex.StackTrace}");
+                Logger.Warn($"Connection Error:subscribed = false {ex.StackTrace}");
                 this.subscribed = false;
                 this.emitter(new List<string>());
             }
 
-            Logger.Debug("Sbscriber Exit:subscribed = false");
+            Logger.Warn("Sbscriber Exit:subscribed = false");
             this.subscribed = false;
         }
 
@@ -278,7 +278,7 @@ namespace Infrastructure.API
                 var sseMessage = SseMessage.BuildMessage(messageList);
                 if (!sseMessage.IsCommentOnly())
                 {
-                    Logger.Debug("NotifyMessage:" + sseMessage.Data);
+                    Logger.Warn("NotifyMessage:" + sseMessage.Data);
                     sseQue.Enqueue(sseMessage);
 
                     if (sseproctask != null)
@@ -309,22 +309,22 @@ namespace Infrastructure.API
             {
                 SseMessage sseMessage = sseQue.Dequeue();
 
-                Logger.Debug("sseMessageProc:NotifyMessage:" + sseMessage.Data);
+                Logger.Warn("sseMessageProc:NotifyMessage:" + sseMessage.Data);
                 eventID = sseMessage.Id;
 
                 ActivateFont font = JsonConvert.DeserializeObject<ActivateFont>(sseMessage.Data);
                 switch (sseMessage.EventType)
                 {
                     case "font-activate":
-                        Logger.Info($"font-activate:{font.FontId}:{font.DisplayFontName}");
+                        Logger.Warn($"font-activate:{font.FontId}:{font.DisplayFontName}");
                         this.fontNotificationService.Activate(font);
                         break;
                     case "font-deactivate":
-                        Logger.Info($"font-deactivate:{font.FontId}");
+                        Logger.Warn($"font-deactivate:{font.FontId}");
                         this.fontNotificationService.Deactivate(font.FontId);
                         break;
                     case "font-all-uninstall":
-                        Logger.Info("font-all-uninstall");
+                        Logger.Warn("font-all-uninstall");
                         this.fontNotificationService.AllUninstall();
                         break;
                     default:

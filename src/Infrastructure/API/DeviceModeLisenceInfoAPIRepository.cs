@@ -67,7 +67,6 @@ namespace Infrastructure.API
                 this.Invoke(this.CallUpdateLicenseAPI);
 
                 // 戻り値のセット（個別処理）
-                // 戻り値のセット（個別処理）
                 Logger.Info(string.Format("DeviceModeLisenceInfoAPIRepository:GetUpdateLicense 戻り値のセット（個別処理）", string.Empty));
                 var ret = (UpdateLicenseResponse)this.ApiResponse;
                 response.Code = ret.Code;
@@ -87,8 +86,6 @@ namespace Infrastructure.API
                         aes.KeySize = 128;
                         aes.Padding = PaddingMode.Zeros;
                         aes.Mode = CipherMode.ECB;
-                        //aes.Key = encrypted;
-                        //aes.Key = Convert.FromBase64String("WCQIbAarS92xCjO5sL1JKcmHPu/DsUAXs5cYjSJ7AEs=");
                         aes.Key = Convert.FromBase64String(licenseDecryptionKey);
 
                         ICryptoTransform decryptor = aes.CreateDecryptor();
@@ -111,8 +108,12 @@ namespace Infrastructure.API
                     }
                     catch (Exception ex)
                     {
-                        Logger.Debug(ex.StackTrace);
+                        Logger.Error(ex.StackTrace);
                     }
+                }
+                else if (ret.Code == (int)ResponseCode.AuthenticationFailed || ret.Code == (int)ResponseCode.InvalidArgument)
+                {
+                    // NOP 認証エラー(契約が削除されている)の場合は空のライセンス情報を返す
                 }
                 else
                 {

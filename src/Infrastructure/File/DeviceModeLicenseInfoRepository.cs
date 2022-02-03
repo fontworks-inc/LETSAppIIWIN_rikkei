@@ -34,7 +34,6 @@ namespace Infrastructure.File
 
         public DeviceModeLicenseInfo CreateLicenseInfoFromJsonText(string jsonText)
         {
-            //throw new NotImplementedException();
             DeviceModeLicenceOfflineInfo deviceModeLicenceOfflineInfo = JsonSerializer.Deserialize<DeviceModeLicenceOfflineInfo>(jsonText);
             DeviceModeLicenseInfo deviceModeLicenseInfo = new DeviceModeLicenseInfo();
             foreach(DeviceModeLicenseOffline deviceModeLicenceOffline in deviceModeLicenceOfflineInfo.licenses)
@@ -47,7 +46,6 @@ namespace Infrastructure.File
             }
             deviceModeLicenseInfo.ZipPassword = deviceModeLicenceOfflineInfo.zip_password;
             return deviceModeLicenseInfo;
-            //return this.GetDeviceModeLicenseInfo();
         }
 
         /// <summary>

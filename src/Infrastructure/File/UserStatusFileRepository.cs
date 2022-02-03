@@ -21,8 +21,6 @@ namespace Infrastructure.File
 
         private static object saveLockObject = new object();
 
-        private static bool isOutputClearUserData = false;
-
         /// <summary>
         /// ユーザレジストリID
         /// </summary>
@@ -85,12 +83,6 @@ namespace Infrastructure.File
                     // アンインストール時ログアウトのための情報を出力する
                     this.OutputUninstallLogoutInfo();
                 }
-
-                if (!isOutputClearUserData)
-                {
-                    this.OutputClearUserData();
-                    isOutputClearUserData = true;
-                }
             }
         }
 
@@ -134,42 +126,6 @@ namespace Infrastructure.File
             }
 
             Logger.Info("CopyUserStatusInfo:Exit");
-        }
-
-        private void OutputClearUserData()
-        {
-            try
-            {
-                // ユーザデータ削除バッチを出力する
-                // ユーザレジストリIDを取得する
-                string userregid = this.GetUserRegID();
-
-                // ホームドライブの取得
-                string appPath = AppDomain.CurrentDomain.BaseDirectory;
-                string homedrive = appPath.Substring(0, appPath.IndexOf("\\"));
-
-                // LETSフォルダ
-                string letsfolder = $@"{homedrive}\ProgramData\Fontworks\LETS";
-
-                string userDataDirectory = Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Fontworks", "LETS");
-
-                string clearUserDataPath = Path.Combine(letsfolder, $"clearuserdata_{userregid}.bat");
-                if (System.IO.File.Exists(clearUserDataPath))
-                {
-                    this.SetHidden(clearUserDataPath, false);
-                }
-
-                System.IO.File.WriteAllText(clearUserDataPath, "REM ユーザー削除" + Environment.NewLine, System.Text.Encoding.GetEncoding("shift_jis"));
-                System.IO.File.AppendAllText(clearUserDataPath, $"rd /s /q {userDataDirectory}\n");
-                System.IO.File.AppendAllText(clearUserDataPath, @"Del /F ""%~dp0%~nx0""" + "\n");
-                this.SetFileAccessEveryone(clearUserDataPath);
-                this.SetHidden(clearUserDataPath, true);
-            }
-            catch (Exception ex)
-            {
-                Logger.Error(ex.StackTrace);
-            }
         }
 
         /// <summary>
@@ -221,33 +177,6 @@ namespace Infrastructure.File
             }
 
             return userRegID;
-        }
-
-        /// <summary>
-        /// ファイルの隠し属性を設定/解除する
-        /// </summary>
-        /// <param name="filepath">ファイルパス</param>
-        /// <param name="isHidden">隠し属性フラグ</param>
-        private void SetHidden(string filepath, bool isHidden)
-        {
-            try
-            {
-                FileAttributes fa = System.IO.File.GetAttributes(filepath);
-                if (isHidden)
-                {
-                    fa = fa | FileAttributes.Hidden;
-                }
-                else
-                {
-                    fa = fa & ~FileAttributes.Hidden;
-                }
-
-                System.IO.File.SetAttributes(filepath, fa);
-            }
-            catch (Exception ex)
-            {
-                Logger.Debug("SetHidden:" + ex.StackTrace);
-            }
         }
 
         private void SetFileAccessEveryone(string path)
