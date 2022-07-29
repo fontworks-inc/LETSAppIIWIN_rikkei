@@ -24,9 +24,19 @@ namespace ApplicationService.Fonts
         private static readonly Logger Logger = LogManager.GetLogger("nlog.config");
 
         /// <summary>
-        /// 同期処理のロックを行うためのオブジェクト
+        /// フォントダウンロード処理のロックを行うためのオブジェクト
+        /// </summary>
+        private static readonly object DownloadFontLockHandler = new object();
+
+        /// <summary>
+        /// フォント同期処理のロックを行うためのオブジェクト
         /// </summary>
         private static readonly object SynchronizeLockHandler = new object();
+
+        /// <summary>
+        /// フォントチェック処理のロックを行うためのオブジェクト
+        /// </summary>
+        private static readonly object CheckFontListLockHandler = new object();
 
         /// <summary>
         /// 文言の取得を行うインスタンス
@@ -406,32 +416,35 @@ namespace ApplicationService.Fonts
         /// <inheritdoc/>
         public void CheckFontsList()
         {
-            // ユーザー配下のフォントフォルダ
-            var local = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-            var userFontsDir = @$"{local}\Microsoft\Windows\Fonts";
-
-            if (!Directory.Exists(userFontsDir))
+            lock (CheckFontListLockHandler)
             {
-                return;
-            }
+                // ユーザー配下のフォントフォルダ
+                var local = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+                var userFontsDir = @$"{local}\Microsoft\Windows\Fonts";
 
-            try
-            {
-                int fileCount = Directory.GetFiles(userFontsDir, "*", SearchOption.TopDirectoryOnly).Length;
-
-                // フォント一覧の取得
-                var fonts = this.userFontsSettingRepository.GetUserFontsSetting().Fonts;
-
-                if (fileCount != fonts.Count)
+                if (!Directory.Exists(userFontsDir))
                 {
-                    Logger.Debug("CheckFontsList:Update");
-                    this.UpdateFontsList(userFontsDir);
-                    this.Synchronize(false);
+                    return;
                 }
-            }
-            catch (Exception)
-            {
-                // NOP
+
+                try
+                {
+                    int fileCount = Directory.GetFiles(userFontsDir, "*", SearchOption.TopDirectoryOnly).Length;
+
+                    // フォント一覧の取得
+                    var fonts = this.userFontsSettingRepository.GetUserFontsSetting().Fonts;
+
+                    if (fileCount != fonts.Count)
+                    {
+                        Logger.Debug("CheckFontsList:Update");
+                        this.UpdateFontsList(userFontsDir);
+                        this.Synchronize(false);
+                    }
+                }
+                catch (Exception)
+                {
+                    // NOP
+                }
             }
         }
 
@@ -803,7 +816,7 @@ namespace ApplicationService.Fonts
         private async void DownloadFontFile(IList<InstallFont> installFontList)
 #pragma warning restore CS1998 // 非同期メソッドは、'await' 演算子がないため、同期的に実行されます
         {
-            lock (SynchronizeLockHandler)
+            lock (DownloadFontLockHandler)
             {
                 // インストール対象フォントが存在する場合のみ下記処理を実施する
                 if (installFontList.Count != 0)

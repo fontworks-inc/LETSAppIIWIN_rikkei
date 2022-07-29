@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using Core.Entities;
 using Core.Interfaces;
 using NLog;
@@ -48,6 +49,8 @@ namespace Infrastructure.API
             this.ApiParam[APIParam.DeviceId] = deviceId;
             this.ApiParam[APIParam.MailAddress] = mailAddress;
             this.ApiParam[APIParam.Password] = password;
+            this.ApiParam[APIParam.HostName] = Dns.GetHostName();
+            this.ApiParam[APIParam.OSUserName] = Environment.UserName;
 
             // API通信を行う(リトライ込み)を行う（共通処理）
             try
@@ -166,6 +169,8 @@ namespace Infrastructure.API
 
             this.ApiParam[APIParam.MailAddress] = mailAddress;
             this.ApiParam[APIParam.Password] = password;
+            this.ApiParam[APIParam.HostName] = Dns.GetHostName();
+            this.ApiParam[APIParam.OSUserName] = Environment.UserName;
 
             // API通信を行う(リトライ込み)を行う（共通処理）
             try
@@ -208,7 +213,10 @@ namespace Infrastructure.API
             LoginApi apiInstance = new LoginApi(config);
             var body = new InlineObject(
                 (string)this.ApiParam[APIParam.MailAddress],
-                (string)this.ApiParam[APIParam.Password]);
+                (string)this.ApiParam[APIParam.Password],
+                (string)this.ApiParam[APIParam.HostName],
+                (string)this.ApiParam[APIParam.OSUserName]
+                );
             Logger.Debug("AuthenticationInformationAPIRepository:CallLoginApi apiInstance.Login:Before");
             Logger.Debug("AuthenticationInformationAPIRepository:CallLoginApi ApiParam[APIParam.DeviceId]=" + this.ApiParam[APIParam.DeviceId]);
             this.ApiResponse = apiInstance.Login((string)this.ApiParam[APIParam.DeviceId], config.UserAgent, body);
@@ -257,7 +265,10 @@ namespace Infrastructure.API
             LoginApi apiInstance = new LoginApi(config);
             var body = new InlineObject(
                 (string)this.ApiParam[APIParam.MailAddress],
-                (string)this.ApiParam[APIParam.Password]);
+                (string)this.ApiParam[APIParam.Password],
+                (string)this.ApiParam[APIParam.HostName],
+                (string)this.ApiParam[APIParam.OSUserName]
+                );
             Logger.Debug("AuthenticationInformationAPIRepository:CallAuthenticateAccountApi apiInstance.AuthenticateAccount:Before");
             this.ApiResponse = apiInstance.AuthenticateAccount(config.UserAgent, body);
             Logger.Debug("AuthenticationInformationAPIRepository:CallAuthenticateAccountApi apiInstance.AuthenticateAccount:After");

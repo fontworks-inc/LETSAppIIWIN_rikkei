@@ -77,6 +77,11 @@ namespace Client.UI.Components
         private readonly IUserStatusRepository userStatusRepository;
 
         /// <summary>
+        /// ユーザ別ステータス情報を格納するリポジトリ
+        /// </summary>
+        private readonly IDeviceModeSettingRepository deviceModeSettingRepository;
+
+        /// <summary>
         /// ログイン画面(メイン)ラッパー
         /// </summary>
         private readonly ILoginWindowWrapper loginWindowWrapper;
@@ -127,6 +132,7 @@ namespace Client.UI.Components
             // 設定ファイルを読み込む
             this.volatileSettingRepository = containerProvider.Resolve<IVolatileSettingRepository>();
             this.userStatusRepository = containerProvider.Resolve<IUserStatusRepository>();
+            this.deviceModeSettingRepository = containerProvider.Resolve<IDeviceModeSettingRepository>();
             this.applicationRuntimeRepository = containerProvider.Resolve<IApplicationRuntimeRepository>();
 
             // 認証サービス
@@ -605,6 +611,21 @@ namespace Client.UI.Components
                             this.Exit(paramType);
                             break;
 
+                        case LParamType.CompletelyOffline:
+                            // 完全オフラインログインメッセージ
+                            Logger.Warn("WndProc:LParamType.CompletelyOffline");
+                            if (this.deviceModeSettingRepository != null)
+                            {
+                                var deviceModeSetting = this.deviceModeSettingRepository.GetDeviceModeSetting();
+                                deviceModeSetting.IsCompletelyOffline = true;
+                                this.deviceModeSettingRepository.SaveDeviceModeSetting(deviceModeSetting);
+                            }
+
+                            if (!this.userStatusRepository.GetStatus().IsLoggingIn && !this.userStatusRepository.GetStatus().IsDeviceMode)
+                            {
+                                this.ShowLoginWindow();
+                            }
+                            break;
                         default:
                             break;
                     }

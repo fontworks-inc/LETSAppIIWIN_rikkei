@@ -11,8 +11,16 @@
     
     <DockPanel>
         <Grid x:Name="LoginCommandPanel" DockPanel.Dock="Bottom" Height="80" Background="#F1F1F1">
-            <WrapPanel Width ="200" Height="30" Margin="25,25,155,0" 
+            <WrapPanel Width ="600" Height="30" Margin="25,25,155,0" 
                     VerticalAlignment="Top" HorizontalAlignment="Right">
+                <TextBlock FontSize="10pt" VerticalAlignment="Center" HorizontalAlignment="Left">           
+                    <Hyperlink x:Name="CompletelyOffilineLink"
+                                Command="{Binding CompletelyOffilineLinkClick}"
+                                TextDecorations ="">
+                                <TextBlock Text="{Binding CompletelyOffilineLinkLabel}"/>
+                    </Hyperlink>
+                </TextBlock>
+                <Label Content="{Binding SpacerLabel}" FontSize="10pt"/>
                 <Label Content="{Binding RegistrationPageLabel}" FontSize="10pt"/>
                 <TextBlock FontSize="10pt" VerticalAlignment="Center">           
                     <Hyperlink x:Name="AccountRegistrationPageLink"

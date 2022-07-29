@@ -227,6 +227,7 @@ namespace ApplicationService.Schedulers
                         if (!this.receiveNotificationRepository.IsConnected())
                         {
                             this.shouldSynchronize = true;
+                            this.FontSynchronize(); // 通知サーバへの再接続時にフォント同期処理を実行する
                         }
                     }
 

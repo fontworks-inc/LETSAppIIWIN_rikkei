@@ -5,6 +5,9 @@ using System.Text;
 
 namespace Core.Entities
 {
+    /// <summary>
+    /// デバイスモードライセンスオフライン
+    /// </summary>
     public class DeviceModeLicenseOffline
     {
         /// <summary>

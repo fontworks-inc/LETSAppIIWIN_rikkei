@@ -1399,6 +1399,15 @@ namespace Client.UI.Resources {
         }
         
         /// <summary>
+        ///   フォント同期 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string MENU_FONT_UPDATE {
+            get {
+                return ResourceManager.GetString("MENU_FONT_UPDATE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   MailAddress に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string MENU_LOGIN_MAILADDRESS {

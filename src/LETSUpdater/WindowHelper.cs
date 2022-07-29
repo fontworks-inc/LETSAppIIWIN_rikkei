@@ -123,10 +123,14 @@ namespace Updater
         private static uint messageCode = 0x8001;
         private static int lParam = 1;
 
-        public static void LoginLETS()
+        public static void LoginLETS(bool isCompletelyOffline = false)
         {
             messageCode = 0x8001;
             lParam = 1;
+            if(isCompletelyOffline)
+            {
+                lParam = 5;
+            }
             MessageOperation();
         }
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Security.Principal;
@@ -49,6 +50,8 @@ namespace Client.UI.Views
 
         private IDeviceModeService deviceModeService = null;
 
+        private IUserStatusRepository userStatusRepository = null;
+
         /// <summary>
         /// 指定のプロセスを実施するサービス
         /// </summary>
@@ -66,7 +69,7 @@ namespace Client.UI.Views
         /// <summary>
         /// デバイスモードアプリ画面
         /// </summary>
-        public DeviceModeApp()
+        public DeviceModeApp(bool initForCompletelyOffline = false)
         {
             this.InitializeComponent();
 
@@ -78,6 +81,7 @@ namespace Client.UI.Views
             this.fontInfoRepository = container.Resolve<IFontFileRepository>();
             this.deviceModeService = container.Resolve<IDeviceModeService>();
             this.startProcessService = container.Resolve<IStartProcessService>();
+            this.userStatusRepository = container.Resolve<IUserStatusRepository>();
 
             // ファイルパスクリア
             this.FilePathClear();
@@ -107,6 +111,27 @@ namespace Client.UI.Views
 
             // アンインストール選択リスト初期表示
             this.UninstallListDisp();
+
+            if (initForCompletelyOffline)
+            {
+                this.FilePathClear();
+
+                this.MenuButtonClear();
+                this.DeviceIdFileButton.Background = new SolidColorBrush(Colors.LightGray);
+
+                this.AllPanelHIdden();
+                this.DeviceIdFilePanel.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                this.FilePathClear();
+
+                this.MenuButtonClear();
+                this.LicenseRegistButton.Background = new SolidColorBrush(Colors.LightGray);
+
+                this.AllPanelHIdden();
+                this.LicenseRegistPanel.Visibility = Visibility.Visible;
+            }
         }
 
         /// <summary>
@@ -190,6 +215,20 @@ namespace Client.UI.Views
         }
 
         /// <summary>
+        /// デバイスIDファイル作成メニュー選択
+        /// </summary>
+        private void DeviceIdFileButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.FilePathClear();
+
+            this.MenuButtonClear();
+            this.DeviceIdFileButton.Background = new SolidColorBrush(Colors.LightGray);
+
+            this.AllPanelHIdden();
+            this.DeviceIdFilePanel.Visibility = Visibility.Visible;
+        }
+
+        /// <summary>
         /// ライセンス情報登録メニュー選択
         /// </summary>
         private void LicenseRegistButton_Click(object sender, RoutedEventArgs e)
@@ -236,11 +275,34 @@ namespace Client.UI.Views
         /// </summary>
         private void MenuButtonClear()
         {
+            this.LicenseRegistButton.IsEnabled = true;
+            this.FontInstallButton.IsEnabled = true;
+            this.FontUninstallButton.IsEnabled = true;
+
+            this.DeviceIdFileButton.Background = new SolidColorBrush(Colors.White);
             this.LicenseRegistButton.Background = new SolidColorBrush(Colors.White);
             this.FontInstallButton.Background = new SolidColorBrush(Colors.White);
             this.FontUninstallButton.Background = new SolidColorBrush(Colors.White);
+
+            this.DeviceIdFileButton.Visibility = Visibility.Hidden;
+            var deviceModeSetting = this.deviceModeSettingRepository.GetDeviceModeSetting();
+            if (deviceModeSetting.IsCompletelyOffline)
+            {
+                this.DeviceIdFileButton.Visibility = Visibility.Visible;
+
+                // デバイスID未設定なら、他のボタンを使用不可にする
+                if (string.IsNullOrEmpty(deviceModeSetting.OfflineDeviceID))
+                {
+                    this.LicenseRegistButton.IsEnabled = false;
+                    this.FontInstallButton.IsEnabled = false;
+                    this.FontUninstallButton.IsEnabled = false;
+                }
+            }
         }
 
+        /// <summary>
+        /// ファイルパスクリア
+        /// </summary>
         private void FilePathClear()
         {
             if (this.deviceModeSettingRepository == null)
@@ -255,6 +317,19 @@ namespace Client.UI.Views
 
             this.FontFilePath.Content = string.Empty;
             this.LicenseKeyFilePath.Content = string.Empty;
+
+            if (this.userStatusRepository == null)
+            {
+                return;
+            }
+
+            if (deviceModeSetting.IsCompletelyOffline)
+            {
+                if (!string.IsNullOrEmpty(deviceModeSetting.OfflineDeviceID))
+                {
+                    this.DeviceIdLabel.Content = $"デバイスID：{deviceModeSetting.OfflineDeviceID}";
+                }
+            }
         }
 
         /// <summary>
@@ -262,6 +337,7 @@ namespace Client.UI.Views
         /// </summary>
         private void AllPanelHIdden()
         {
+            this.DeviceIdFilePanel.Visibility = Visibility.Hidden;
             this.LicenseRegistPanel.Visibility = Visibility.Hidden;
             this.FontInstallPanel.Visibility = Visibility.Hidden;
             this.FontUninstallPanel.Visibility = Visibility.Hidden;
@@ -544,6 +620,68 @@ namespace Client.UI.Views
                     }
 
                     this.UninstallListDisp();
+                }
+            }
+        }
+
+        /// <summary>
+        /// デバイスIDファイル作成ボタン処理
+        /// </summary>
+        private void DeviceIdFileCreateButton_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new SaveFileDialog();
+            dialog.Filter = "データファイル (*.csv)|*.csv|全てのファイル (*.*)|*.*";
+            dialog.OverwritePrompt = true;
+
+            dialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            dialog.FileName = "deviceid.csv";
+
+            // ダイアログを表示する
+            if (dialog.ShowDialog() == DialogResult.OK)
+            {
+                try
+                {
+                    bool isCreateDevID = false; // デバイスIDを新規作成したときにtrue
+
+                    var deviceModeSetting = this.deviceModeSettingRepository.GetDeviceModeSetting();
+                    var devid = deviceModeSetting.OfflineDeviceID;
+
+                    // デバイスIDが未設定ならGUIDを作成する。
+                    if (string.IsNullOrEmpty(devid))
+                    {
+                        isCreateDevID = true;
+                        devid = Guid.NewGuid().ToString();
+                    }
+
+                    // デバイスIDファイルを保存する
+                    var hostName = Dns.GetHostName();
+                    var osUserName = Environment.UserName;
+                    var deviceIdLine = $"\"{devid}\",\"{hostName}\",\"{osUserName}\"";
+                    File.WriteAllText(dialog.FileName, deviceIdLine + Environment.NewLine);
+
+                    if (isCreateDevID)
+                    {
+                        // デバイスIDを新規作成した場合、設定ファイルに保存する
+                        deviceModeSetting.OfflineDeviceID = devid;
+                        this.deviceModeSettingRepository.SaveDeviceModeSetting(deviceModeSetting);
+
+                        // 復号キーを保存する
+                        var deviceModeLicenseInfo = this.deviceModeLicenseInfoRepository.GetDeviceModeLicenseInfo();
+                        if (string.IsNullOrEmpty(deviceModeLicenseInfo.ZipPassword))
+                        {
+                            deviceModeLicenseInfo.ZipPassword = devid.Substring(devid.Length - 12);
+                            this.deviceModeLicenseInfoRepository.SaveDeviceModeLicenseInfo(deviceModeLicenseInfo);
+                        }
+                    }
+
+                    this.DeviceIdLabel.Content = $"デバイスID：{deviceModeSetting.OfflineDeviceID}";
+                    this.MenuButtonClear();
+                }
+                catch (Exception ex)
+                {
+                    Logger.Error(ex.StackTrace);
+                    this.ErrorMessage.Text = $"ファイルの保存に失敗しました。({ex.Message})";
+                    this.ErrorMessage.Visibility = Visibility.Visible;
                 }
             }
         }

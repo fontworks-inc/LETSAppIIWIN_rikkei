@@ -29,10 +29,12 @@ namespace Org.OpenAPITools.Model
         /// </summary>
         /// <param name="offlineDeviceId">mailAddress.</param>
         /// <param name="indefiniteAccessToken">password.</param>
-        public InlineObjectUpdateLicense(string offlineDeviceId = default(string), string indefiniteAccessToken = default(string))
+        public InlineObjectUpdateLicense(string offlineDeviceId = default(string), string indefiniteAccessToken = default(string), string hostname = default(string), string osUserName = default(string))
         {
             this.OfflineDeviceId = offlineDeviceId;
             this.IndefiniteAccessToken = indefiniteAccessToken;
+            this.Hostname = hostname;
+            this.OsUserName = osUserName;
         }
 
         /// <summary>
@@ -48,6 +50,18 @@ namespace Org.OpenAPITools.Model
         public string IndefiniteAccessToken { get; set; }
 
         /// <summary>
+        /// Gets or Sets hostname
+        /// </summary>
+        [DataMember(Name = "hostname", EmitDefaultValue = false)]
+        public string Hostname { get; set; }
+
+        /// <summary>
+        /// Gets or Sets osUserName
+        /// </summary>
+        [DataMember(Name = "osUserName", EmitDefaultValue = false)]
+        public string OsUserName { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -57,6 +71,8 @@ namespace Org.OpenAPITools.Model
             sb.Append("class InlineObject {\n");
             sb.Append("  OfflineDeviceId: ").Append(OfflineDeviceId).Append("\n");
             sb.Append("  IndefiniteAccessToken: ").Append(IndefiniteAccessToken).Append("\n");
+            sb.Append("  Hostname: ").Append(Hostname).Append("\n");
+            sb.Append("  OsUserName: ").Append(OsUserName).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -100,6 +116,16 @@ namespace Org.OpenAPITools.Model
                     this.IndefiniteAccessToken == input.IndefiniteAccessToken ||
                     (this.IndefiniteAccessToken != null &&
                     this.IndefiniteAccessToken.Equals(input.IndefiniteAccessToken))
+                ) &&
+                (
+                    this.Hostname == input.Hostname ||
+                    (this.Hostname != null &&
+                    this.Hostname.Equals(input.Hostname))
+                ) &&
+                (
+                    this.OsUserName == input.OsUserName ||
+                    (this.OsUserName != null &&
+                    this.OsUserName.Equals(input.OsUserName))
                 );
         }
 
@@ -116,6 +142,10 @@ namespace Org.OpenAPITools.Model
                     hashCode = hashCode * 59 + this.OfflineDeviceId.GetHashCode();
                 if (this.IndefiniteAccessToken != null)
                     hashCode = hashCode * 59 + this.IndefiniteAccessToken.GetHashCode();
+                if (this.Hostname != null)
+                    hashCode = hashCode * 59 + this.Hostname.GetHashCode();
+                if (this.OsUserName != null)
+                    hashCode = hashCode * 59 + this.OsUserName.GetHashCode();
                 return hashCode;
             }
         }

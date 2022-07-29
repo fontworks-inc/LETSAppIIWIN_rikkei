@@ -64,7 +64,11 @@ namespace Updater
             app.StartupUri = new Uri("MainWindow.xaml", UriKind.Relative);
             app.InitializeComponent();
             app.Run();
-            WindowHelper.LoginLETS();
+            bool isCpmpletelyOffline = false;
+#if COMPLETELY_OFFLINE
+            isCpmpletelyOffline = true; //完全オフラインインストールのとき。
+#endif
+            WindowHelper.LoginLETS(isCpmpletelyOffline);
         }
 
         private static void FontInstallFromList(string tempPath)

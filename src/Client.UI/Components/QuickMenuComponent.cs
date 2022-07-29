@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Windows.Forms;
+using ApplicationService.Interfaces;
 using Client.UI.Components.MenuItem;
 using Core.Interfaces;
 using NLog;
@@ -44,6 +45,11 @@ namespace Client.UI.Components
         private readonly ICustomerRepository customerRepository;
 
         /// <summary>
+        /// フォント管理サービス
+        /// </summary>
+        private IFontManagerService fontManagerService = null;
+
+        /// <summary>
         /// コンストラクタ
         /// </summary>
         /// <param name="manager">ComponentManager</param>
@@ -62,6 +68,7 @@ namespace Client.UI.Components
             // コンテナに登録されている情報を取得
             this.urlRepository = containerProvider.Resolve<IUrlRepository>();
             this.customerRepository = containerProvider.Resolve<ICustomerRepository>();
+            this.fontManagerService = containerProvider.Resolve<IFontManagerService>();
 
             this.InitializeComponent();
 
@@ -146,6 +153,15 @@ namespace Client.UI.Components
         /// クイックメニュー－フォント
         /// </summary>
         public MenuItemFontListPage MenuFontListPage
+        {
+            get;
+            private set;
+        }
+
+        /// <summary>
+        /// クイックメニュー－フォント同期
+        /// </summary>
+        public MenuItemFontUpdate MenuFontUpdate
         {
             get;
             private set;
@@ -252,6 +268,7 @@ namespace Client.UI.Components
             this.MenuAnnouncePage = new MenuItemAnnouncePage(this, this.volatileSettingRepository, this.userStatusRepository, this.urlRepository);
             this.MenuAccountPage = new MenuItemAccountPage(this, this.resourceWrapper, this.volatileSettingRepository, this.userStatusRepository, this.urlRepository);
             this.MenuFontListPage = new MenuItemFontListPage(this, this.resourceWrapper, this.volatileSettingRepository, this.userStatusRepository, this.urlRepository);
+            this.MenuFontUpdate = new MenuItemFontUpdate(this, this.resourceWrapper, this.volatileSettingRepository, this.userStatusRepository, this.urlRepository, this.fontManagerService);
             this.MenuLogout = new MenuItemLogout(this);
             this.MenuUpdate = new MenuItemUpdate(this, this.resourceWrapper);
 

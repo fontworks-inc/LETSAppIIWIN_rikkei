@@ -25,5 +25,10 @@
         /// アプリケーションを終了
         /// </summary>
         Shutdown = 4,
+
+        /// <summary>
+        /// 完全オフライン
+        /// </summary>
+        CompletelyOffline = 5,
     }
 }

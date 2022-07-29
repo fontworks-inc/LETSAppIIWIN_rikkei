@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net;
 using System.Runtime.Serialization;
 using System.Security.Cryptography;
 using System.Text.Json;
@@ -60,6 +61,8 @@ namespace Infrastructure.API
             // APIの引数の値をセット(個別処理)
             this.ApiParam[APIParam.OfflineDeviceId] = offlineDeviceId;
             this.ApiParam[APIParam.IndefiniteAccessToken] = indefiniteAccessToken;
+            this.ApiParam[APIParam.HostName] = Dns.GetHostName();
+            this.ApiParam[APIParam.OSUserName] = Environment.UserName;
 
             // API通信を行う(リトライ込み)を行う（共通処理）
             try
@@ -166,6 +169,8 @@ namespace Infrastructure.API
             InlineObjectUpdateLicense inlineObjectUpdateLicense = new InlineObjectUpdateLicense();
             inlineObjectUpdateLicense.OfflineDeviceId = (string)this.ApiParam[APIParam.OfflineDeviceId];
             inlineObjectUpdateLicense.IndefiniteAccessToken = (string)this.ApiParam[APIParam.IndefiniteAccessToken];
+            inlineObjectUpdateLicense.Hostname = (string)this.ApiParam[APIParam.HostName];
+            inlineObjectUpdateLicense.OsUserName = (string)this.ApiParam[APIParam.OSUserName];
             Logger.Debug("DeviceModeLisenceInfoAPIRepository:CallAuthenticateAccountApi apiInstance.AuthenticateAccount:Before");
             this.ApiResponse = apiInstance.UpdateLicense((string)this.ApiParam[APIParam.UserAgent], inlineObjectUpdateLicense);
             Logger.Debug("DeviceModeLisenceInfoAPIRepository:CallAuthenticateAccountApi apiInstance.AuthenticateAccount:After");

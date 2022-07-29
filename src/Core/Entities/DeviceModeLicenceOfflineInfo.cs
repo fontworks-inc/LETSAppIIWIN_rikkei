@@ -5,9 +5,11 @@ using System.Text;
 
 namespace Core.Entities
 {
+    /// <summary>
+    /// デバイスモードライセンスオフライン情報
+    /// </summary>
     public class DeviceModeLicenceOfflineInfo
     {
-
         /// <summary>
         /// デバイスID
         /// </summary>

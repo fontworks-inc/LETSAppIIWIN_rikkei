@@ -752,4 +752,8 @@ LETSデスクトップアプリをログアウトしてください。</value>
     <value>同名フォントが存在したため、ダウンロードを中断しました。{0}</value>
     <comment>フォントダウンロード中断通知メッセージ</comment>
   </data>
+  <data name="MENU_FONT_UPDATE" xml:space="preserve">
+    <value>フォント同期</value>
+    <comment>クイックメニュー[フォント同期]</comment>
+  </data>
 </root>

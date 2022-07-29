@@ -396,11 +396,6 @@ namespace Client.UI
                 var deviceModeService = container.Resolve<IDeviceModeService>();
                 try
                 {
-                    //if (!deviceModeService.IsAdministratorsMember())
-                    //{
-                    //    throw new InvalidOperationException("管理者ユーザーで起動してください。");
-                    //}
-
                     IList<string> messageList = deviceModeService.FixedTermCheck(true);
                     if (messageList.Count > 0)
                     {

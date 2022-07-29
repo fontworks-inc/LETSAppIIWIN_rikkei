@@ -94,7 +94,7 @@ namespace OS.Services
 
             try
             {
-                Logger.Info($"Install:Path(Source)={font.Path}" );
+                Logger.Info($"Install:Path(Source)={font.Path}");
                 var destFileName = this.MoveFile(font.Path);
                 font.Path = destFileName;
                 Logger.Info($"Install:Path(Dest)={font.Path}");

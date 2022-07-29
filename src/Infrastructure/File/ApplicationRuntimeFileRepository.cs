@@ -5,6 +5,7 @@ using System.Security.Principal;
 using System.Text.Json;
 using Core.Entities;
 using Core.Interfaces;
+using NLog;
 
 namespace Infrastructure.File
 {
@@ -13,6 +14,11 @@ namespace Infrastructure.File
     /// </summary>
     public class ApplicationRuntimeFileRepository : TextFileRepositoryBase, IApplicationRuntimeRepository
     {
+        /// <summary>
+        /// ロガー
+        /// </summary>
+        private static readonly Logger Logger = LogManager.GetLogger("nlog.config");
+
         /// <summary>
         /// インスタンスを初期化する
         /// </summary>
@@ -37,7 +43,8 @@ namespace Infrastructure.File
             else
             {
                 // ファイルが存在しない場合、新規のオブジェクトを返す
-                return new ApplicationRuntime();
+                ApplicationRuntime applicationRuntime = new ApplicationRuntime();
+                return applicationRuntime;
             }
         }
 

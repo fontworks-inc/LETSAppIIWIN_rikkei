@@ -33,5 +33,10 @@ namespace Core.Entities
         /// フォントファイルパス
         /// </summary>
         public string FontFilePath { get; set; } = string.Empty;
+
+        /// <summary>
+        /// 完全オフラインモード
+        /// </summary>
+        public bool IsCompletelyOffline { get; set; } = false;
     }
 }

@@ -50,14 +50,21 @@ namespace Infrastructure.File
                 }
                 catch (Exception ex)
                 {
-                    Logger.Error("UserStatus:" + ex.StackTrace);
+                    Logger.Error("DeviceModeSetting:" + ex.StackTrace);
                     return new DeviceModeSetting();
                 }
             }
             else
             {
                 // ファイルが存在しない場合、新規のオブジェクトを返す
-                return new DeviceModeSetting();
+                DeviceModeSetting deviceModeSetting = new DeviceModeSetting();
+                Logger.Warn($"DeviceModeSetting 新規作成");
+#if COMPLETELY_OFFLINE
+                Logger.Warn($"完全オフラインモード");
+                deviceModeSetting.IsCompletelyOffline = true;  //完全オフラインモードをtrueにする
+                this.SaveDeviceModeSetting(deviceModeSetting);
+#endif
+                return deviceModeSetting;
             }
         }
 

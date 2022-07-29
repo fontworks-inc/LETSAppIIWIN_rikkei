@@ -29,10 +29,12 @@ namespace Org.OpenAPITools.Model
         /// </summary>
         /// <param name="mailAddress">mailAddress.</param>
         /// <param name="password">password.</param>
-        public InlineObject(string mailAddress = default(string), string password = default(string))
+        public InlineObject(string mailAddress = default(string), string password = default(string), string hostname = default(string), string osUserName = default(string))
         {
             this.MailAddress = mailAddress;
             this.Password = password;
+            this.Hostname = hostname;
+            this.OsUserName = osUserName;
         }
 
         /// <summary>
@@ -48,6 +50,18 @@ namespace Org.OpenAPITools.Model
         public string Password { get; set; }
 
         /// <summary>
+        /// Gets or Sets hostname
+        /// </summary>
+        [DataMember(Name = "hostname", EmitDefaultValue = false)]
+        public string Hostname { get; set; }
+
+        /// <summary>
+        /// Gets or Sets osUserName
+        /// </summary>
+        [DataMember(Name = "osUserName", EmitDefaultValue = false)]
+        public string OsUserName { get; set; }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -57,6 +71,8 @@ namespace Org.OpenAPITools.Model
             sb.Append("class InlineObject {\n");
             sb.Append("  MailAddress: ").Append(MailAddress).Append("\n");
             sb.Append("  Password: ").Append(Password).Append("\n");
+            sb.Append("  Hostname: ").Append(Hostname).Append("\n");
+            sb.Append("  OsUserName: ").Append(OsUserName).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -100,6 +116,16 @@ namespace Org.OpenAPITools.Model
                     this.Password == input.Password ||
                     (this.Password != null &&
                     this.Password.Equals(input.Password))
+                ) &&
+                (
+                    this.Hostname == input.Hostname ||
+                    (this.Hostname != null &&
+                    this.Hostname.Equals(input.Hostname))
+                ) &&
+                (
+                    this.OsUserName == input.OsUserName ||
+                    (this.OsUserName != null &&
+                    this.OsUserName.Equals(input.OsUserName))
                 );
         }
 
@@ -116,6 +142,10 @@ namespace Org.OpenAPITools.Model
                     hashCode = hashCode * 59 + this.MailAddress.GetHashCode();
                 if (this.Password != null)
                     hashCode = hashCode * 59 + this.Password.GetHashCode();
+                if (this.Hostname != null)
+                    hashCode = hashCode * 59 + this.Hostname.GetHashCode();
+                if (this.OsUserName != null)
+                    hashCode = hashCode * 59 + this.OsUserName.GetHashCode();
                 return hashCode;
             }
         }

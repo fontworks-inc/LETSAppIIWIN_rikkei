@@ -555,19 +555,20 @@ namespace ApplicationService.DeviceMode
 
         public bool IsAdministratorsMember()
         {
-            //ローカルコンピュータストアのPrincipalContextオブジェクトを作成する
+            // ローカルコンピュータストアのPrincipalContextオブジェクトを作成する
             using (PrincipalContext pc = new PrincipalContext(ContextType.Machine))
             {
-                //現在のユーザーのプリンシパルを取得する
+                // 現在のユーザーのプリンシパルを取得する
                 UserPrincipal up = UserPrincipal.Current;
-                //ローカルAdministratorsグループを探す
-                //"S-1-5-32-544"はローカルAdministratorsグループを示すSID
+
+                // ローカルAdministratorsグループを探す
+                // S-1-5-32-544"はローカルAdministratorsグループを示すSID
                 GroupPrincipal gp = GroupPrincipal.FindByIdentity(pc, "S-1-5-32-544");
-                //グループのメンバーであるか調べる
+
+                // グループのメンバーであるか調べる
                 return up.IsMemberOf(gp);
             }
         }
-
 
         /// <summary>
         /// フォント走査プログラムを実行

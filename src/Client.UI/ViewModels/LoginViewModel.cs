@@ -43,9 +43,19 @@ namespace Client.UI.ViewModels
         private readonly IAuthenticationService authenticationService;
 
         /// <summary>
-        /// 認証サービス
+        /// デバイスモードサービス
         /// </summary>
         private readonly IDeviceModeService deviceModeService;
+
+        /// <summary>
+        /// ユーザー設定リポジトリ
+        /// </summary>
+        private readonly IUserStatusRepository userStatusRepository;
+
+        /// <summary>
+        /// ユーザー設定リポジトリ
+        /// </summary>
+        private readonly IDeviceModeSettingRepository deviceModeSettingRepository;
 
         /// <summary>
         /// (メイン)ログイン画面
@@ -129,6 +139,9 @@ namespace Client.UI.ViewModels
         /// <param name="resouceWrapper">Resourceのラッパー</param>
         /// <param name="componentManagerWrapper">ComponentManagerWrapperのラッパー</param>
         /// <param name="authenticationService">認証サービス</param>
+        /// <param name="deviceModeService">デバイスモードサービス</param>
+        /// <param name="userStatusRepository">アプリケーション設定リポジトリ</param>
+        /// <param name="deviceModeSettingRepository">デバイスモード設定リポジトリ</param>
         /// <param name="urlRepository">URLアドレスを格納するリポジトリ</param>
         public LoginViewModel(
             ILoginWindowWrapper loginWindowWrapper,
@@ -136,6 +149,8 @@ namespace Client.UI.ViewModels
             IComponentManagerWrapper componentManagerWrapper,
             IAuthenticationService authenticationService,
             IDeviceModeService deviceModeService,
+            IUserStatusRepository userStatusRepository,
+            IDeviceModeSettingRepository deviceModeSettingRepository,
             IUrlRepository urlRepository)
         {
             this.loginWindow = loginWindowWrapper;
@@ -144,7 +159,9 @@ namespace Client.UI.ViewModels
 
             this.authenticationService = authenticationService;
             this.deviceModeService = deviceModeService;
+            this.deviceModeSettingRepository = deviceModeSettingRepository;
 
+            this.userStatusRepository = userStatusRepository;
             this.urlRepository = urlRepository;
 
             this.errorMessageVisibility = Visibility.Hidden;
@@ -152,6 +169,7 @@ namespace Client.UI.ViewModels
             this.passwordErrorMessageVisibility = Visibility.Hidden;
 
             this.ResetPasswordPageLinkClick = new DelegateCommand(this.OnResetPasswordPageLinkClick);
+            this.CompletelyOffilineLinkClick = new DelegateCommand(this.OnCompletelyOffilineLinkClick);
             this.AccountRegistrationPageLinkClick = new DelegateCommand(this.OnAccountRegistrationPageLinkClick);
             this.LoginButtonClick = new DelegateCommand(this.OnLoginButtonClick, this.CanLogin);
 
@@ -171,6 +189,11 @@ namespace Client.UI.ViewModels
         /// パスワード再設定ページへのリンククリックコマンド
         /// </summary>
         public DelegateCommand ResetPasswordPageLinkClick { get; }
+
+        /// <summary>
+        /// 完全オフラインボタンクリックコマンド
+        /// </summary>
+        public DelegateCommand CompletelyOffilineLinkClick { get; }
 
         /// <summary>
         /// 会員登録するボタンクリックコマンド
@@ -371,6 +394,24 @@ namespace Client.UI.ViewModels
         }
 
         /// <summary>
+        /// スペーサーラベル
+        /// </summary>
+        public string SpacerLabel
+        {
+            get
+            {
+                var label = "                                                            ";
+                var deviceModeSetting = this.deviceModeSettingRepository.GetDeviceModeSetting();
+                if (!deviceModeSetting.IsCompletelyOffline)
+                {
+                    label += "                                  ";
+                }
+
+                return label;
+            }
+        }
+
+        /// <summary>
         /// アカウント登録画面案内
         /// </summary>
         public string RegistrationPageLabel
@@ -378,6 +419,24 @@ namespace Client.UI.ViewModels
             get
             {
                 return this.resouceWrapper.GetString("APP_04_01_LBL_REGISTRATION_PAGE");
+            }
+        }
+
+        /// <summary>
+        /// 完全オフライン画面リンク
+        /// </summary>
+        public string CompletelyOffilineLinkLabel
+        {
+            get
+            {
+                var label = "オフラインの場合はこちら";
+                var deviceModeSetting = this.deviceModeSettingRepository.GetDeviceModeSetting();
+                if (!deviceModeSetting.IsCompletelyOffline)
+                {
+                    label = string.Empty;
+                }
+
+                return label;
             }
         }
 
@@ -459,16 +518,16 @@ namespace Client.UI.ViewModels
                 switch (responseCode)
                 {
                     case ResponseCode.Succeeded:
+                        {
+                            // アカウント認証が成功したら、完全オフラインはfalseに設定する
+                            Logger.Info($"アカウント認証が成功したら、完全オフラインはfalseに設定");
+                            var deviceModeSetting = this.deviceModeSettingRepository.GetDeviceModeSetting();
+                            deviceModeSetting.IsCompletelyOffline = false;
+                            this.deviceModeSettingRepository.SaveDeviceModeSetting(deviceModeSetting);
+                        }
+
                         if (!string.IsNullOrEmpty(System.Environment.GetEnvironmentVariable("LETS_DEVICE_MODE")))
                         {
-                            //if (!this.deviceModeService.IsAdministratorsMember())
-                            //{
-                            //    this.ErrorMessage = "管理者ユーザーで起動してください。";
-                            //    this.ErrorMessageVisibility = Visibility.Visible;
-                            //    Logger.Error(this.ErrorMessage);
-                            //    return;
-                            //}
-
                             // デバイスアプリ画面に遷移
                             this.loginWindow.NavigationService.Navigate(new DeviceModeApp());
                             return;
@@ -574,6 +633,27 @@ namespace Client.UI.ViewModels
                 this.webBrowser.Navigate(this.GetResetPasswordPageUrl());
             }
             catch (GetResetPasswordPageUrlException e)
+            {
+                // 配信サーバアクセスでエラーが発生したときは、画面を閉じ以後の処理を行わない
+                Logger.Error(e);
+                this.loginWindow.Close();
+            }
+        }
+
+        /// <summary>
+        /// 完全オフラインへのリンククリック時の処理
+        /// </summary>
+        private void OnCompletelyOffilineLinkClick()
+        {
+            Logger.Info("完全オフラインリンク");
+
+            try
+            {
+                // デバイスアプリ画面に遷移
+                this.loginWindow.NavigationService.Navigate(new DeviceModeApp(true));
+                return;
+            }
+            catch (Exception e)
             {
                 // 配信サーバアクセスでエラーが発生したときは、画面を閉じ以後の処理を行わない
                 Logger.Error(e);
