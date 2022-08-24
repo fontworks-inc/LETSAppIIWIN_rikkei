@@ -4994,7 +4994,7 @@
         {
             "{994432C3-9487-495D-8656-3E829A8DBDDE}:_3622654BA3D449C487917B74E5BA7656"
             {
-            "DefaultLocation" = "8:[WindowsVolume]\\ProgramData\\[Manufacturer]\\LETS"
+            "DefaultLocation" = "8:[CommonAppDataFolder]\\[Manufacturer]\\LETS"
             "Name" = "8:Application Common Folder"
             "AlwaysCreate" = "11:FALSE"
             "Condition" = "8:"
@@ -5050,7 +5050,7 @@
             }
             "{3C67513D-01DD-4637-8A68-80971EB9504F}:_AC62088A0E0A4A3FB6DB1EB63C11DEEC"
             {
-            "DefaultLocation" = "8:[WindowsVolume]\\ProgramData\\[Manufacturer]\\LETS\\[ProductName]"
+            "DefaultLocation" = "8:[CommonAppDataFolder]\\[Manufacturer]\\LETS\\[ProductName]"
             "Name" = "8:#1925"
             "AlwaysCreate" = "11:TRUE"
             "Condition" = "8:"
@@ -5075,7 +5075,7 @@
         "Product"
         {
         "Name" = "8:Microsoft Visual Studio"
-        "ProductName" = "8:LETS-Ver2.2.0"
+        "ProductName" = "8:LETS-Ver3.0.0"
         "ProductCode" = "8:{805BF39F-7BBE-445F-B56B-A6FD34C4D817}"
         "PackageCode" = "8:{E7FCABEB-2BB9-4243-A952-CE06C4F1DC65}"
         "UpgradeCode" = "8:{D06420E7-C210-4085-A03E-05BA8DF52137}"
@@ -5084,7 +5084,7 @@
         "RemovePreviousVersions" = "11:FALSE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:TRUE"
-        "ProductVersion" = "8:2.2.0"
+        "ProductVersion" = "8:3.0.0"
         "Manufacturer" = "8:Fontworks"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:https://fontworks.co.jp/"

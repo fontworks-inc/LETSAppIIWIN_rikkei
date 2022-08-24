@@ -338,14 +338,17 @@ namespace Updater
             string homedrive = appPath.Substring(0, appPath.IndexOf("\\"));
 
             // LETSプログラムフォルダの取得
-            string letsFolder = $@"{homedrive}\ProgramData\Fontworks\LETS";
+            //string letsFolder = $@"{homedrive}\ProgramData\Fontworks\LETS";
+            string programdataFolder = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
+            string letsFolder = $@"{programdataFolder}\Fontworks\LETS";
             string programFolder = $@"{letsFolder}\LETS-Ver{updateVersion}";
             string programExePath = $@"{letsFolder}\LETS-Ver{updateVersion}\LETS.exe";
 
             string updateZip = $@"{programFolder}\LETS-Ver{updateVersion}.zip";
 
             // ショートカットパスの取得
-            string shortcut = $@"{homedrive}\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\LETS デスクトップアプリ.lnk";
+            //string shortcut = $@"{homedrive}\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\LETS デスクトップアプリ.lnk";
+            string shortcut = $@"{programdataFolder}\Microsoft\Windows\Start Menu\Programs\StartUp\LETS デスクトップアプリ.lnk";
 
             // 1.管理者権限で実行されていることをチェックする
             // →管理者権限ではない場合、エラーメッセージを表示する
@@ -630,7 +633,9 @@ namespace Updater
 
                 string appPath = AppDomain.CurrentDomain.BaseDirectory;
                 string homedrive = appPath.Substring(0, appPath.IndexOf("\\"));
-                string letsFolder = $@"{homedrive}\ProgramData\Fontworks\LETS";
+                //string letsFolder = $@"{homedrive}\ProgramData\Fontworks\LETS";
+                string programdataFolder = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
+                string letsFolder = $@"{programdataFolder}\Fontworks\LETS";
                 string verFolderPrefix = $@"{letsFolder}\LETS-Ver";
                 int lenPrefix = verFolderPrefix.Length;
 

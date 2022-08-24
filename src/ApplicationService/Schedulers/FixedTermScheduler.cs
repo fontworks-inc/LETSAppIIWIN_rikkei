@@ -388,7 +388,9 @@ namespace ApplicationService.Schedulers
             string homedrive = appPath.Substring(0, appPath.IndexOf("\\"));
 
             // LETSフォルダ
-            string letsfolder = $@"{homedrive}\ProgramData\Fontworks\LETS";
+            //string letsfolder = $@"{homedrive}\ProgramData\Fontworks\LETS";
+            string programdataFolder = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
+            string letsfolder = $@"{programdataFolder}\Fontworks\LETS";
 
             // ユーザー名一覧を出力する
             string userlist = Path.Combine(letsfolder, "userlist.txt");

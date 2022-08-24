@@ -40,7 +40,9 @@ namespace InstallerUtil
             string homedrive = winDir.Substring(0, winDir.IndexOf("\\"));
 
             // LETSフォルダ
-            string letsfolder = $@"{homedrive}\ProgramData\Fontworks\LETS";
+            //string letsfolder = $@"{homedrive}\ProgramData\Fontworks\LETS";
+            string programdataFolder = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
+            string letsfolder = $@"{programdataFolder}\Fontworks\LETS";
 
             if (IsRunFromSetup())
             {
@@ -50,7 +52,8 @@ namespace InstallerUtil
             // ログアウト実行
             try
             {
-                string updator = $@"{homedrive}\ProgramData\Fontworks\LETS\LETSUpdater.exe";
+                //string updator = $@"{homedrive}\ProgramData\Fontworks\LETS\LETSUpdater.exe";
+                string updator = $@"{programdataFolder}\Fontworks\LETS\LETSUpdater.exe";
                 Process upd = Process.Start(updator, "Logout");
                 upd.WaitForExit();
             }
@@ -62,7 +65,8 @@ namespace InstallerUtil
             // uninstallfontバッチファイル名
             string uninstallbat = "uninstallfonts.bat";
             string uninstallfontsbat = $@"{letsfolder}\{uninstallbat}";
-            string shortcutfolder = $@"{homedrive}\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp";
+            //string shortcutfolder = $@"{homedrive}\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp";
+            string shortcutfolder = $@"{programdataFolder}\Microsoft\Windows\Start Menu\Programs\StartUp";
             string destfile = $@"{shortcutfolder}\{uninstallbat}";
 
             try
@@ -255,7 +259,9 @@ namespace InstallerUtil
             string homedrive = winDir.Substring(0, winDir.IndexOf("\\"));
 
             // LETSフォルダ
-            string letsfolder = $@"{homedrive}\ProgramData\Fontworks\LETS";
+            //string letsfolder = $@"{homedrive}\ProgramData\Fontworks\LETS";
+            string programdataFolder = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
+            string letsfolder = $@"{programdataFolder}\Fontworks\LETS";
 
             try
             {
@@ -376,7 +382,9 @@ namespace InstallerUtil
             string homedrive = winDir.Substring(0, winDir.IndexOf("\\"));
 
             // Setupプログラムから実行していることを示す一時ファイル
-            string tmpfile = $@"{homedrive}\ProgramData\.runfromletssetup";
+            //string tmpfile = $@"{homedrive}\ProgramData\.runfromletssetup";
+            string programdataFolder = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
+            string tmpfile = $@"{programdataFolder}\.runfromletssetup";
 
             if (File.Exists(tmpfile))
             {

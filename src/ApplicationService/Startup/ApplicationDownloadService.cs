@@ -175,7 +175,9 @@ namespace ApplicationService.Startup
             // ダウンロード先のファイルパス
             string appPath = AppDomain.CurrentDomain.BaseDirectory;
             string homedrive = appPath.Substring(0, appPath.IndexOf("\\"));
-            string dirPath = Path.Combine($@"{homedrive}\ProgramData\Fontworks\LETS", "LETS-Ver" + installer.Version);
+            //string dirPath = Path.Combine($@"{homedrive}\ProgramData\Fontworks\LETS", "LETS-Ver" + installer.Version);
+            string programdataFolder = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
+            string dirPath = Path.Combine($@"{programdataFolder}\Fontworks\LETS", "LETS-Ver" + installer.Version);
             string fileName = string.Format(FileNameTamplate, installer.Version);
             string filePath = Path.Combine(dirPath, fileName);
             if (!Directory.Exists(dirPath))

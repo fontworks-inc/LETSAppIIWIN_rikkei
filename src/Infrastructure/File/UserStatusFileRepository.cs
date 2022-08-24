@@ -106,7 +106,9 @@ namespace Infrastructure.File
                 string homedrive = appPath.Substring(0, appPath.IndexOf("\\"));
 
                 // LETSフォルダ
-                string letsfolder = $@"{homedrive}\ProgramData\Fontworks\LETS";
+                //string letsfolder = $@"{homedrive}\ProgramData\Fontworks\LETS";
+                string programdataFolder = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
+                string letsfolder = $@"{programdataFolder}\Fontworks\LETS";
 
                 // ログアウト情報を出力する
                 Logger.Info("CopyUserStatusInfo:OutputUninstInfo:ログアウト情報を出力する");

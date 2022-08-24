@@ -276,7 +276,9 @@ namespace Client.UI.Components
                         string homedrive = appPath.Substring(0, appPath.IndexOf("\\"));
 
                         // LETSアプリの起動(ショートカットを実行する)
-                        string shortcut = $@"{homedrive}\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\LETS デスクトップアプリ.lnk";
+                        //string shortcut = $@"{homedrive}\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\LETS デスクトップアプリ.lnk";
+                        string programdataFolder = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
+                        string shortcut = $@"{programdataFolder}\Microsoft\Windows\Start Menu\Programs\StartUp\LETS デスクトップアプリ.lnk";
                         Process.Start(new ProcessStartInfo("cmd", $"/c \"{shortcut}\"") { CreateNoWindow = true });
                         break;
 
@@ -835,7 +837,9 @@ namespace Client.UI.Components
             string homedrive = winDir.Substring(0, winDir.IndexOf("\\"));
 
             // Setupプログラムから実行していることを示す一時ファイル
-            string tmpfile = $@"{homedrive}\ProgramData\.runfromletssetup";
+            //string tmpfile = $@"{homedrive}\ProgramData\.runfromletssetup";
+            string programdataFolder = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
+            string tmpfile = $@"{programdataFolder}\.runfromletssetup";
 
             if (File.Exists(tmpfile))
             {

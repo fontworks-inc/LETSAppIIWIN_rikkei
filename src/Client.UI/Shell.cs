@@ -513,7 +513,9 @@ namespace Client.UI
                 string homedrive = appPath.Substring(0, appPath.IndexOf("\\"));
 
                 // LETSフォルダ
-                string letsfolder = $@"{homedrive}\ProgramData\Fontworks\LETS";
+                //string letsfolder = $@"{homedrive}\ProgramData\Fontworks\LETS";
+                string programdataFolder = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
+                string letsfolder = $@"{programdataFolder}\Fontworks\LETS";
 
                 string userDataDirectory = Path.Combine(
                     Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Fontworks", "LETS");
@@ -699,7 +701,9 @@ namespace Client.UI
                 string homedrive = appPath.Substring(0, appPath.IndexOf("\\"));
 
                 // ログフォルダ
-                string letsfolder = $@"{homedrive}\ProgramData\Fontworks\LETS\config";
+                //string letsfolder = $@"{homedrive}\ProgramData\Fontworks\LETS\config";
+                string programdataFolder = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
+                string letsfolder = $@"{programdataFolder}\Fontworks\LETS\config";
 
                 // ログファイル名
                 string normallog = Path.Combine(letsfolder, "LETS.log");

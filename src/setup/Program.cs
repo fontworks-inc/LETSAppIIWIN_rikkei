@@ -23,7 +23,43 @@ namespace setup
             string homedrive = winDir.Substring(0, winDir.IndexOf("\\"));
 
             // LETSフォルダ
-            string letsfolder = $@"{homedrive}\ProgramData\Fontworks\LETS";
+            //string letsfolder = $@"{homedrive}\ProgramData\Fontworks\LETS";
+            string programdataFolder = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
+            string letsfolder = $@"{programdataFolder}\Fontworks\LETS";
+
+            // フォルダ存在チェック＆書き込み可能チェック
+            {
+                if (!Directory.Exists(letsfolder))
+                {
+                    // フォルダがなければ作成する
+                    try
+                    {
+                        Directory.CreateDirectory(letsfolder);
+                    }
+                    catch (Exception)
+                    {
+                        System.Windows.Forms.MessageBox.Show("インストール先フォルダを作成できません");
+                        return;
+                    }
+                }
+
+                // ファイル作成を試行する
+                var filePath = Path.Combine(letsfolder, "_create_test_file_");
+                try
+                {
+                    // ファイルを作って閉じる
+                    var fs = File.Create(filePath);
+                    fs.Close();
+
+                    // ファイルを削除する
+                    File.Delete(filePath);
+                }
+                catch (Exception)
+                {
+                    System.Windows.Forms.MessageBox.Show("インストール先にファイルを作成できません");
+                    return;
+                }
+            }
 
             System.Diagnostics.Process pro = new System.Diagnostics.Process();
 
@@ -63,7 +99,8 @@ namespace setup
             DateTime inststt = DateTime.Now;
 
             // Setupプログラムから実行していることを示す一時ファイル
-            string tmpfile = $@"{homedrive}\ProgramData\.runfromletssetup";
+            //string tmpfile = $@"{homedrive}\ProgramData\.runfromletssetup";
+            string tmpfile = $@"{programdataFolder}\.runfromletssetup";
 
             try
             {
@@ -117,7 +154,8 @@ namespace setup
                     }
 
                     // ショートカット(uninstallfonts.bat)の削除
-                    string uninstbat = $@"{homedrive}\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\uninstallfonts.bat";
+                    //string uninstbat = $@"{homedrive}\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\uninstallfonts.bat";
+                    string uninstbat = $@"{programdataFolder}\Microsoft\Windows\Start Menu\Programs\StartUp\uninstallfonts.bat";
                     if (File.Exists(uninstbat))
                     {
                         File.Delete(uninstbat);
@@ -125,7 +163,8 @@ namespace setup
                 }
 
                 // ショートカットにバッチ(uninstallfonts.bat)があるか確認
-                string uninstshortcut = $@"{homedrive}\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\uninstallfonts.bat";
+                //string uninstshortcut = $@"{homedrive}\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\uninstallfonts.bat";
+                string uninstshortcut = $@"{programdataFolder}\Microsoft\Windows\Start Menu\Programs\StartUp\uninstallfonts.bat";
                 if (File.Exists(uninstshortcut))
                 {
                     System.Windows.Forms.MessageBox.Show("アンインストール処理が完了していません。");
@@ -148,8 +187,9 @@ namespace setup
                 }
 
                 // LETSアプリの起動(ショートカットを実行する)
-                string shortcut = $@"{homedrive}\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\LETS デスクトップアプリ.lnk";
-                if(!File.Exists(shortcut))
+                //string shortcut = $@"{homedrive}\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\LETS デスクトップアプリ.lnk";
+                string shortcut = $@"{programdataFolder}\Microsoft\Windows\Start Menu\Programs\StartUp\LETS デスクトップアプリ.lnk";
+                if (!File.Exists(shortcut))
                 {
                     // ショートカットがなければ終了する
                     return;
@@ -159,7 +199,8 @@ namespace setup
 
                 // チュートリアル画面の起動
                 Thread.Sleep(5000); // アプリの起動待ち
-                string updator = $@"{homedrive}\ProgramData\Fontworks\LETS\LETSUpdater.exe";
+                //string updator = $@"{homedrive}\ProgramData\Fontworks\LETS\LETSUpdater.exe";
+                string updator = $@"{programdataFolder}\Fontworks\LETS\LETSUpdater.exe";
                 Process p3 = Process.Start(updator);
             }
             catch (Exception ex)
@@ -205,7 +246,7 @@ namespace setup
             }
             catch (Exception ex)
             {
-                System.Windows.Forms.MessageBox.Show(ex.StackTrace);
+                //System.Windows.Forms.MessageBox.Show(ex.StackTrace);
                 return true;
             }
         }

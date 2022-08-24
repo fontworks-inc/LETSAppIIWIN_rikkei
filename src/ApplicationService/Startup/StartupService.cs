@@ -286,7 +286,7 @@ namespace ApplicationService.Startup
                 if (isForceUpdate)
                 {
                     // アップデートが「強制」であれば強制アップデート実行
-                    forceUpdateEvent();
+                    //forceUpdateEvent();   //とりあえず無効化
                 }
                 else
                 {
