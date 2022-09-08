@@ -435,11 +435,39 @@ namespace Client.UI.Views
 
                             // AES復号化を行う
                             RijndaelManaged aes = new RijndaelManaged();
-                            aes.BlockSize = 128;
-                            aes.KeySize = 128;
-                            aes.Padding = PaddingMode.Zeros;
-                            aes.Mode = CipherMode.ECB;
-                            aes.Key = Convert.FromBase64String(deviceModeSetting.LicenseDecryptionKey);
+                            if (deviceModeSetting.IsCompletelyOffline)
+                            {
+                                aes.BlockSize = 128;
+                                //aes.BlockSize = 256;
+                                //aes.KeySize = 128;
+                                aes.Padding = PaddingMode.Zeros;
+                                aes.Mode = CipherMode.ECB;
+                                //aes.Key = Convert.FromBase64String(deviceModeSetting.LicenseDecryptionKey);
+                                //aes.Key = deviceModeSetting.LicenseDecryptionKey;
+                                byte[] wkey = Encoding.ASCII.GetBytes(deviceModeSetting.LicenseDecryptionKey);
+                                //byte[] wkey = Convert.FromBase64String(deviceModeSetting.LicenseDecryptionKey);
+                                //byte[] wkey = Convert.FromBase64String(deviceModeSetting.LicenseDecryptionKey);
+                                byte[] wwkey = new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                                                            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+                                //byte[] wwkey = new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+                                for (int i = 0; i < wkey.Length && i < wwkey.Length; i++)
+                                {
+                                    wwkey[i] = wkey[i];
+                                }
+                                //aes.Key = Encoding.ASCII.GetBytes(deviceModeSetting.LicenseDecryptionKey);
+                                aes.KeySize = wwkey.Length * 8;
+                                //aes.KeySize = wkey.Length * 8;
+                                aes.Key = wwkey;
+                                //aes.Key = wkey;
+                            }
+                            else
+                            {
+                                aes.BlockSize = 128;
+                                aes.KeySize = 128;
+                                aes.Padding = PaddingMode.Zeros;
+                                aes.Mode = CipherMode.ECB;
+                                aes.Key = Convert.FromBase64String(deviceModeSetting.LicenseDecryptionKey);
+                            }
 
                             ICryptoTransform decryptor = aes.CreateDecryptor();
 
@@ -484,6 +512,7 @@ namespace Client.UI.Views
             }
             catch (Exception ex)
             {
+                this.ToastShow("ライセンス登録", "デバイスに対応するライセンスがありません。ライセンスキーファイルが適切であるか確認してください。");
                 Logger.Error(ex.StackTrace);
             }
         }
@@ -651,6 +680,7 @@ namespace Client.UI.Views
                     {
                         isCreateDevID = true;
                         devid = Guid.NewGuid().ToString();
+                        //devid = "f1be3191-4aab-442d-bd00-1aa792b0e295";
                     }
 
                     // デバイスIDファイルを保存する
@@ -661,17 +691,32 @@ namespace Client.UI.Views
 
                     if (isCreateDevID)
                     {
+                        // 復号キーを保存する
+                        var deviceModeLicenseInfo = this.deviceModeLicenseInfoRepository.GetDeviceModeLicenseInfo();
+                        //if (string.IsNullOrEmpty(deviceModeLicenseInfo.ZipPassword))
+                        if (string.IsNullOrEmpty(deviceModeSetting.LicenseDecryptionKey))
+                        {
+                            // ライセンス復号キーを保存する
+                            //deviceModeSetting.LicenseDecryptionKey = devid.Substring(devid.Length - 12) + "    ";
+                            //deviceModeSetting.LicenseDecryptionKey = "MWFhNzkyYjBlMjk1";
+                            deviceModeSetting.LicenseDecryptionKey = devid.Substring(devid.Length - 12);
+                            //deviceModeSetting.LicenseDecryptionKey = devid.Substring(devid.Length - 32);
+                            //deviceModeSetting.LicenseDecryptionKey = devid.Substring(0, 32);
+                            //"7yeRrKnQkWVA9ZHw7CD72599olhrDcg=";
+                            //"                                ";
+                            //"xiF519iwauIL7yeRrKnQkWVA9ZHw7CD72599olhrDcg=";
+
+
+                            //deviceModeLicenseInfo.ZipPassword = devid.Substring(devid.Length - 12);
+                            //this.deviceModeLicenseInfoRepository.SaveDeviceModeLicenseInfo(deviceModeLicenseInfo);
+
+                            //// ライセンス復号キーも同じものとする
+                            //deviceModeSetting.LicenseDecryptionKey = deviceModeLicenseInfo.ZipPassword;
+                        }
+
                         // デバイスIDを新規作成した場合、設定ファイルに保存する
                         deviceModeSetting.OfflineDeviceID = devid;
                         this.deviceModeSettingRepository.SaveDeviceModeSetting(deviceModeSetting);
-
-                        // 復号キーを保存する
-                        var deviceModeLicenseInfo = this.deviceModeLicenseInfoRepository.GetDeviceModeLicenseInfo();
-                        if (string.IsNullOrEmpty(deviceModeLicenseInfo.ZipPassword))
-                        {
-                            deviceModeLicenseInfo.ZipPassword = devid.Substring(devid.Length - 12);
-                            this.deviceModeLicenseInfoRepository.SaveDeviceModeLicenseInfo(deviceModeLicenseInfo);
-                        }
                     }
 
                     this.DeviceIdLabel.Content = $"デバイスID：{deviceModeSetting.OfflineDeviceID}";

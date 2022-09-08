@@ -37,6 +37,7 @@ namespace Core.Entities
         /// <summary>
         /// 完全オフラインモード
         /// </summary>
+        //public bool IsCompletelyOffline { get; set; } = true;
         public bool IsCompletelyOffline { get; set; } = false;
     }
 }
