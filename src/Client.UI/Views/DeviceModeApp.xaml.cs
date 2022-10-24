@@ -357,7 +357,10 @@ namespace Client.UI.Views
             {
                 DeviceModeLicenseInfo deviceModeLicenseInfo = this.deviceModeLicenseInfoRepository.GetDeviceModeLicenseInfo(true, deviceModeSetting.OfflineDeviceID, deviceModeSetting.IndefiniteAccessToken, null, deviceModeSetting.LicenseDecryptionKey);
 
-                this.deviceModeLicenseInfoRepository.SaveDeviceModeLicenseInfo(deviceModeLicenseInfo);
+                if (deviceModeLicenseInfo != null)
+                {
+                    this.deviceModeLicenseInfoRepository.SaveDeviceModeLicenseInfo(deviceModeLicenseInfo);
+                }
 
                 // ライセンス情報を表示する。
                 string letsKinds = this.LicenseInfoDisp();

@@ -56,7 +56,8 @@ namespace Infrastructure.API
         public DeviceModeLicenseInfo GetUpdateLicense(string offlineDeviceId, string indefiniteAccessToken, string licenceFileKeyPath, string licenseDecryptionKey)
         {
             UpdateLicenseResponse response = new UpdateLicenseResponse();
-            DeviceModeLicenseInfo deviceModeLicenseInfo = new DeviceModeLicenseInfo();
+            //DeviceModeLicenseInfo deviceModeLicenseInfo = new DeviceModeLicenseInfo();
+            DeviceModeLicenseInfo deviceModeLicenseInfo = null;
 
             // APIの引数の値をセット(個別処理)
             this.ApiParam[APIParam.OfflineDeviceId] = offlineDeviceId;
@@ -76,6 +77,7 @@ namespace Infrastructure.API
                 response.Message = ret.Message;
                 if (ret.Code == (int)ResponseCode.Succeeded)
                 {
+                    string jsonText = string.Empty;
                     try
                     {
                         // ライセンスキーを解凍する
@@ -99,7 +101,7 @@ namespace Infrastructure.API
                         CryptoStream cryptStream = new CryptoStream(memoryStream, decryptor, CryptoStreamMode.Read);
 
                         cryptStream.Read(planeText, 0, planeText.Length);
-                        string jsonText = System.Text.Encoding.UTF8.GetString(planeText);
+                        jsonText = System.Text.Encoding.UTF8.GetString(planeText);
 
                         int lastClosingParenthesis = jsonText.LastIndexOf('}');
                         if (lastClosingParenthesis > 0)
@@ -112,11 +114,13 @@ namespace Infrastructure.API
                     catch (Exception ex)
                     {
                         Logger.Error(ex.StackTrace);
+                        Logger.Error($"jsonText=[{jsonText}]");
+                        deviceModeLicenseInfo = null;   //Jsonエラーのときはnullを返す
                     }
                 }
                 else if (ret.Code == (int)ResponseCode.AuthenticationFailed || ret.Code == (int)ResponseCode.InvalidArgument)
                 {
-                    // NOP 認証エラー(契約が削除されている)の場合は空のライセンス情報を返す
+                    // NOP 認証エラーの場合はnullを返す
                 }
                 else
                 {
