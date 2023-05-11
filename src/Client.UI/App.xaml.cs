@@ -1,6 +1,8 @@
 ﻿using System;
+using System.IO;
 using System.Windows;
 using Core.Entities;
+using NLog;
 
 namespace Client.UI
 {
@@ -10,11 +12,18 @@ namespace Client.UI
     public partial class App : Application
     {
         /// <summary>
+        /// ロガー
+        /// </summary>
+        private static readonly Logger Logger = LogManager.GetLogger("nlog.config");
+
+        /// <summary>
         /// エントリポイント
         /// </summary>
         [STAThread]
         public static void Main()
         {
+            Logger.Debug("Main:return:Enter");
+
             // 常駐アプリケーションを起動
             Shell shell = new Shell();
             MultiplePreventionInfo multipleInfo = Shell.MultiplePrevention;
@@ -32,6 +41,7 @@ namespace Client.UI
 
                 if (!multipleInfo.HasHandle)
                 {
+                    Logger.Debug("Main:return:!multipleInfo.HasHandle");
                     return;
                 }
 
@@ -45,6 +55,8 @@ namespace Client.UI
                 }
 
                 multipleInfo.MutexInfo.Close();
+
+                Logger.Debug("Main:finally");
             }
         }
     }

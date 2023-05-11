@@ -39,6 +39,8 @@ namespace Infrastructure.API
         /// <returns>フォントファイルストリーム</returns>
         public FileStream DownloadFonts(string deviceId, string fontId)
         {
+            Logger.Debug("FontsAPIRepository#DownloadFonts:Enter");
+
             FileStream response = null;
 
             this.ApiParam[APIParam.DeviceId] = deviceId;
@@ -56,18 +58,22 @@ namespace Infrastructure.API
                 var ret = (FileStream)this.ApiResponse;
                 response = ret;
             }
-            catch (ApiException)
+            catch (ApiException e)
             {
                 // 通信に失敗or通信しなかった
+                Logger.Error(e.StackTrace);
                 throw;
             }
 
+            Logger.Debug("FontsAPIRepository#DownloadFonts:Exit");
             return response;
         }
 
         /// <inheritdoc/>
         public IList<InstallFont> GetInstallFontInformations(string deviceId, VaildFontType type)
         {
+            Logger.Debug("FontsAPIRepository#GetInstallFontInformations:Enter");
+
             IList<InstallFont> response = new List<InstallFont>();
 
             this.ApiParam[APIParam.DeviceId] = deviceId;
@@ -126,15 +132,18 @@ namespace Infrastructure.API
                 }
                 else
                 {
+                    Logger.Debug("FontsAPIRepository#GetInstallFontInformations:exit throw");
                     throw new ApiException(ret.Code, ret.Message);
                 }
             }
-            catch (ApiException)
+            catch (ApiException e)
             {
                 // 通信に失敗or通信しなかった
+                Logger.Error(e.StackTrace);
                 throw;
             }
 
+            Logger.Debug("FontsAPIRepository#GetInstallFontInformations:Exit");
             return response;
         }
 
@@ -143,6 +152,8 @@ namespace Infrastructure.API
         /// </summary>
         private void CallFontsDownload()
         {
+            Logger.Debug("FontsAPIRepository#CallFontsDownload:Enter");
+
             Configuration config = new Configuration();
             config.BasePath = this.BasePath;
             config.UserAgent = (string)this.ApiParam[APIParam.UserAgent];
@@ -150,6 +161,8 @@ namespace Infrastructure.API
             config.AccessToken = (string)this.ApiParam[APIParam.AccessToken];
             FontApi apiInstance = new FontApi(config);
             this.ApiResponse = apiInstance.GetFont((string)this.ApiParam[APIParam.DeviceId], config.UserAgent, (string)this.ApiParam[APIParam.FontId]);
+
+            Logger.Debug("FontsAPIRepository#CallFontsDownload:Exit");
         }
 
         /// <summary>
@@ -157,6 +170,8 @@ namespace Infrastructure.API
         /// </summary>
         private void CallGetInstallFonts()
         {
+            Logger.Debug("FontsAPIRepository#CallGetInstallFonts:Enter");
+
             Configuration config = new Configuration();
             config.BasePath = this.BasePath;
             config.UserAgent = (string)this.ApiParam[APIParam.UserAgent];
@@ -164,6 +179,8 @@ namespace Infrastructure.API
             config.AccessToken = (string)this.ApiParam[APIParam.AccessToken];
             FontApi apiInstance = new FontApi(config);
             this.ApiResponse = apiInstance.GetInstallFonts((string)this.ApiParam[APIParam.DeviceId], config.UserAgent, (string)this.ApiParam[APIParam.Contains]);
+
+            Logger.Debug("FontsAPIRepository#CallGetInstallFonts:Exit");
         }
     }
 }

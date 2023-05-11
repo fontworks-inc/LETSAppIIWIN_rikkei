@@ -195,6 +195,7 @@ namespace ApplicationService.Schedulers
         /// </summary>
         protected override void ScheduledEvent()
         {
+            Logger.Debug("FixedTermScheduler#ScheduledEvent:Enter");
             Logger.Debug(this.ResourceWrapper.GetString("LOG_INFO_FixedTermScheduler_ScheduledEvent_Start"));
 
             // 以下の処理中にGCを防ぐため、ここでGCをかけておく
@@ -214,11 +215,14 @@ namespace ApplicationService.Schedulers
             // ユーザーステータスの保存
             this.userStatusRepository.SaveStatus(this.userStatusRepository.GetStatus());
 
+            Logger.Debug("FixedTermScheduler#ScheduledEvent:Before:if (volatileSetting.IsCheckedStartup)");
             if (volatileSetting.IsCheckedStartup)
             {
+                Logger.Debug("FixedTermScheduler#ScheduledEvent:if (volatileSetting.IsCheckedStartup)");
                 UserStatus userStatusWk = this.userStatusRepository.GetStatus();
                 if (userStatusWk.IsLoggingIn)
                 {
+                    Logger.Debug("FixedTermScheduler#ScheduledEvent:if (userStatusWk.IsLoggingIn)");
                     if (!this.receiveNotificationRepository.IsConnected())
                     {
                         Logger.Info(this.ResourceWrapper.GetString("LOG_INFO_FixedTermScheduler_ScheduledEvent_ReceiveNotificationStart"));
@@ -226,6 +230,7 @@ namespace ApplicationService.Schedulers
 
                         if (!this.receiveNotificationRepository.IsConnected())
                         {
+                            Logger.Debug("FixedTermScheduler#ScheduledEvent:if (!this.receiveNotificationRepository.IsConnected())");
                             this.shouldSynchronize = true;
                             this.FontSynchronize(); // 通知サーバへの再接続時にフォント同期処理を実行する
                         }
@@ -233,6 +238,8 @@ namespace ApplicationService.Schedulers
 
                     if (this.receiveNotificationRepository.IsConnected())
                     {
+                        Logger.Debug("FixedTermScheduler#ScheduledEvent: if (this.receiveNotificationRepository.IsConnected())");
+
                         // アクセストークンが変わっている or 前回接続時より1時間経過している場合、再接続を行うため、一度切断する
                         if ((volatileSetting.AccessToken.CompareTo(this.receiveNotificationRepository.ConnectedAccessToken()) != 0)
                             || (this.receiveNotificationRepository.ConnectedTime().AddHours(1).CompareTo(DateTime.Now) < 0))
@@ -245,7 +252,7 @@ namespace ApplicationService.Schedulers
                 // 前回実行時間から、interval秒過ぎていなければ抜ける
                 if (DateTime.Now < this.lastScheduledEvent.AddMilliseconds(this.originalInterval * MillisecondMultiplier))
                 {
-                    Logger.Debug(this.ResourceWrapper.GetString("LOG_INFO_FixedTermScheduler_ScheduledEvent_End"));
+                    Logger.Debug("FixedTermScheduler#ScheduledEvent:return 前回実行時間から、interval秒過ぎていなければ抜ける");
                     return;
                 }
             }
@@ -254,8 +261,10 @@ namespace ApplicationService.Schedulers
             if (!volatileSetting.IsCheckedStartup
                 || ((DateTime)volatileSetting.CheckedStartupAt).AddHours(ElapsedHours).CompareTo(DateTime.Now) <= 0)
             {
+                Logger.Debug("FixedTermScheduler#ScheduledEvent:[起動チェック処理]が「未処理」のとき、または[起動時チェック日時]からn時間以上経過しているときのみ処理を行う");
                 if (this.userStatusRepository.GetStatus().IsDeviceMode)
                 {
+                    Logger.Debug("FixedTermScheduler#ScheduledEvent:if (this.userStatusRepository.GetStatus().IsDeviceMode)");
                     IList<string> messageList = this.deviceModeService.FixedTermCheck(false);
                     if (messageList.Count > 0)
                     {
@@ -265,6 +274,7 @@ namespace ApplicationService.Schedulers
                         }
                     }
 
+                    Logger.Debug("FixedTermScheduler#ScheduledEvent:return [起動チェック処理]が「未処理」のとき、または[起動時チェック日時]からn時間以上経過しているときのみ処理を行う");
                     return;
                 }
 
@@ -323,6 +333,7 @@ namespace ApplicationService.Schedulers
                 }
 
                 // フォントファイルチェックを行う
+                Logger.Debug("FixedTermScheduler#ScheduledEvent:フォントファイルチェックを行う");
                 this.fontManagerService.CheckFontsList();
             }
 
@@ -339,6 +350,8 @@ namespace ApplicationService.Schedulers
         private void NetworkChange_NetworkAvailabilityChanged(
             object sender, NetworkAvailabilityEventArgs e)
         {
+            Logger.Debug("FixedTermScheduler#NetworkChange_NetworkAvailabilityChanged:Enter");
+
             if (e.IsAvailable && this.shouldSynchronize)
             {
                 Logger.Info(this.ResourceWrapper.GetString("LOG_INFO_FixedTermScheduler_NetworkChange_NetworkAvailabilityChanged_ShouldSynchronize"));
@@ -347,6 +360,8 @@ namespace ApplicationService.Schedulers
                 // フォントの同期処理を行う
                 this.FontSynchronize();
             }
+
+            Logger.Debug("FixedTermScheduler#NetworkChange_NetworkAvailabilityChanged:Exit");
         }
 
         /// <summary>
@@ -354,14 +369,19 @@ namespace ApplicationService.Schedulers
         /// </summary>
         private void FontSynchronize()
         {
+            Logger.Debug("FixedTermScheduler#FontSynchronize:Enter");
+
             if (this.shouldSynchronize)
             {
                 // フォントの同期処理を行う
+                Logger.Debug("FixedTermScheduler#FontSynchronize:フォントの同期処理を行う");
                 this.fontManagerService.Synchronize(false);
 
                 // 実行後、falseに設定
                 this.shouldSynchronize = false;
             }
+
+            Logger.Debug("FixedTermScheduler#FontSynchronize:Exit");
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.OrderingRules", "SA1201:Elements should appear in the correct order", Justification = "<保留中>")]
@@ -369,12 +389,15 @@ namespace ApplicationService.Schedulers
 
         private void OutputLogout()
         {
+            Logger.Debug("FixedTermScheduler#OutputLogout:Enter");
+
             VolatileSetting vSetting = this.volatileSettingRepository.GetVolatileSetting();
 
             string accessToken = vSetting.AccessToken;
 
             if (preAccessToken == accessToken)
             {
+                Logger.Debug("FixedTermScheduler#OutputLogout:return (preAccessToken == accessToken)");
                 return;
             }
 
@@ -420,10 +443,14 @@ namespace ApplicationService.Schedulers
             }
 
             this.SetHidden(userlist, true);
+
+            Logger.Debug("FixedTermScheduler#OutputLogout:Exit");
         }
 
         private void SetHidden(string filepath, bool isHidden)
         {
+            Logger.Debug("FixedTermScheduler#SetHidden:Enter");
+
             try
             {
                 FileAttributes fa = System.IO.File.GetAttributes(filepath);
@@ -442,10 +469,14 @@ namespace ApplicationService.Schedulers
             {
                 Logger.Debug("SetHidden:" + ex.StackTrace);
             }
+
+            Logger.Debug("FixedTermScheduler#SetHidden:Exit");
         }
 
         private void SetFileAccessEveryone(string path)
         {
+            Logger.Debug("FixedTermScheduler#SetFileAccessEveryone:Enter");
+
             try
             {
                 FileSystemAccessRule rule = new FileSystemAccessRule(
@@ -459,8 +490,10 @@ namespace ApplicationService.Schedulers
             }
             catch (Exception ex)
             {
-                Logger.Debug("SetFileAccessEveryone:" + ex.StackTrace);
+                Logger.Error("SetFileAccessEveryone:" + ex.StackTrace);
             }
+
+            Logger.Debug("FixedTermScheduler#SetFileAccessEveryone:Exit");
         }
     }
 }

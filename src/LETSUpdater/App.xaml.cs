@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.IO;
 using System.Net;
 using System.Net.Http;
@@ -16,6 +17,8 @@ namespace Updater
     /// </summary>
     public partial class App : Application
     {
+        private const string RepairRegKeyList = "RepairRegKey.lst";
+
         [STAThread]
         public static void Main(string[] args)
         {
@@ -41,21 +44,28 @@ namespace Updater
                     string param1 = args[1];
                     if (param0 == "FontInstall")
                     {
+                        DebugLog($"Main:Before FontInstallFromList (param1={param1})");
                         FontInstallFromList(param1);
+                        DebugLog("Main:After FontInstallFromList");
                         Environment.Exit(0);
                     }
 
                     if (param0 == "FontUninstall")
                     {
+                        DebugLog($"Main:Before FontUninstallFromList (param1={param1})");
                         FontUninstallFromList(param1);
+                        DebugLog("Main:After FontUninstallFromList");
                         Environment.Exit(0);
                     }
                     //========================================
 
+                    DebugLog("LETSUpdater:Before updateLETS");
                     updateLETS(param0, param1);
+                    DebugLog("LETSUpdater:After updateLETS");
                 }
                 catch (Exception e)
                 {
+                    DebugLog(e.StackTrace);
                     MessageBox.Show(e.Message);
                 }
                 Environment.Exit(0);
@@ -63,20 +73,35 @@ namespace Updater
 
             app.StartupUri = new Uri("MainWindow.xaml", UriKind.Relative);
             app.InitializeComponent();
+            DebugLog("LETSUpdater:Before app.Run");
             app.Run();
+            DebugLog("LETSUpdater:After app.Run");
             bool isCpmpletelyOffline = false;
 #if COMPLETELY_OFFLINE
             isCpmpletelyOffline = true; //完全オフラインインストールのとき。
 #endif
+            DebugLog($"LETSUpdater:Before LoginLETS:isCpmpletelyOffline={isCpmpletelyOffline}");
             WindowHelper.LoginLETS(isCpmpletelyOffline);
+            DebugLog("LETSUpdater:After LoginLETS");
         }
 
         private static void FontInstallFromList(string tempPath)
         {
+            DebugLog($"FontInstallFromList Enter:{tempPath}");
             try
             {
+                // レジストリ修復
+                RepairRegistorys(tempPath);
+
                 // インストールフォント一覧ファイルから情報を取得
                 string installFontListFile = Path.Combine(tempPath, "InstallFontInfo.lst");
+                if (!File.Exists(installFontListFile))
+                {
+                    // フォントリストファイルが存在しなければ、ここで終了
+                    DebugLog($"FontInstallFromList Exit:フォントリストファイルが存在しなければ、ここで終了");
+                    return;
+                }
+
                 string installResultListFile = Path.Combine(tempPath, "InstallFontInfoResult.lst");
                 string[] installFonts = File.ReadAllLines(installFontListFile, Encoding.GetEncoding("shift_jis"));
                 foreach (string installFont in installFonts)
@@ -85,7 +110,9 @@ namespace Updater
                     string fontPath = installFontInfo[0];
                     string uniqName = installFontInfo[1];
                     string letsKind = installFontInfo[2];
+                    DebugLog($"FontInstallFromList:Before FontInstall:{fontPath}, {uniqName}, {letsKind}");
                     List<string> resultList = FontInstall(fontPath, uniqName, letsKind);
+                    DebugLog($"FontInstallFromList:After FontInstall:{string.Join(",", resultList)}");
 
                     string resultLine = string.Join("\t", resultList);
                     File.AppendAllText(installResultListFile, resultLine + Environment.NewLine, Encoding.GetEncoding("shift_jis"));
@@ -95,14 +122,26 @@ namespace Updater
             {
                 DebugLog(ex.StackTrace);
             }
+            DebugLog($"FontInstallFromList Exit");
         }
 
         private static void FontUninstallFromList(string tempPath)
         {
+            DebugLog($"FontUninstallFromList Enter:{tempPath}");
             try
             {
+                // レジストリ修復
+                RepairRegistorys(tempPath);
+
                 // インストールフォント一覧ファイルから情報を取得
                 string uninstallFontListFile = Path.Combine(tempPath, "UninstallFontInfo.lst");
+                if (!File.Exists(uninstallFontListFile))
+                {
+                    // フォントリストファイルが存在しなければ、ここで終了
+                    DebugLog($"FontUninstallFromList Exit:フォントリストファイルが存在しなければ、ここで終了");
+                    return;
+                }
+
                 string uninstallResultListFile = Path.Combine(tempPath, "UninstallFontInfoResult.lst");
                 string[] uninstallFonts = File.ReadAllLines(uninstallFontListFile, Encoding.GetEncoding("shift_jis"));
                 foreach (string uninstallFont in uninstallFonts)
@@ -112,7 +151,9 @@ namespace Updater
                     string uniqName = uninstallFontInfo[1];
                     string letsKind = uninstallFontInfo[2];
                     string opeKind = uninstallFontInfo[3];
+                    DebugLog($"FontUninstallFromList:Before FontUninstall:{fontPath}, {uniqName}, {letsKind}, {opeKind}");
                     List<string> resultList = FontUninstall(fontPath, uniqName, letsKind, opeKind);
+                    DebugLog($"FontUninstallFromList:After FontUninstall:{string.Join(",", resultList)}");
 
                     string resultLine = string.Join("\t", resultList);
                     File.AppendAllText(uninstallResultListFile, resultLine + Environment.NewLine, Encoding.GetEncoding("shift_jis"));
@@ -122,10 +163,26 @@ namespace Updater
             {
                 DebugLog(ex.StackTrace);
             }
+            DebugLog($"FontUninstallFromList Exit");
+        }
+
+        private static void RepairRegistorys(string tempPath)
+        {
+            // 修復レジストリ一覧ファイルから情報を取得
+            string repairRegistoryFile = Path.Combine(tempPath, RepairRegKeyList);
+            if(File.Exists(repairRegistoryFile))
+            {
+                string[] repairRegKeys = File.ReadAllLines(repairRegistoryFile, Encoding.GetEncoding("shift_jis"));
+                foreach(string regKey in repairRegKeys)
+                {
+                    RepairRegistory(regKey);
+                }
+            }
         }
 
         private static List<string> FontUninstall(string filePath, string regkey, string letsKind, string opeKind)
         {
+            DebugLog($"FontUninstall:Enter:{filePath}, {regkey}, {letsKind}, {opeKind}");
             List<string> resultInfo = new List<string>();
             resultInfo.Add(filePath);
             resultInfo.Add(regkey);
@@ -142,6 +199,7 @@ namespace Updater
             {
                 // Deactivateだけのときはここまで
                 resultInfo.Add("OK");
+                DebugLog($"FontUninstall:Exit:Deactivateだけのときはここまで");
                 return resultInfo;
             }
 
@@ -165,32 +223,38 @@ namespace Updater
                 resultInfo.Add(ex.Message);
             }
 
+            DebugLog($"FontUninstall:Exit");
             return resultInfo;
         }
 
         private static List<string> FontInstall(string fontPath, string uniqName, string letsKind)
         {
+            DebugLog($"FontInstall:Enter:{fontPath}, {uniqName}, {letsKind}");
             List<string> resultInfo = new List<string>();
             resultInfo.Add(fontPath);
             resultInfo.Add(uniqName);
             try
             {
                 // インストール先パスを取得
-                string appPath = AppDomain.CurrentDomain.BaseDirectory;
-                string homedrive = appPath.Substring(0, appPath.IndexOf("\\"));
-                string sysFontFolder = $@"{homedrive}\Windows\Fonts";
+                //string appPath = AppDomain.CurrentDomain.BaseDirectory;
+                //string homedrive = appPath.Substring(0, appPath.IndexOf("\\"));
+                //string sysFontFolder = $@"{homedrive}\Windows\Fonts";
+                string sysFontFolder = Environment.GetFolderPath(Environment.SpecialFolder.Fonts);
+                DebugLog($"FontInstall:sysFontFolder={sysFontFolder}");
 
                 // フォントファイル名を取得
                 string fontFileName = System.IO.Path.GetFileName(fontPath);
+                DebugLog($"FontInstall:fontFileName={fontFileName}");
 
                 // インストールファイルのフルパスを作成
                 string targetFullPath = System.IO.Path.Combine(sysFontFolder, fontFileName);
+                DebugLog($"FontInstall:targetFullPath={targetFullPath}");
 
                 // 既にファイルがあるか確認
                 if (File.Exists(targetFullPath))
                 {
                     // ログを出力して、スキップ
-                    DebugLog($"同名フォントが存在したため、インストールを中断しました。:{uniqName}");
+                    DebugLog($"FontInstall:Exit:同名フォントが存在したため、インストールを中断しました。:{uniqName}, {targetFullPath}");
                     resultInfo.Add("NG");
                     resultInfo.Add($"同名フォントが存在したため、インストールを中断しました。:{uniqName}");
                     return resultInfo;
@@ -201,6 +265,7 @@ namespace Updater
                     File.Copy(fontPath, targetFullPath);
 
                     string regKey = GetFontName(targetFullPath, uniqName);
+                    DebugLog($"FontInstall:regKey={regKey}");
 
                     AddRegistry(regKey, targetFullPath);
 
@@ -216,9 +281,11 @@ namespace Updater
                     DebugLog(ex.StackTrace);
                     resultInfo.Add("ERR");
                     resultInfo.Add(ex.Message);
+                    DebugLog($"FontInstall:Exit");
                     return null;
                 }
 
+                DebugLog($"FontInstall:Exit");
                 return resultInfo;
             }
             catch (Exception ex)
@@ -226,6 +293,7 @@ namespace Updater
                 DebugLog(ex.StackTrace);
                 resultInfo.Add("ERR");
                 resultInfo.Add(ex.Message);
+                DebugLog($"FontInstall:Exit");
                 return resultInfo;
             }
         }
@@ -270,7 +338,8 @@ namespace Updater
         /// <param name="value">値：フォントファイルパス</param>
         private static void AddRegistry(string key, string value)
         {
-            var regkey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(registryFontsPath, true);
+            //var regkey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(registryFontsPath, true);
+            var regkey = Microsoft.Win32.Registry.LocalMachine.OpenSubKey(registryFontsPath, true);
 
             try
             {
@@ -305,12 +374,41 @@ namespace Updater
         {
             try
             {
-                var regkey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(registryFontsPath, true);
+                //var regkey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(registryFontsPath, true);
+                var regkey = Microsoft.Win32.Registry.LocalMachine.OpenSubKey(registryFontsPath, true);
                 regkey.DeleteValue(key);
+                regkey.Close();
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 // 無視
+                DebugLog(e.StackTrace);
+            }
+        }
+
+        private static void RepairRegistory(string key)
+        {
+            try
+            {
+                // ユーザレジストリから情報を取得
+                var regkey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(registryFontsPath, true);
+                if (regkey != null)
+                {
+                    // 該当するキーの値を取得する
+                    string value = (string)regkey.GetValue(key);
+
+                    // ユーザキーを削除する
+                    regkey.DeleteValue(key);
+                    regkey.Close();
+
+                    // ローカルマシンキーを設定する
+                    AddRegistry(key, value);
+                }
+            }
+            catch (Exception e)
+            {
+                // 無視
+                DebugLog(e.StackTrace);
             }
         }
 
@@ -334,8 +432,8 @@ namespace Updater
         private static void updateLETS(string updateVersion, string runVersion)
         {
             // ホームドライブの取得
-            string appPath = AppDomain.CurrentDomain.BaseDirectory;
-            string homedrive = appPath.Substring(0, appPath.IndexOf("\\"));
+            //string appPath = AppDomain.CurrentDomain.BaseDirectory;
+            //string homedrive = appPath.Substring(0, appPath.IndexOf("\\"));
 
             // LETSプログラムフォルダの取得
             //string letsFolder = $@"{homedrive}\ProgramData\Fontworks\LETS";
@@ -409,20 +507,45 @@ namespace Updater
 
         }
 
+        static string isDebug = string.Empty;
+
+        /// <summary>
+        /// デバッグ出力
+        /// ・実行モジュールのフォルダに .debug ファイルがあったらデバッグログを出力する
+        /// </summary>
+        /// <param name="msg"></param>
         private static void DebugLog(string msg)
         {
-#if DEBUGLOG
             try
             {
-                string logpath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Fontworks", "LETS", "config", "logout.log");
-                File.AppendAllText(logpath, msg + "\n");
+                if (string.IsNullOrEmpty(isDebug))
+                {
+                    isDebug = "NODEBUG";
+
+                    Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+                    string debugmode = config.AppSettings.Settings["Debugmode"].Value;
+
+                    // デバッグモード判定
+                    if (!string.IsNullOrEmpty(debugmode))
+                    {
+                        isDebug = debugmode;
+                    }
+                }
+
+                if (isDebug == "NODEBUG")
+                {
+                    return;
+                }
+
+                string logpath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Fontworks", "LETS", "config", "LETSUPD_debug.log");
+                string current = DateTime.Now.ToString();
+                File.AppendAllText(logpath, $"{current}\t{msg}{Environment.NewLine}");
             }
             catch (Exception)
             {
                 // NOP
             }
 
-#endif
         }
 
         private static void LogoutLETS()
@@ -456,8 +579,9 @@ namespace Updater
 
                         File.Delete(logoutinfo);
                     }
-                    catch (Exception)
+                    catch (Exception e)
                     {
+                        DebugLog(e.StackTrace);
                         return;
                     }
                 }
@@ -484,8 +608,9 @@ namespace Updater
                         appSettig = ser.ReadObject(ms) as AppSetting;
                         baseurl = appSettig.FontDeliveryServerUri;
                     }
-                    catch (Exception)
+                    catch (Exception e)
                     {
+                        DebugLog(e.StackTrace);
                         return;
                     }
 
@@ -505,8 +630,9 @@ namespace Updater
                         var ser = new DataContractJsonSerializer(proxyauthtext.GetType());
                         proxyAuthSetting = ser.ReadObject(ms) as ProxyAuthSetting;
                     }
-                    catch (Exception)
+                    catch (Exception e)
                     {
+                        DebugLog(e.StackTrace);
                         return;
                     }
                 }
@@ -567,8 +693,9 @@ namespace Updater
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                DebugLog(e.StackTrace);
                 // NOP
             }
         }
@@ -631,8 +758,8 @@ namespace Updater
                     return -1;
                 }
 
-                string appPath = AppDomain.CurrentDomain.BaseDirectory;
-                string homedrive = appPath.Substring(0, appPath.IndexOf("\\"));
+                //string appPath = AppDomain.CurrentDomain.BaseDirectory;
+                //string homedrive = appPath.Substring(0, appPath.IndexOf("\\"));
                 //string letsFolder = $@"{homedrive}\ProgramData\Fontworks\LETS";
                 string programdataFolder = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
                 string letsFolder = $@"{programdataFolder}\Fontworks\LETS";
@@ -688,9 +815,10 @@ namespace Updater
                     System.IO.File.SetAttributes(filePath, FileAttributes.Normal);
                     System.IO.File.Delete(filePath);
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
                     // 消せないファイルは無視する
+                    DebugLog(e.StackTrace);
                 }
             }
 
@@ -706,9 +834,10 @@ namespace Updater
             {
                 Directory.Delete(targetDirectoryPath, false);
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 // 消せないフォルダも無視する
+                DebugLog(e.StackTrace);
             }
         }
 
@@ -726,9 +855,10 @@ namespace Updater
                         System.IO.File.Delete(filePath);
                     }
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
                     // 消せないファイルは無視する
+                    DebugLog(e.StackTrace);
                 }
             }
 
@@ -776,9 +906,9 @@ namespace Updater
             {
                 System.IO.File.Move(wkShortcut, shortcutPath);
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                //
+                DebugLog(e.StackTrace);
             }
 
             // 後始末

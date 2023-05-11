@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
 using Core.Interfaces;
+using NLog;
 
 namespace Infrastructure.File
 {
@@ -9,6 +11,11 @@ namespace Infrastructure.File
     /// </summary>
     public class FontFileRepository : IFontFileRepository
     {
+        /// <summary>
+        /// ロガー
+        /// </summary>
+        private static readonly Logger Logger = LogManager.GetLogger("nlog.config");
+
         /// <summary>
         /// 文言の取得を行うインスタンス
         /// </summary>
@@ -28,15 +35,28 @@ namespace Infrastructure.File
         /// </summary>
         /// <param name="fontFilePath">対象のフォントファイルパス</param>
         /// <returns>成功した場合は取得したフォントの内部情報を返し、失敗した場合は空の内部情報を返す</returns>
+        [HandleProcessCorruptedStateExceptions]
         public FontIdInfo GetFontInfo(string fontFilePath)
         {
+            Logger.Debug($"FontFileRepository#GetFontInfo:Enter ({fontFilePath})");
+
             // 識別子確認のDLLを介し、情報を取得する
             var info = default(FontIdInfo);
 
             string outValid = string.Empty.PadLeft(1);
             IntPtr outGotIdInfo = Marshal.AllocCoTaskMem(Marshal.SizeOf(info));
 
-            int ret = f_get_id(fontFilePath, outValid, outGotIdInfo);
+            int ret = -1;
+            try
+            {
+                Logger.Debug($"FontFileRepository#GetFontInfo:Before f_get_id");
+                ret = f_get_id(fontFilePath, outValid, outGotIdInfo);
+                Logger.Debug($"FontFileRepository#GetFontInfo:After f_get_id(ret={ret})");
+            }
+            catch (Exception e)
+            {
+                Logger.Error(e);
+            }
 
             // 正常終了の0以外の場合
             if (ret != 0)
@@ -47,6 +67,7 @@ namespace Infrastructure.File
                 errFontIdInfo.UserId = string.Empty;
                 errFontIdInfo.NameInfo.UniqueName = string.Empty;
                 errFontIdInfo.NameInfo.Version = string.Empty;
+                Logger.Debug($"FontFileRepository#GetFontInfo:retuen (ret={ret})");
                 return errFontIdInfo;
             }
 
@@ -57,6 +78,7 @@ namespace Infrastructure.File
                 fontIdInfo.NameInfo.Ids.FontId = string.Empty;
             }
 
+            Logger.Debug($"FontFileRepository#GetFontInfo:Exit ({fontIdInfo.NameInfo.UniqueName})");
             return fontIdInfo;
         }
 

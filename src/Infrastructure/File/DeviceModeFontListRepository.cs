@@ -133,6 +133,7 @@ namespace Infrastructure.File
                 }
 
                 System.IO.File.AppendAllText(regfilePath, $@"reg delete ""SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts"" /v ""{f.RegistryKey}"" /f" + Environment.NewLine, System.Text.Encoding.GetEncoding("shift_jis"));
+                System.IO.File.AppendAllText(regfilePath, $@"reg delete ""HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts"" /v ""{f.RegistryKey}"" /f" + Environment.NewLine, System.Text.Encoding.GetEncoding("shift_jis"));
             }
 
             System.IO.File.AppendAllText(regfilePath, @"Del /F ""%~dp0%~nx0""" + "\n");

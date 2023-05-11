@@ -8,7 +8,7 @@
     <EnableDefaultItems Condition=" '$(EnableDefaultItems)' == '' ">false</EnableDefaultItems>
     <EnableDefaultCompileItems Condition=" '$(EnableDefaultCompileItems)' == '' ">false</EnableDefaultCompileItems>
     <ApplicationIcon>LETS.ico</ApplicationIcon>
-    <Version>3.0.1</Version>
+    <Version>3.0.2</Version>
     <NoWin32Manifest>true</NoWin32Manifest>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">

@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using NLog;
+using System.IO;
 using Windows.Data.Xml.Dom;
 using Windows.UI.Notifications;
 
@@ -9,6 +10,11 @@ namespace Client.UI.Wrappers
     /// </summary>
     public static class ToastNotificationWrapper
     {
+        /// <summary>
+        /// ロガー
+        /// </summary>
+        private static readonly Logger Logger = LogManager.GetLogger("nlog.config");
+
         /// <summary>
         /// アプリケーション名
         /// </summary>
@@ -26,6 +32,8 @@ namespace Client.UI.Wrappers
         /// <param name="description">メッセージ説明部</param>
         public static void Show(string mainMessage, string description)
         {
+            Logger.Debug("ToastNotificationWrapper#Show:Enter");
+
             // テンプレート(ToastImageAndText02)を使用してトースト通知のXMLを生成
             var xml = ToastNotificationManager.GetTemplateContent(ToastTemplateType.ToastImageAndText02);
             var stringElements = xml.GetElementsByTagName("text");
@@ -45,6 +53,8 @@ namespace Client.UI.Wrappers
             // トースト通知を表示する
             var toast = new ToastNotification(xml);
             ToastNotificationManager.CreateToastNotifier(AppId).Show(toast);
+
+            Logger.Debug("ToastNotificationWrapper#Show:Exit");
         }
     }
 }

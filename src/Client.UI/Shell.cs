@@ -60,12 +60,23 @@ namespace Client.UI
         /// </summary>
         public Shell()
         {
-            // グローバル例外に対応するイベントハンドラを追加（WPF用）
-            AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+            Logger.Debug("Shell#Construct:Enter");
 
-            // グローバル例外に対応するイベントハンドラを追加（Windowsフォーム用）
-            System.Windows.Forms.Application.ThreadException +=
-                new ThreadExceptionEventHandler(Application_ThreadException);
+            try
+            {
+                // グローバル例外に対応するイベントハンドラを追加（WPF用）
+                AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+
+                // グローバル例外に対応するイベントハンドラを追加（Windowsフォーム用）
+                System.Windows.Forms.Application.ThreadException +=
+                    new ThreadExceptionEventHandler(Application_ThreadException);
+            }
+            catch (Exception e)
+            {
+                Logger.Error(e.StackTrace);
+            }
+
+            Logger.Debug("Shell#Construct:Exit");
         }
 
         /// <summary>
@@ -79,6 +90,8 @@ namespace Client.UI
         /// <param name="containerRegistry">コンテナレジストリ</param>
         protected override void RegisterTypes(IContainerRegistry containerRegistry)
         {
+            Logger.Debug("Shell#RegisterTypes:Enter");
+
             {
                 string selfpath = System.Reflection.Assembly.GetExecutingAssembly().Location;
                 System.IO.FileInfo fi = new System.IO.FileInfo(selfpath);
@@ -112,23 +125,28 @@ namespace Client.UI
             }
 
             // メモリ上で保存する情報
+            Logger.Debug("Shell#RegisterTypes:メモリ上で保存する情報");
             var volatileSettingMemoryRepository = new VolatileSettingMemoryRepository();
             containerRegistry.RegisterInstance<IVolatileSettingRepository>(volatileSettingMemoryRepository);
             volatileSettingMemoryRepository.GetVolatileSetting().ClientApplicationPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "LETS.exe");
 
             // 共通設定情報
+            Logger.Debug("Shell#RegisterTypes:共通設定情報");
             var applicationSettingRepository = new ApplicationSettingFileRepository(Path.Combine(ApplicationSettingFolder, "appsettings.json"));
             containerRegistry.RegisterInstance<IApplicationSettingRepository>(applicationSettingRepository);
 
             // プロキシ認証情報
+            Logger.Debug("Shell#RegisterTypes:プロキシ認証情報");
             var proxyAuthSettingRepository = new ProxyAuthSettingFileRepository(Path.Combine(ApplicationSettingFolder, "puroxyauth.json"));
             containerRegistry.RegisterInstance<IProxyAuthSettingRepository>(proxyAuthSettingRepository);
 
             // 共通保存情報
+            Logger.Debug("Shell#RegisterTypes:共通保存情報");
             var applicationRuntimeRepository = new ApplicationRuntimeFileRepository(Path.Combine(ApplicationSettingFolder, "appruntime.json"));
             containerRegistry.RegisterInstance<IApplicationRuntimeRepository>(applicationRuntimeRepository);
 
             // ユーザー別保存情報
+            Logger.Debug("Shell#RegisterTypes:ユーザー別保存情報");
             var userStatusFileRepository = new UserStatusFileRepository(Path.Combine(UserDataDirectory, "status.dat"));
             containerRegistry.RegisterInstance<IUserStatusRepository>(userStatusFileRepository);
             volatileSettingMemoryRepository.GetVolatileSetting().RefreshToken = userStatusFileRepository.GetStatus().RefreshToken;
@@ -138,72 +156,89 @@ namespace Client.UI
             Logger.Debug("deviceid=" + deviceid);
 
             // APIConfiguration
+            Logger.Debug("Shell#RegisterTypes:APIConfiguration");
             ApplicationSetting applicationSetting = applicationSettingRepository.GetSetting();
             var apiConfiguration = new APIConfiguration(applicationSetting.FontDeliveryServerUri, applicationSetting.NotificationServerUri, applicationSetting.FixedTermConfirmationInterval, applicationSetting.CommunicationRetryCount, proxyAuthSettingRepository);
 
             // フォント情報
+            Logger.Debug("Shell#RegisterTypes:フォント情報");
             var userFontsSettingFileRepository = new UserFontsSettingFileRepository(Path.Combine(UserDataDirectory, "fonts.dat"));
             containerRegistry.RegisterInstance<IUserFontsSettingRepository>(userFontsSettingFileRepository);
 
             // 各種画面で利用する情報
+            Logger.Debug("Shell#RegisterTypes:各種画面で利用する情報");
             var resourceWrapper = new ResourceWrapper();
             containerRegistry.RegisterInstance<IResourceWrapper>(resourceWrapper);
             containerRegistry.RegisterInstance<ILoginWindowWrapper>(new LoginWindowWrapper());
 
             // 認証情報
+            Logger.Debug("Shell#RegisterTypes:認証情報");
             containerRegistry.RegisterInstance<IAuthenticationInformationRepository>(
                new AuthenticationInformationAPIRepository(apiConfiguration));
 
             // URL情報
+            Logger.Debug("Shell#RegisterTypes:URL情報");
             containerRegistry.RegisterInstance<IUrlRepository>(new UrlAPIRepository(apiConfiguration));
 
             // フォント情報
+            Logger.Debug("Shell#RegisterTypes:フォント情報");
             FontsAPIRepository fontsAPIRepository = new FontsAPIRepository(apiConfiguration);
             containerRegistry.RegisterInstance<IFontsRepository>(fontsAPIRepository);
 
             // 端末情報
+            Logger.Debug("Shell#RegisterTypes:端末情報");
             var devicesRepository = new DevicesAPIRepository(apiConfiguration);
             containerRegistry.RegisterInstance<IDevicesRepository>(devicesRepository);
 
             // フォントの内部情報リポジトリ
+            Logger.Debug("Shell#RegisterTypes:フォントの内部情報リポジトリ");
             var fontInfoRepository = new FontFileRepository(resourceWrapper);
             containerRegistry.Register<IFontFileRepository, FontFileRepository>();
 
             // デバイスモード時設定ファイル
             // 設定情報(デバイスモード時)
+            Logger.Debug("Shell#RegisterTypes:設定情報(デバイスモード時)");
             var deviceModeSettingRepository = new DeviceModeSettingRepository(Path.Combine(ApplicationSettingFolder, "dev-setting.dat"));
             containerRegistry.RegisterInstance<IDeviceModeSettingRepository>(deviceModeSettingRepository);
 
             // フォント情報(デバイスモード時)
+            Logger.Debug("Shell#RegisterTypes:フォント情報(デバイスモード時)");
             var deviceModeFontListRepository = new DeviceModeFontListRepository(Path.Combine(ApplicationSettingFolder, "dev-fonts.dat"));
             containerRegistry.RegisterInstance<IDeviceModeFontListRepository>(deviceModeFontListRepository);
 
             // ライセンス情報(デバイスモード時)
+            Logger.Debug("Shell#RegisterTypes:ライセンス情報(デバイスモード時)");
             var deviceModeLicenseInfoAPIRepository = new DeviceModeLisenceInfoAPIRepository(apiConfiguration);
             var deviceModeLicenseInfoRepository = new DeviceModeLicenseInfoRepository(Path.Combine(ApplicationSettingFolder, "dev-license.dat"), deviceModeLicenseInfoAPIRepository);
             containerRegistry.RegisterInstance<IDeviceModeLicenseInfoRepository>(deviceModeLicenseInfoRepository);
 
             // フォントのアクティベートサービス
+            Logger.Debug("Shell#RegisterTypes:フォントのアクティベートサービス");
             var fontActivationService = new FontActivationService(userFontsSettingFileRepository, userStatusFileRepository, fontInfoRepository);
             containerRegistry.Register<IFontActivationService, FontActivationService>();
 
             // 未読お知らせ情報
+            Logger.Debug("Shell#RegisterTypes:未読お知らせ情報");
             var unreadNoticeRepository = new UnreadNoticeRepository(apiConfiguration);
             containerRegistry.RegisterInstance<IUnreadNoticeRepository>(unreadNoticeRepository);
 
             // フォントセキュリティ情報を格納するリポジトリ
+            Logger.Debug("Shell#RegisterTypes:フォントセキュリティ情報を格納するリポジトリ");
             var fontSecurityRepository = new FontSecurityAPIRepository(apiConfiguration);
             containerRegistry.RegisterInstance<IFontSecurityRepository>(fontSecurityRepository);
 
             // クライアントアプリケーションバージョン情報(API)
+            Logger.Debug("Shell#RegisterTypes:クライアントアプリケーションバージョン情報(API)");
             var clientApplicationVersionAPIRepository = new ClientApplicationVersionAPIRepository(apiConfiguration);
             containerRegistry.RegisterInstance<IClientApplicationVersionRepository>(clientApplicationVersionAPIRepository);
 
             // プログラムバージョン取得サービス
+            Logger.Debug("Shell#RegisterTypes:プログラムバージョン取得サービス");
             var applicationVersionService = new ApplicationVersionService(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "LETS.exe"));
             containerRegistry.RegisterInstance<IApplicationVersionService>(applicationVersionService);
 
             // フォント管理サービス
+            Logger.Debug("Shell#RegisterTypes:フォント管理サービス");
             var fontManagerService = new FontManagerService(
                 resourceWrapper,
                 applicationSettingRepository,
@@ -216,10 +251,12 @@ namespace Client.UI
             containerRegistry.RegisterInstance<IFontManagerService>(fontManagerService);
 
             // フォントのアクティベート通知サービス
+            Logger.Debug("Shell#RegisterTypes:フォントのアクティベート通知サービス");
             var fontNotificationService = new FontNotificationService(fontManagerService);
             containerRegistry.RegisterInstance<IFontNotificationService>(fontNotificationService);
 
             // 通知受信処理
+            Logger.Debug("Shell#RegisterTypes:通知受信処理");
             var receiveNotificationRepository = new ReceiveNotificationAPIRepository(
                 apiConfiguration,
                 userStatusFileRepository,
@@ -227,36 +264,45 @@ namespace Client.UI
             containerRegistry.RegisterInstance<IReceiveNotificationRepository>(receiveNotificationRepository);
 
             // キャッシュ情報 FUNCTION_08_02_01(お客様情報取得APIのレスポンス)
+            Logger.Debug("Shell#RegisterTypes:キャッシュ情報 FUNCTION_08_02_01(お客様情報取得APIのレスポンス)");
             containerRegistry.RegisterInstance<ICustomerRepository>(
                 new CustomerFileRepository(Path.Combine(UserDataDirectory, "FUNCTION_08_02_01.dat"), new CustomerAPIRepository(apiConfiguration)));
 
             // キャッシュ情報 FUNCTION_08_03_02(契約情報取得APIのレスポンス)
+            Logger.Debug("Shell#RegisterTypes:キャッシュ情報 FUNCTION_08_03_02(契約情報取得APIのレスポンス)");
             var contractsAggregateFileRepository = new ContractsAggregateFileRepository(Path.Combine(UserDataDirectory, "FUNCTION_08_03_02.dat"), new ContractsAggregateAPIRepository(apiConfiguration));
 
             // キャッシュ情報 FUNCTION_08_05_02(クライアントアプリの起動Ver情報取得APIのレスポンス)
+            Logger.Debug("Shell#RegisterTypes:キャッシュ情報 FUNCTION_08_05_02(クライアントアプリの起動Ver情報取得APIのレスポンス)");
             var clientApplicationVersionFileRepository = new ClientApplicationVersionFileRepository(Path.Combine(UserDataDirectory, "FUNCTION_08_05_02.dat"), clientApplicationVersionAPIRepository);
 
             // 認証サービス
+            Logger.Debug("Shell#RegisterTypes:認証サービス");
             containerRegistry.RegisterInstance<IAuthenticationService>(
                 new AuthenticationService((Application.Current as PrismApplication).Container));
 
             // 更新プログラムダウンロードサービス
+            Logger.Debug("Shell#RegisterTypes:更新プログラムダウンロードサービス");
             var applicationDownloadService = new ApplicationDownloadService(resourceWrapper, volatileSettingMemoryRepository, applicationRuntimeRepository, (IAPIConfiguration)apiConfiguration);
             containerRegistry.RegisterInstance<IApplicationDownloadService>(applicationDownloadService);
 
             // プロセス実施サービス
+            Logger.Debug("Shell#RegisterTypes:プロセス実施サービス");
             var startProcessService = new StartProcessService(resourceWrapper);
             containerRegistry.RegisterInstance<IStartProcessService>(startProcessService);
 
             // プログラムアップデートサービス
+            Logger.Debug("Shell#RegisterTypes:プログラムアップデートサービス");
             var applicationUpdateService = new ApplicationUpdateService(resourceWrapper, volatileSettingMemoryRepository, clientApplicationVersionFileRepository, applicationRuntimeRepository, startProcessService);
             containerRegistry.RegisterInstance<IApplicationUpdateService>(applicationUpdateService);
 
             // デバイスモードサービス
+            Logger.Debug("Shell#RegisterTypes:デバイスモードサービス");
             var deviceModeService = new DeviceModeService(deviceModeSettingRepository, deviceModeFontListRepository, deviceModeLicenseInfoRepository, deviceModeLicenseInfoAPIRepository, startProcessService, fontInfoRepository);
             containerRegistry.RegisterInstance<IDeviceModeService>(deviceModeService);
 
             // アプリケーションコンポーネントを生成
+            Logger.Debug("Shell#RegisterTypes:アプリケーションコンポーネントを生成");
             this.componentManager = new ComponentManager();
             this.componentManager.SetMultiplePreventionInfo(MultiplePrevention);
             var componentManagerWrapper = new ComponentManagerWrapper();
@@ -302,6 +348,7 @@ namespace Client.UI
             };
 
             // 起動時処理サービス
+            Logger.Debug("Shell#RegisterTypes:起動時処理サービス");
             var startupService = new StartupService(
                 resourceWrapper,
                 applicationVersionService,
@@ -320,6 +367,7 @@ namespace Client.UI
             containerRegistry.RegisterInstance<IStartupService>(startupService);
 
             // 定期確認処理
+            Logger.Debug("Shell#RegisterTypes:定期確認処理");
             containerRegistry.RegisterInstance<IFixedTermScheduler>(
                 new FixedTermScheduler(
                     applicationSetting.FixedTermConfirmationInterval,
@@ -359,6 +407,7 @@ namespace Client.UI
                     MultiplePrevention));
 
             // APIに強制ログアウト処理を持たせる
+            Logger.Debug("Shell#RegisterTypes:APIに強制ログアウト処理を持たせる");
             apiConfiguration.ForceLogout = () =>
             {
                 Current.Dispatcher.Invoke(() =>
@@ -366,6 +415,8 @@ namespace Client.UI
                     this.componentManager.ForcedLogout();
                 });
             };
+
+            Logger.Debug("Shell#RegisterTypes:Exit");
         }
 
         /// <summary>
@@ -374,6 +425,8 @@ namespace Client.UI
         /// <param name="e">StartupEventArgs</param>
         protected override void OnStartup(StartupEventArgs e)
         {
+            Logger.Debug("Shell#OnStartup:Enter");
+
             base.OnStartup(e);
 
             // コンテナに登録したオブジェクトを取得する
@@ -390,6 +443,7 @@ namespace Client.UI
             this.OutputClearUserData();
 
             // [ユーザー別保存：デバイスモード]を取得する
+            Logger.Debug("Shell#OnStartup:ユーザー別保存：デバイスモード]を取得する");
             if (userStatusRepository.GetStatus().IsDeviceMode)
             {
                 // コンテナに登録したオブジェクトを取得する
@@ -408,6 +462,7 @@ namespace Client.UI
                 catch (InvalidOperationException invalidEx)
                 {
                     // アプリケーションを終了する
+                    Logger.Debug("Shell#OnStartup:アプリケーションを終了する");
                     Logger.Error(invalidEx.StackTrace);
                     ToastNotificationWrapper.Show("LETSオフライン専用アプリ", invalidEx.Message);
                     Shell shell = (Shell)(System.Windows.Application.Current as PrismApplication);
@@ -418,17 +473,22 @@ namespace Client.UI
                     Logger.Error(ex.StackTrace);
                 }
 
+                Logger.Debug("Shell#OnStartup:return");
+
                 return;
             }
 
             // [ユーザー別保存：ログイン状態]を取得する
+            Logger.Debug("Shell#OnStartup:[ユーザー別保存：ログイン状態]を取得する");
             Logger.Debug(string.Format("OnStartup:[ユーザー別保存：ログイン状態]を取得する", string.Empty));
             if (userStatusRepository.GetStatus().IsLoggingIn)
             {
                 // 状態表示：ログイン中を表示する
+                Logger.Debug("Shell#OnStartup:状態表示：ログイン中を表示する");
                 this.componentManager.QuickMenu.ShowLoginStatus();
 
                 // アップデート状態確認：アップデート完了を表示する
+                Logger.Debug("Shell#OnStartup:アップデート状態確認：アップデート完了を表示する");
                 var applicationRuntimeRepository = container.Resolve<IApplicationRuntimeRepository>();
                 var nextVersionInstaller = applicationRuntimeRepository.GetApplicationRuntime().NextVersionInstaller;
                 if (nextVersionInstaller != null && nextVersionInstaller.DownloadStatus == DownloadStatus.Update)
@@ -446,16 +506,20 @@ namespace Client.UI
                 }
 
                 // クイックメニューを設定
+                Logger.Debug("Shell#OnStartup:クイックメニューを設定");
                 this.componentManager.ApplicationIcon.Enabled = true;
 
                 // ユーザー配下のフォントフォルダ
+                Logger.Debug("Shell#OnStartup:ユーザー配下のフォントフォルダ");
                 var local = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
                 var userFontsDir = @$"{local}\Microsoft\Windows\Fonts";
 
                 // フォント一覧の更新
+                Logger.Debug("Shell#OnStartup:フォント一覧の更新");
                 fontService.UpdateFontsList(userFontsDir);
 
                 // 起動時チェック処理
+                Logger.Debug("Shell#OnStartup:起動時チェック処理");
                 var receiveNotificationRepository = container.Resolve<IReceiveNotificationRepository>();
                 var volatileSettingRepository = container.Resolve<IVolatileSettingRepository>();
                 var startupService = container.Resolve<IStartupService>();
@@ -471,22 +535,28 @@ namespace Client.UI
                     MultiplePrevention))
                 {
                     // 起動時チェック処理が処理済みとなった場合、通知受信処理を開始する
+                    Logger.Debug("Shell#OnStartup:起動時チェック処理が処理済みとなった場合、通知受信処理を開始する");
                     receiveNotificationRepository.Start(volatileSettingRepository.GetVolatileSetting().AccessToken, userStatusRepository.GetStatus().DeviceId);
                 }
             }
             else
             {
                 // ログアウト中の場合、LETSフォントをディアクティベートし、[フォント：フォント一覧]に保存
+                Logger.Debug("Shell#OnStartup:ログアウト中の場合、LETSフォントをディアクティベートし、[フォント：フォント一覧]に保存");
                 Logger.Debug("OnStartup:ログアウト中の場合、LETSフォントをディアクティベートし、[フォント：フォント一覧]に保存");
                 fontService.DeactivateSettingFonts();
             }
 
             // アイコン表示ルールに従いアイコンを設定
+            Logger.Debug("Shell#OnStartup:アイコン表示ルールに従いアイコンを設定");
             this.componentManager.SetIcon();
 
             // 定期確認処理の開始
+            Logger.Debug("Shell#OnStartup:定期確認処理の開始");
             var fixedTermScheduler = container.Resolve<IFixedTermScheduler>();
             fixedTermScheduler.Start();
+
+            Logger.Debug("Shell#OnStartup:Exit");
         }
 
         private static bool isOutputClearUserData = false;
@@ -495,6 +565,8 @@ namespace Client.UI
 
         private void OutputClearUserData()
         {
+            Logger.Debug("Shell#OutputClearUserData:Enter");
+
             Logger.Info("OutputClearUserData:Enter");
             try
             {
@@ -539,6 +611,8 @@ namespace Client.UI
                 Logger.Error(ex.StackTrace);
             }
             Logger.Info("OutputClearUserData:Exit");
+
+            Logger.Debug("Shell#OutputClearUserData:Exit");
         }
 
         /// <summary>
@@ -546,6 +620,8 @@ namespace Client.UI
         /// </summary>
         private string GetUserRegID()
         {
+            Logger.Debug("Shell#GetUserRegID:Enter");
+
             string username = Environment.UserName;
 
             if (string.IsNullOrEmpty(userRegID))
@@ -589,6 +665,8 @@ namespace Client.UI
                 userRegID = username.Replace(' ', '_');
             }
 
+            Logger.Debug("Shell#GetUserRegID:Exit");
+
             return userRegID;
         }
 
@@ -599,6 +677,8 @@ namespace Client.UI
         /// <param name="isHidden">隠し属性フラグ</param>
         private void SetHidden(string filepath, bool isHidden)
         {
+            Logger.Debug("Shell#SetHidden:Enter");
+
             try
             {
                 FileAttributes fa = System.IO.File.GetAttributes(filepath);
@@ -617,10 +697,14 @@ namespace Client.UI
             {
                 Logger.Debug("SetHidden:" + ex.StackTrace);
             }
+
+            Logger.Debug("Shell#SetHidden:Exit");
         }
 
         private void SetFileAccessEveryone(string path)
         {
+            Logger.Debug("Shell#SetFileAccessEveryone:Enter");
+
             try
             {
                 FileSystemAccessRule rule = new FileSystemAccessRule(
@@ -636,6 +720,8 @@ namespace Client.UI
             {
                 Logger.Debug("SetFileAccessEveryone:" + ex.StackTrace);
             }
+
+            Logger.Debug("Shell#SetFileAccessEveryone:Exit");
         }
 
         /// <summary>
@@ -644,9 +730,14 @@ namespace Client.UI
         /// <param name="e">ExitEventArgs</param>
         protected override void OnExit(ExitEventArgs e)
         {
+            Logger.Debug("Shell#OnExit:Enter");
+
             base.OnExit(e);
 
             this.componentManager.Dispose();
+
+            Logger.Debug("Shell#OnExit:Exit");
+
         }
 
         /// <summary>
@@ -666,6 +757,8 @@ namespace Client.UI
         /// <param name="e">UnhandledExceptionEventArgs</param>
         private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
+            Logger.Debug("Shell#CurrentDomain_UnhandledException:Enter");
+
             // 例外発生時、エラーを通知する
             var exception = e.ExceptionObject as Exception;
             ExceptionNotifier.Notify(exception);
@@ -673,6 +766,8 @@ namespace Client.UI
             // アプリケーションを終了する
             Shell shell = (Shell)(System.Windows.Application.Current as PrismApplication);
             shell.Shutdown();
+
+            Logger.Debug("Shell#CurrentDomain_UnhandledException:Exit");
         }
 
         /// <summary>
@@ -681,12 +776,16 @@ namespace Client.UI
         /// </summary>
         private static void Application_ThreadException(object sender, ThreadExceptionEventArgs e)
         {
+            Logger.Debug("Shell#Application_ThreadException:Enter");
+
             // 例外発生時、エラーを通知する
             ExceptionNotifier.Notify(e.Exception);
 
             // アプリケーションを終了する
             Shell shell = (Shell)(System.Windows.Application.Current as PrismApplication);
             shell.Shutdown();
+
+            Logger.Debug("Shell#Application_ThreadException:Exit");
         }
 
         /// <summary>
@@ -694,6 +793,8 @@ namespace Client.UI
         /// </summary>
         private void SetLogAccessEveryone()
         {
+            Logger.Debug("Shell#SetLogAccessEveryone:Enter");
+
             try
             {
                 // ホームドライブの取得
@@ -729,10 +830,13 @@ namespace Client.UI
                     System.IO.FileSystemAclExtensions.SetAccessControl(new FileInfo(debuglog), sec);
                 }
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 // NOP
+                Logger.Error(e.StackTrace);
             }
+
+            Logger.Debug("Shell#SetLogAccessEveryone:Exit");
         }
     }
 }

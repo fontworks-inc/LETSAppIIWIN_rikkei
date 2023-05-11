@@ -14,9 +14,11 @@ namespace ApplicationService.Interfaces
         /// </summary>
         IList<string> FixedTermCheck(bool isStartup);
 
-        IList<string> UninstallFonts(IList<string> uninstallFontList, string messageHead);
+        IList<string> UninstallFonts(IList<string> uninstallFontList, string messageHead, IList<string> repairRegKeyList);
 
-        IList<string> InstallFonts(string tempPath);
+        IList<string> InstallFonts(string tempPath, IList<string> repairRegKeyList);
+
+        IList<string> CheckRepairRegistory();
 
         IDictionary<string, int> LetsNameKindMap();
 

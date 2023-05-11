@@ -109,6 +109,7 @@ namespace ApplicationService.Fonts
             IFontActivationService fontActivationService,
             IFontFileRepository fontInfoRepository = null)
         {
+            Logger.Debug("FontManagerService#Constructor:Enter");
             this.resourceWrapper = resourceWrapper;
             this.applicationSettingRepository = applicationSettingRepository;
             this.volatileSettingRepository = volatileSettingRepository;
@@ -117,6 +118,7 @@ namespace ApplicationService.Fonts
             this.fontsRepository = fontsRepository;
             this.fontActivationService = fontActivationService;
             this.fontInfoRepository = fontInfoRepository;
+            Logger.Debug("FontManagerService#Constructor:Exit");
         }
 
         /// <summary>
@@ -153,6 +155,7 @@ namespace ApplicationService.Fonts
         /// <remarks>アクティベート通知からの同期処理</remarks>
         public void Synchronize(ActivateFont font)
         {
+            Logger.Debug("FontManagerService#Synchronize:Enter");
             InstallFont installFont = null;
 
             // 保持しているフォントからアクティベート対象フォントとIDが一致するフォントを取得する
@@ -203,11 +206,13 @@ namespace ApplicationService.Fonts
             if (!this.userStatusRepository.GetStatus().IsLoggingIn)
             {
                 // ログアウトされていたら処理を行わない
+                Logger.Debug("FontManagerService#Synchronize:return ログアウトされていたら処理を行わない");
                 return;
             }
 
             if (installFont == null)
             {
+                Logger.Debug("FontManagerService#Synchronize:return installFont == null");
                 return;
             }
 
@@ -246,9 +251,12 @@ namespace ApplicationService.Fonts
                     }
                 });
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                Logger.Error(e.StackTrace);
             }
+
+            Logger.Debug("FontManagerService#Synchronize:Exit");
         }
 
         /// <summary>
@@ -258,6 +266,8 @@ namespace ApplicationService.Fonts
         /// <remarks>アクティベート通知以外からの同期処理</remarks>
         public void Synchronize(bool startUp)
         {
+            Logger.Debug("FontManagerService#Synchronize:Enter");
+
             // 起動時のみ下記処理を実施
             if (startUp)
             {
@@ -299,6 +309,7 @@ namespace ApplicationService.Fonts
             if (installFontInformations == null || installFontInformations.Count() == 0)
             {
                 // インストール対象フォントが存在しない
+                Logger.Debug("FontManagerService#Synchronize:return インストール対象フォントが存在しない");
                 return;
             }
 
@@ -347,6 +358,8 @@ namespace ApplicationService.Fonts
             {
                 Logger.Debug("Synchronize:" + ex.Message + "\n" + ex.StackTrace);
             }
+
+            Logger.Debug("FontManagerService#Synchronize:Exit");
         }
 
         /// <inheritdoc/>
@@ -361,6 +374,8 @@ namespace ApplicationService.Fonts
         /// <remarks>保存ファイル内のアクティベートフォントを一括でディアクティベートする</remarks>
         public void DeactivateSettingFonts()
         {
+            Logger.Debug("FontManagerService#DeactivateSettingFonts:Enter");
+
             // [フォント：フォント情報]でアクティベートされているLETSフォントをディアクティベート
             var setting = this.userFontsSettingRepository.GetUserFontsSetting();
             setting.Fonts = setting.Fonts
@@ -376,11 +391,15 @@ namespace ApplicationService.Fonts
 
             // 保存処理
             this.userFontsSettingRepository.SaveUserFontsSetting(setting);
+
+            Logger.Debug("FontManagerService#DeactivateSettingFonts:Exit");
         }
 
         /// <inheritdoc/>
         public void UninstallDeactivatedFonts()
         {
+            Logger.Debug("FontManagerService#UninstallDeactivatedFonts:Enter");
+
             // [フォント：フォント情報]でディアクティベートされているLETSフォントを削除
             var setting = this.userFontsSettingRepository.GetUserFontsSetting();
             setting.Fonts = setting.Fonts
@@ -396,6 +415,8 @@ namespace ApplicationService.Fonts
 
             // 保存処理
             this.userFontsSettingRepository.SaveUserFontsSetting(setting);
+
+            Logger.Debug("FontManagerService#UninstallDeactivatedFonts:Exit");
         }
 
         /// <summary>
@@ -405,17 +426,23 @@ namespace ApplicationService.Fonts
         /// <remark>フォントディアクティベート通知での呼び出し用</remark>
         public void DeactivateFont(string fontId)
         {
+            Logger.Debug("FontManagerService#DeactivateFont:Enter");
+
             UserFontsSetting userFontsSetting = this.userFontsSettingRepository.GetUserFontsSetting();
             Font font = userFontsSetting.Fonts.Where(font => this.FormatFontID(font.Id).Equals(this.FormatFontID(fontId))).FirstOrDefault();
             if (font != null)
             {
                 this.fontActivationService.Deactivate(font);
             }
+
+            Logger.Debug("FontManagerService#DeactivateFont:Exit");
         }
 
         /// <inheritdoc/>
         public void CheckFontsList()
         {
+            Logger.Debug("FontManagerService#CheckFontsList:Enter");
+
             lock (CheckFontListLockHandler)
             {
                 // ユーザー配下のフォントフォルダ
@@ -424,6 +451,7 @@ namespace ApplicationService.Fonts
 
                 if (!Directory.Exists(userFontsDir))
                 {
+                    Logger.Debug($"FontManagerService#CheckFontsList:return !Directory.Exists({userFontsDir})");
                     return;
                 }
 
@@ -441,11 +469,14 @@ namespace ApplicationService.Fonts
                         this.Synchronize(false);
                     }
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
                     // NOP
+                    Logger.Error(e.StackTrace);
                 }
             }
+
+            Logger.Debug("FontManagerService#CheckFontsList:Exit");
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.OrderingRules", "SA1201:Elements should appear in the correct order", Justification = "<保留中>")]
@@ -457,6 +488,7 @@ namespace ApplicationService.Fonts
         /// <param name="userFontsDir">ユーザーフォントのディレクトリ</param>
         public void UpdateFontsList(string userFontsDir)
         {
+            Logger.Debug("FontManagerService#UpdateFontsList:Enter");
             lock (lockUpdateFontList)
             {
                 if (this.fontInfoRepository == null)
@@ -466,6 +498,7 @@ namespace ApplicationService.Fonts
 
                 if (!Directory.Exists(userFontsDir))
                 {
+                    Logger.Debug("FontManagerService#UpdateFontsList:return");
                     return;
                 }
 
@@ -480,6 +513,7 @@ namespace ApplicationService.Fonts
                     var updateFonts = new List<Font>();
                     foreach (string filePath in files)
                     {
+                        Logger.Debug($"FontManagerService#UpdateFontsList:{filePath}");
                         try
                         {
                             var savedFont = fonts.FirstOrDefault(f => f.Path == filePath);
@@ -495,11 +529,14 @@ namespace ApplicationService.Fonts
                     // 保存
                     this.userFontsSettingRepository.SaveUserFontsSetting(new UserFontsSetting() { Fonts = updateFonts });
                 }
-                catch (System.IO.DirectoryNotFoundException)
+                catch (System.IO.DirectoryNotFoundException ex)
                 {
+                    Logger.Error(ex.StackTrace);
                     return;
                 }
             }
+
+            Logger.Debug("FontManagerService#UpdateFontsList:exit");
         }
 
         /// <summary>
@@ -535,6 +572,8 @@ namespace ApplicationService.Fonts
         /// <param name="contracts">契約情報の集合体</param>
         public void DeactivateExpiredFonts(IList<Contract> contracts)
         {
+            Logger.Debug("FontManagerService#DeactivateExpiredFonts:Enter");
+
             // 有効な契約終了日の契約情報(「契約終了日」が過ぎていない契約情報)を取得する
             var now = DateTime.Now;
             var today = new DateTime(now.Year, now.Month, now.Day);
@@ -637,16 +676,21 @@ namespace ApplicationService.Fonts
                     this.fontActivationService.Uninstall(font);
                 }
             }
+
+            Logger.Debug("FontManagerService#DeactivateExpiredFonts:Exit");
         }
 
         private void UpdateFontInfo(InstallFontBase installFont)
         {
+            Logger.Debug("FontManagerService#UpdateFontInfo:Enter");
+
             var setting = this.userFontsSettingRepository.GetUserFontsSetting();
             IList<Font> userFonts = setting.Fonts;
             Font userFont = userFonts.Where(userFont => this.FormatFontID(userFont.Id).Equals(this.FormatFontID(installFont.FontId))).FirstOrDefault();
 
             if (userFont == null)
             {
+                Logger.Debug("FontManagerService#UpdateFontInfo:return");
                 return;
             }
 
@@ -670,6 +714,8 @@ namespace ApplicationService.Fonts
             {
                 this.userFontsSettingRepository.SaveUserFontsSetting(setting);
             }
+
+            Logger.Debug("FontManagerService#UpdateFontInfo:Exit");
         }
 
         /// <summary>
@@ -679,6 +725,8 @@ namespace ApplicationService.Fonts
         /// <param name="installFontInformations">インストール対象フォント情報</param>
         private void CollectInstallTargetFontFromFontInfomations(bool startUp, IList<InstallFont> installFontInformations)
         {
+            Logger.Debug("FontManagerService#CollectInstallTargetFontFromFontInfomations:Enter");
+
             // 取得した各フォント情報と内部に保持するフォント情報を比較する
             UserFontsSetting settings = this.userFontsSettingRepository.GetUserFontsSetting();
             IList<Font> userFonts = settings.Fonts;
@@ -797,6 +845,8 @@ namespace ApplicationService.Fonts
                     }
                 }
             }
+
+            Logger.Debug("FontManagerService#CollectInstallTargetFontFromFontInfomations:Exit");
         }
 
         private string FormatFontID(string fontId)
@@ -816,6 +866,8 @@ namespace ApplicationService.Fonts
         private async void DownloadFontFile(IList<InstallFont> installFontList)
 #pragma warning restore CS1998 // 非同期メソッドは、'await' 演算子がないため、同期的に実行されます
         {
+            Logger.Debug("FontManagerService#DownloadFontFile:Enter");
+
             lock (DownloadFontLockHandler)
             {
                 // インストール対象フォントが存在する場合のみ下記処理を実施する
@@ -855,6 +907,7 @@ namespace ApplicationService.Fonts
                             notEnoughCapacityMessage = DateTime.Now;
                         }
 
+                        Logger.Debug("FontManagerService#DownloadFontFile:return");
                         return;
                     }
 
@@ -930,6 +983,8 @@ namespace ApplicationService.Fonts
                     }
                 }
             }
+
+            Logger.Debug("FontManagerService#DownloadFontFile:Exit");
         }
 
         /// <summary>
@@ -940,6 +995,8 @@ namespace ApplicationService.Fonts
         /// <returns>更新後のフォント情報</returns>
         private Font UpdateSavedFont(string filePath, Font savedFont)
         {
+            Logger.Debug("FontManagerService#UpdateSavedFont:Enter");
+
             // [フォント一覧]に存在する場合
             if (savedFont.IsLETS)
             {
@@ -967,6 +1024,7 @@ namespace ApplicationService.Fonts
             }
 
             // 更新用のフォント
+            Logger.Debug("FontManagerService#UpdateSavedFont:Exit");
             return savedFont;
         }
 
@@ -977,6 +1035,8 @@ namespace ApplicationService.Fonts
         /// <returns>フォント情報</returns>
         private Font CreateFont(string filePath)
         {
+            Logger.Debug("FontManagerService#CreateFonr Enter");
+
             // [フォント一覧]に存在しない場合、識別子確認のDLLを介し情報を取得する
             var idInfo = this.fontInfoRepository.GetFontInfo(filePath);
 
@@ -993,11 +1053,14 @@ namespace ApplicationService.Fonts
                 new List<string>(),
                 false);
 
+            Logger.Debug($"FontManagerService#CreateFonr Exit({addFont.DisplayName})");
             return addFont;
         }
 
         private bool FontExitsInUserFonts(string filename)
         {
+            Logger.Debug("FontManagerService#FontExitsInUserFonts Enter");
+
             try
             {
                 // ユーザー配下のフォントフォルダ
@@ -1006,10 +1069,12 @@ namespace ApplicationService.Fonts
 
                 if (!Directory.Exists(userFontsDir))
                 {
+                    Logger.Debug("FontManagerService#FontExitsInUserFonts return false");
                     return false;
                 }
 
                 string fontpath = Path.Combine(userFontsDir, filename);
+                Logger.Debug("FontManagerService#FontExitsInUserFonts return Exists");
                 return File.Exists(fontpath);
             }
             catch (Exception ex)
@@ -1017,6 +1082,7 @@ namespace ApplicationService.Fonts
                 Logger.Error(ex.StackTrace);
             }
 
+            Logger.Debug("FontManagerService#FontExitsInUserFonts return false");
             return false;
         }
     }

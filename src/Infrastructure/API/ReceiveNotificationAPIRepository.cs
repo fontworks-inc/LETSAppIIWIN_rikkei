@@ -79,9 +79,11 @@ namespace Infrastructure.API
             IFontNotificationService fontNotificationService)
             : base(apiConfiguration)
         {
+            Logger.Debug("ReceiveNotificationAPIRepository#Constructor:Enter");
             this.userStatusRepository = userStatusRepository;
             this.fontNotificationService = fontNotificationService;
             this.emitter = this.MessageHandler;
+            Logger.Debug("ReceiveNotificationAPIRepository#Constructor:Exit");
         }
 
         /// <summary>
@@ -92,6 +94,8 @@ namespace Infrastructure.API
         /// <returns>SSE接続の成否</returns>
         public bool Start(string accessToken, string deviceid)
         {
+            Logger.Debug("ReceiveNotificationAPIRepository#Start:Enter");
+
             if (this.client == null)
             {
                 HttpClientHandler ch = new HttpClientHandler();
@@ -130,21 +134,27 @@ namespace Infrastructure.API
 
             Task.Run(() => this.Sbscriber(this.client, request));
 
+            Logger.Debug("ReceiveNotificationAPIRepository#Start:return");
             return true;
         }
 
         private string GetUserAgent()
         {
+            Logger.Debug("ReceiveNotificationAPIRepository#GetUserAgent:Enter");
+
             VolatileSetting vSetting = new VolatileSettingMemoryRepository().GetVolatileSetting();
 
             if (!string.IsNullOrEmpty(vSetting.UserAgent))
             {
+                Logger.Debug($"ReceiveNotificationAPIRepository#GetUserAgent:return ({vSetting.UserAgent})");
                 return vSetting.UserAgent;
             }
 
             var useragent = this.APIConfiguration.GetUserAgent(vSetting.ClientApplicationPath);
 
             vSetting.UserAgent = useragent;
+
+            Logger.Debug($"ReceiveNotificationAPIRepository#GetUserAgent:return ({vSetting.UserAgent})");
             return vSetting.UserAgent;
         }
 
@@ -154,6 +164,8 @@ namespace Infrastructure.API
         [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.OrderingRules", "SA1202:Elements should be ordered by access", Justification = "<保留中>")]
         public void Stop()
         {
+            Logger.Debug("ReceiveNotificationAPIRepository#Stop:Enter");
+
             if (this.subscribed)
             {
                 try
@@ -168,6 +180,8 @@ namespace Infrastructure.API
 
             this.subscribed = false;
             Logger.Warn("SSE Stop:subscribed = false");
+
+            Logger.Debug("ReceiveNotificationAPIRepository#Stop:Exit");
         }
 
         /// <summary>

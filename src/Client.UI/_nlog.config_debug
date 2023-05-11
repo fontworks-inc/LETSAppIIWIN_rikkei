@@ -44,6 +44,6 @@
     <!-- Microsoftのログ(致命的でないもの=Info以下)はスキップする -->
     <logger name="Microsoft.*" maxlevel="Info" final="true" />
     <logger name="*" minlevel="Warn" writeTo="release" />
-    <logger name="*" minlevel="Info" writeTo="debug" />
+    <logger name="*" minlevel="Debug" writeTo="debug" />
   </rules>
 </nlog>

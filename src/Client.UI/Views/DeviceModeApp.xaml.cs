@@ -548,57 +548,72 @@ namespace Client.UI.Views
         /// </summary>
         private void InstallButton_Click(object sender, RoutedEventArgs e)
         {
-            // フォントファイルのパスを取得する
-            var deviceModeSetting = this.deviceModeSettingRepository.GetDeviceModeSetting();
-            string filePath = deviceModeSetting.FontFilePath;
-            if (!string.IsNullOrEmpty(filePath))
-            {
-                string zipPassword = this.deviceModeLicenseInfoRepository.GetDeviceModeLicenseInfo().ZipPassword;
+            // 一時フォルダを作成する
+            string tempPath = System.IO.Path.GetTempPath();
+            tempPath = System.IO.Path.Combine(tempPath, Guid.NewGuid().ToString());
+            Directory.CreateDirectory(tempPath);
 
-                if (!string.IsNullOrEmpty(zipPassword))
+            try
+            {
+                // リペアが必要なレジストリ一覧を取得する
+                IList<string> repairRegKeyList = this.deviceModeService.CheckRepairRegistory();
+
+                // フォントファイルのパスを取得する
+                var deviceModeSetting = this.deviceModeSettingRepository.GetDeviceModeSetting();
+                string filePath = deviceModeSetting.FontFilePath;
+                if (!string.IsNullOrEmpty(filePath))
                 {
-                    // 一時フォルダを作成する
-                    string tempPath = System.IO.Path.GetTempPath();
-                    tempPath = System.IO.Path.Combine(tempPath, Guid.NewGuid().ToString());
-                    Directory.CreateDirectory(tempPath);
-                    try
+                    string zipPassword = this.deviceModeLicenseInfoRepository.GetDeviceModeLicenseInfo().ZipPassword;
+
+                    if (!string.IsNullOrEmpty(zipPassword))
                     {
-                        // フォントファイルをUNZIPする
                         try
                         {
-                            SZManager.ExtractWithPassword(filePath, tempPath, zipPassword);
+                            // フォントファイルをUNZIPする
+                            try
+                            {
+                                SZManager.ExtractWithPassword(filePath, tempPath, zipPassword);
+                            }
+                            catch (Exception ex)
+                            {
+                                Logger.Error(ex.StackTrace);
+
+                                // 解凍に失敗した場合、通知を表示する。
+                                this.ToastShow("フォントインストール失敗", "フォントのインストールに失敗しました。正しいフォントファイルを選択してください。");
+                                return;
+                            }
+
+                            IList<string> messageList = this.deviceModeService.InstallFonts(tempPath, repairRegKeyList);
+                            if (messageList.Count > 0)
+                            {
+                                foreach (string message in messageList)
+                                {
+                                    this.ToastShow("フォントインストール", message);
+                                }
+                            }
+
+                            // アンインストール対象リストを更新する
+                            this.UninstallListDisp();
                         }
                         catch (Exception ex)
                         {
                             Logger.Error(ex.StackTrace);
-
-                            // 解凍に失敗した場合、通知を表示する。
-                            this.ToastShow("フォントインストール失敗", "フォントのインストールに失敗しました。正しいフォントファイルを選択してください。");
-                            return;
                         }
-
-                        IList<string> messageList = this.deviceModeService.InstallFonts(tempPath);
-                        if (messageList.Count > 0)
-                        {
-                            foreach (string message in messageList)
-                            {
-                                this.ToastShow("フォントインストール", message);
-                            }
-                        }
-
-                        // アンインストール対象リストを更新する
-                        this.UninstallListDisp();
-                    }
-                    catch (Exception ex)
-                    {
-                        Logger.Error(ex.StackTrace);
-                    }
-                    finally
-                    {
-                        // 一時フォルダを削除する
-                        this.deviceModeService.DeleteFolder(tempPath);
                     }
                 }
+                else
+                {
+                    // インストールするフォントがない場合でもレジストリ修復だけは行う
+                    if (repairRegKeyList.Count > 0)
+                    {
+                        this.deviceModeService.InstallFonts(tempPath, repairRegKeyList);
+                    }
+                }
+            }
+            finally
+            {
+                // 一時フォルダを削除する
+                this.deviceModeService.DeleteFolder(tempPath);
             }
         }
 
@@ -607,6 +622,9 @@ namespace Client.UI.Views
         /// </summary>
         private void UninstallButton_Click(object sender, RoutedEventArgs e)
         {
+            // リペアが必要なレジストリ一覧を取得する
+            IList<string> repairRegKeyList = this.deviceModeService.CheckRepairRegistory();
+
             // ライセンス情報から、LEST種別名-LETS種別マップを作成する
             DeviceModeLicenseInfo deviceModeLicenseInfo = this.deviceModeLicenseInfoRepository.GetDeviceModeLicenseInfo();
             IDictionary<string, int> letsNameKindMap = this.deviceModeService.LetsNameKindMap();
@@ -640,9 +658,9 @@ namespace Client.UI.Views
                 }
             }
 
-            if (uninstallFontList.Count > 0)
+            if (uninstallFontList.Count > 0 || repairRegKeyList.Count > 0)
             {
-                IList<string> messageList = this.deviceModeService.UninstallFonts(uninstallFontList, "フォントのアンインストールに成功しました。");
+                IList<string> messageList = this.deviceModeService.UninstallFonts(uninstallFontList, "フォントのアンインストールに成功しました。", repairRegKeyList);
 
                 if (messageList.Count > 0)
                 {
@@ -650,9 +668,9 @@ namespace Client.UI.Views
                     {
                         this.ToastShow("フォントアンインストール", message);
                     }
-
-                    this.UninstallListDisp();
                 }
+
+                this.UninstallListDisp();
             }
         }
 

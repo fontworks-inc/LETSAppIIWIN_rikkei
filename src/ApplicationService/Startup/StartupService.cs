@@ -125,6 +125,7 @@ namespace ApplicationService.Startup
             IFontSecurityRepository fontSecurityRepository,
             IFontFileRepository fontInfoRepository)
         {
+            Logger.Debug("StartupService#Constructor(1):Enter");
             this.resourceWrapper = resourceWrapper;
             this.applicationVersionService = applicationVersionService;
             this.startProcessService = startProcessService;
@@ -139,6 +140,7 @@ namespace ApplicationService.Startup
             this.unreadNoticeRepository = unreadNoticeRepository;
             this.fontSecurityRepository = fontSecurityRepository;
             this.fontInfoRepository = fontInfoRepository;
+            Logger.Debug("StartupService#Constructor:Exit");
         }
 
         /// <summary>
@@ -152,9 +154,11 @@ namespace ApplicationService.Startup
             IVolatileSettingRepository volatileSettingRepository,
             IDevicesRepository devicesRepository)
         {
+            Logger.Debug("StartupService#Constructor(2):Enter");
             this.resourceWrapper = resourceWrapper;
             this.volatileSettingRepository = volatileSettingRepository;
             this.devicesRepository = devicesRepository;
+            Logger.Debug("StartupService#Constructor:Exit");
         }
 
         /// <summary>
@@ -181,11 +185,14 @@ namespace ApplicationService.Startup
             DetectionFontCopyEvent detectionFontCopyEvent,
             MultiplePreventionInfo multipleInfo)
         {
+            Logger.Debug("StartupService#IsCheckedStartup:Enter");
+
             try
             {
                 Logger.Info(this.resourceWrapper.GetString("LOG_INFO_StartupService_IsCheckedStartup_Start"));
 
                 // 開始時に起動時チェック処理を「未設定」に設定する
+                Logger.Debug("StartupService#IsCheckedStartup:開始時に起動時チェック処理を「未設定」に設定する");
                 this.volatileSettingRepository.GetVolatileSetting().IsCheckedStartup = false;
 
                 if (this.applicationVersionService == null
@@ -200,20 +207,25 @@ namespace ApplicationService.Startup
                     || this.fontSecurityRepository == null
                     || this.fontInfoRepository == null)
                 {
+                    Logger.Debug("StartupService#IsCheckedStartup:LOG_ERR_StartupService_IsCheckedStartup_InvalidOperationException");
                     throw new InvalidOperationException(this.resourceWrapper.GetString("LOG_ERR_StartupService_IsCheckedStartup_InvalidOperationException"));
                 }
 
                 // 強制アップデートチェックを実施する（実行結果は以降の起動時チェックに影響しない）
+                Logger.Debug("StartupService#IsCheckedStartup:強制アップデートチェックを実施する（実行結果は以降の起動時チェックに影響しない）");
                 this.ForceUpdateCheck(forceUpdateEvent, downloadCompletedEvent);
 
                 // 起動指定バージョンチェックを実施し、起動する別バージョンのクライアントアプリがある場合は起動中のクライアントアプリを終了する
+                Logger.Debug("StartupService#IsCheckedStartup:起動指定バージョンチェックを実施し、起動する別バージョンのクライアントアプリがある場合は起動中のクライアントアプリを終了する");
                 if (!this.StartingVersionCheck(multipleInfo))
                 {
                     shutdownClientApplicationRequiredEvent();
+                    Logger.Debug("StartupService#IsCheckedStartup:shutdownClientApplicationRequiredEvent");
                     return false;
                 }
 
                 // ログイン状態確認処理を実行し、ログアウト中になる場合は以後の起動時チェックを行わない
+                Logger.Debug("StartupService#IsCheckedStartup:ログイン状態確認処理を実行し、ログアウト中になる場合は以後の起動時チェックを行わない");
                 UserStatus userStatus = this.userStatusRepository.GetStatus();
                 if (!userStatus.IsLoggingIn || !this.ConfirmLoginStatus(userStatus.DeviceId, notContainsDeviceEvent))
                 {
@@ -222,12 +234,15 @@ namespace ApplicationService.Startup
                 }
 
                 // 次バージョンチェックを実行し、配信サーバアクセスでエラーが発生したときは以後の起動時チェックを行わない
+                Logger.Debug("StartupService#IsCheckedStartup:次バージョンチェックを実行し、配信サーバアクセスでエラーが発生したときは以後の起動時チェックを行わない");
                 if (!this.NextVersionCheck(existsUpdateProgramEvent, startDownloadEvent))
                 {
+                    Logger.Debug("StartupService#IsCheckedStartup:!NextVersionCheck");
                     return false;
                 }
 
                 // ライセンス更新チェック
+                Logger.Debug("StartupService#IsCheckedStartup:ライセンス更新チェック");
                 ContractsResult contractsResult = this.GetContractsAggregate(userStatus.DeviceId);
                 if (!contractsResult.IsCashed && contractsResult.ContractsAggregate.NeedContractRenewal)
                 {
@@ -239,14 +254,18 @@ namespace ApplicationService.Startup
                 }
 
                 // お知らせ有無チェック
+                Logger.Debug("StartupService#IsCheckedStartup:お知らせ有無チェック");
                 if (!this.ExistsNotificationCheck(existsUnreadNotificationEvent))
                 {
+                    Logger.Debug("StartupService#IsCheckedStartup:!ExistsNotificationCheck");
                     return false;
                 }
 
+                Logger.Debug("StartupService#IsCheckedStartup:Task.Run");
                 Task.Run(() => this.StartupFontCheck(contractsResult.ContractsAggregate.Contracts, detectionFontCopyEvent));
 
                 // 起動時チェック状態の保存(チェックした日時と「処理済みである」という情報)
+                Logger.Debug("StartupService#IsCheckedStartup:起動時チェック状態の保存(チェックした日時と「処理済みである」という情報)");
                 VolatileSetting volatileSetting = this.volatileSettingRepository.GetVolatileSetting();
                 volatileSetting.CheckedStartupAt = DateTime.Now;
                 volatileSetting.IsCheckedStartup = true;
@@ -258,6 +277,7 @@ namespace ApplicationService.Startup
             catch (GetContractsAggregateException e)
             {
                 Logger.Warn(e);
+                Logger.Debug("StartupService#IsCheckedStartup:return false");
                 return false;
             }
         }
@@ -269,11 +289,14 @@ namespace ApplicationService.Startup
         /// <param name="downloadCompletedEvent">ダウンロード完了時に実施するイベント</param>
         public void ForceUpdateCheck(ForceUpdateEvent forceUpdateEvent, DownloadCompletedEvent downloadCompletedEvent)
         {
+            Logger.Debug("StartupService#ForceUpdateCheck:Enter");
+
             // 共通保存情報より「ダウンロード状態」、「強制/任意」を取得
             Installer installer = this.applicationRuntimeRepository.GetApplicationRuntime().NextVersionInstaller;
             if (installer == null)
             {
                 // インストーラ情報がなければアップデート不要
+                Logger.Debug("StartupService#ForceUpdateCheck:return");
                 return;
             }
 
@@ -298,6 +321,8 @@ namespace ApplicationService.Startup
                     downloadCompletedEvent();
                 }
             }
+
+            Logger.Debug("StartupService#ForceUpdateCheck:Exit");
         }
 
         /// <summary>
@@ -307,6 +332,8 @@ namespace ApplicationService.Startup
         /// <returns>再起動が不要な場合true、必要な場合false</returns>
         public bool StartingVersionCheck(MultiplePreventionInfo multipleInfo)
         {
+            Logger.Debug("StartupService#StartingVersionCheck:Enter");
+
             // 起動Ver情報取得APIを呼び出し、「アプリバージョン」（起動指定バージョン）を取得する
             string startingVersion = string.Empty;
             try
@@ -327,6 +354,7 @@ namespace ApplicationService.Startup
             if (string.IsNullOrEmpty(startingVersion))
             {
                 // 起動Verが取得できなければ再起動無しで続行する
+                Logger.Debug("StartupService#StartingVersionCheck:起動Verが取得できなければ再起動無しで続行する");
                 return true;
             }
 
@@ -360,6 +388,7 @@ namespace ApplicationService.Startup
             }
 
             // 再起動不要
+            Logger.Debug("StartupService#StartingVersionCheck:再起動不要");
             return true;
         }
 
@@ -371,6 +400,8 @@ namespace ApplicationService.Startup
         /// <returns>起動時チェック処理を続行する場合はtrue、起動時チェック処理を終了する場合はfalse</returns>
         public bool NextVersionCheck(ExistsUpdateProgramEvent existsUpdateProgramEvent, StartDownloadEvent startDownloadEvent)
         {
+            Logger.Debug("StartupService#NextVersionCheck:Enter");
+
             // 更新情報取得APIを呼び出し、クライアントアプリの更新情報を取得する
             ClientApplicationUpdateInfomation clientApplicationUpdateInfomation = null;
             try
@@ -384,6 +415,7 @@ namespace ApplicationService.Startup
                 Logger.Warn(e, this.resourceWrapper.GetString("LOG_ERR_NextVersionCheck_clientApplicationVersionAPIRepository"));
 
                 // APIでエラーがあった場合、起動時チェックを終了する
+                Logger.Debug("StartupService#NextVersionCheck:APIでエラーがあった場合、起動時チェックを終了する");
                 return false;
             }
 
@@ -393,6 +425,7 @@ namespace ApplicationService.Startup
                 if (this.CheckVersionInstalled(clientApplicationUpdateInfomation.ClientApplicationVersion.Version))
                 {
                     // 次バージョンがインストール済みの時は処理を続行する
+                    Logger.Debug("StartupService#NextVersionCheck:次バージョンがインストール済みの時は処理を続行する");
                     return true;
                 }
 
@@ -426,6 +459,7 @@ namespace ApplicationService.Startup
                 }
             }
 
+            Logger.Debug("StartupService#NextVersionCheck:return true");
             return true;
         }
 
@@ -438,6 +472,8 @@ namespace ApplicationService.Startup
         /// <summary>
         public bool ConfirmLoginStatus(string deviceId, NotContainsDeviceEvent notContainsDeviceEvent)
         {
+            Logger.Debug("StartupService#ConfirmLoginStatus:Enter");
+
             try
             {
                 IList<Device> devices = this.GetAllDevices(deviceId);
@@ -445,30 +481,31 @@ namespace ApplicationService.Startup
                 {
                     Logger.Debug("ConfirmLoginStatus:デバイスリストが存在しない場合ログアウト");
                     notContainsDeviceEvent();
+                    Logger.Debug("StartupService#ConfirmLoginStatus:デバイスリストが存在しない場合ログアウト");
                     return false;
                 }
 
                 if (!devices.Any(device => device.DeviceId == deviceId))
                 {
                     // 自デバイスの情報が含まれていない場合、イベントを実行する
-                    Logger.Debug("ConfirmLoginStatus:自デバイスの情報が含まれていない場合、イベントを実行する");
+                    Logger.Debug("StartupService#ConfirmLoginStatus:自デバイスの情報が含まれていない場合、イベントを実行する");
                     notContainsDeviceEvent();
                     return false;
                 }
 
-                Logger.Debug("ConfirmLoginStatus:true");
+                Logger.Debug("StartupService#ConfirmLoginStatus:return true");
                 return true;
             }
             catch (GetAllDevicesException ex)
             {
                 // 全端末情報を取得で例外が発生した場合は失敗扱い
-                Logger.Debug("ConfirmLoginStatus:全端末情報を取得で例外が発生した場合は失敗扱い：" + ex.StackTrace);
+                Logger.Debug("StartupService#ConfirmLoginStatus:全端末情報を取得で例外が発生した場合は失敗扱い");
                 return false;
             }
             catch (Exception ex)
             {
                 // 全端末情報を取得で例外が発生した場合は失敗扱い
-                Logger.Debug("ConfirmLoginStatus:その他のエラー:" + ex.StackTrace);
+                Logger.Debug("StartupService#ConfirmLoginStatus:その他のエラー");
                 return false;
             }
         }
@@ -480,6 +517,8 @@ namespace ApplicationService.Startup
         /// <returns>起動時チェック処理を続行する場合はtrue、起動時チェック処理を終了する場合はfalse</returns>
         public bool ExistsNotificationCheck(ExistsUnreadNotificationEvent existsUnreadNotificationEvent)
         {
+            Logger.Debug("StartupService#ExistsNotificationCheck:Enter");
+
             // お知らせ情報取得APIを呼び出し、「未読お知らせ情報」を取得する
             UnreadNotice unreadNotice = null;
             try
@@ -498,9 +537,11 @@ namespace ApplicationService.Startup
                 Logger.Warn(e, this.resourceWrapper.GetString("LOG_ERR_ExistsNotificationCheck_unreadNoticeRepository"));
 
                 // APIでエラーが発生した場合、起動時チェック処理を終了する
+                Logger.Debug("StartupService#ExistsNotificationCheck:return false");
                 return false;
             }
 
+            Logger.Debug("StartupService#ExistsNotificationCheck:return true");
             return true;
         }
 
@@ -511,6 +552,7 @@ namespace ApplicationService.Startup
         /// <returns>起動時チェック処理を続行する場合はtrue、起動時チェック処理を終了する場合はfalse</returns>
         public bool FontCopyCheck(DetectionFontCopyEvent detectionFontCopyEvent)
         {
+            Logger.Debug("StartupService#FontCopyCheck:Enter");
             Logger.Warn($"[INFO] FontCopyCheck");
 
             // ユーザID取得APIを呼び出し、ユーザIDを取得する
@@ -526,6 +568,7 @@ namespace ApplicationService.Startup
                 Logger.Warn(e, this.resourceWrapper.GetString("LOG_ERR_FontCopyCheck_fontSecurityRepository_GetUserId"));
 
                 // APIでエラーが発生した場合、起動時チェック処理を終了する
+                Logger.Debug("StartupService#FontCopyCheck:return false");
                 return false;
             }
 
@@ -573,6 +616,7 @@ namespace ApplicationService.Startup
                         Logger.Warn(e, this.resourceWrapper.GetString("LOG_ERR_FontCopyCheck_fontSecurityRepository_PostFontFileCopyDetection"));
 
                         // APIでエラーが発生した場合、起動時チェック処理を終了する
+                        Logger.Debug("StartupService#FontCopyCheck:return false");
                         return false;
                     }
                 }
@@ -585,6 +629,7 @@ namespace ApplicationService.Startup
                             this.volatileSettingRepository.GetVolatileSetting().AccessToken);
             }
 
+            Logger.Debug("StartupService#FontCopyCheck:return true");
             return true;
         }
 
@@ -594,6 +639,8 @@ namespace ApplicationService.Startup
         /// <returns>起動時チェック処理を続行する場合はtrue、起動時チェック処理を終了する場合はfalse</returns>
         public bool DeletedFontCheck()
         {
+            Logger.Debug("StartupService#DeletedFontCheck:Enter");
+
             // APIから削除されたフォント情報を取得する
             IList<InstallFont> deletedFontInformations = null;
             try
@@ -605,12 +652,14 @@ namespace ApplicationService.Startup
                 Logger.Warn(e, this.resourceWrapper.GetString("LOG_ERR_DeletedFontCheck_GetInstallFontInformations"));
 
                 // APIでエラーが発生した場合、起動時チェック処理を終了する
+                Logger.Debug("StartupService#DeletedFontCheck:return false");
                 return false;
             }
 
             if (deletedFontInformations == null || deletedFontInformations.Count == 0)
             {
                 // 削除されたフォントが1件も無ければ処理しない
+                Logger.Debug("StartupService#DeletedFontCheck:return true");
                 return true;
             }
 
@@ -629,6 +678,7 @@ namespace ApplicationService.Startup
                 this.fontManagerService.Uninstall(userFont);
             }
 
+            Logger.Debug("StartupService#DeletedFontCheck:return true");
             return true;
         }
 
@@ -639,18 +689,18 @@ namespace ApplicationService.Startup
         /// <param name="detectionFontCopyEvent">コピーされたフォント発見時の処理</param>
         private async Task StartupFontCheck(IList<Contract> contracts, DetectionFontCopyEvent detectionFontCopyEvent)
         {
-            Logger.Debug("StartupFontCheck:Start");
+            Logger.Debug("StartupService#StartupFontCheck:Enter");
 
             // フォントアクティブ/ディアクティブ情報の同期
-            Logger.Debug("StartupFontCheck:Synchronize:Start");
+            Logger.Debug("StartupService#StartupFontCheck:フォントアクティブ/ディアクティブ情報の同期");
             this.fontManagerService.Synchronize(true);
 
             // 契約切れフォントのディアクティベート
-            Logger.Debug("StartupFontCheck:DeactivateExpiredFonts:Start");
+            Logger.Debug("StartupService#StartupFontCheck:契約切れフォントのディアクティベート");
             this.fontManagerService.DeactivateExpiredFonts(contracts);
 
             // サーバから削除されたフォントの削除チェック
-            Logger.Debug("StartupFontCheck:DeletedFontCheck:Start");
+            Logger.Debug("StartupService#StartupFontCheck:サーバから削除されたフォントの削除チェック");
             this.DeletedFontCheck();
 
             // wait download
@@ -660,15 +710,15 @@ namespace ApplicationService.Startup
                 if (this.fontManagerService.GetIsFirstDownloadCompleted())
                 {
                     // 契約切れフォントのディアクティベート
-                    Logger.Debug("StartupFontCheck:2nd:DeactivateExpiredFonts:Start");
+                    Logger.Debug("StartupService#StartupFontCheck:契約切れフォントのディアクティベート");
                     this.fontManagerService.DeactivateExpiredFonts(contracts);
 
                     // サーバから削除されたフォントの削除チェック
-                    Logger.Debug("StartupFontCheck:2nd:DeletedFontCheck:Start");
+                    Logger.Debug("StartupService#StartupFontCheck:サーバから削除されたフォントの削除チェック");
                     this.DeletedFontCheck();
 
                     // 他端末コピーチェック
-                    Logger.Debug("StartupFontCheck:2nd:FontCopyCheck:Start");
+                    Logger.Debug("StartupService#StartupFontCheck:他端末コピーチェック");
                     this.FontCopyCheck(detectionFontCopyEvent);
 
                     doSecondCheck = true;
@@ -678,7 +728,7 @@ namespace ApplicationService.Startup
                 await Task.Delay(1000);
             }
 
-            Logger.Debug("StartupFontCheck:End");
+            Logger.Debug("StartupService#StartupFontCheck:Exit");
         }
 
         /// <summary>
@@ -686,16 +736,20 @@ namespace ApplicationService.Startup
         /// </summary>
         private bool CheckVersionInstalled(string version)
         {
+            Logger.Debug("StartupService#CheckVersionInstalled:Enter");
+
             // 起動指定バージョンのプログラムフォルダが存在する場合、そちらのクライアントアプリケーションで再起動する
             string versionDirectoryPath = this.applicationVersionService.GetTargetVerisonDirectory(version);
             if (Directory.Exists(versionDirectoryPath))
             {
                 if (File.Exists(Path.Combine(versionDirectoryPath, "LETS.exe")))
                 {
+                    Logger.Debug("StartupService#CheckVersionInstalled:return true");
                     return true;
                 }
             }
 
+            Logger.Debug("StartupService#CheckVersionInstalled:return false");
             return false;
         }
 
@@ -706,10 +760,13 @@ namespace ApplicationService.Startup
         /// <returns>ダウンロード済みである場合はtrue、そうでなければfalse</returns>
         private bool CheckDownloadCompleted(ClientApplicationUpdateInfomation clientApplicationUpdateInfomation)
         {
+            Logger.Debug("StartupService#CheckDownloadCompleted:Enter");
+
             // 共通保存が更新情報を保持していなければ、ダウンロードしていない
             Installer installer = this.applicationRuntimeRepository.GetApplicationRuntime().NextVersionInstaller;
             if (installer == null || string.IsNullOrEmpty(installer.Version))
             {
+                Logger.Debug("StartupService#CheckDownloadCompleted:return false");
                 return false;
             }
 
@@ -718,9 +775,11 @@ namespace ApplicationService.Startup
             string cacheVersion = installer.Version;
             if (!targetVersion.Equals(cacheVersion))
             {
+                Logger.Debug("StartupService#CheckDownloadCompleted:return false");
                 return false;
             }
 
+            Logger.Debug("StartupService#CheckDownloadCompleted:return true");
             return true;
         }
 
@@ -731,9 +790,12 @@ namespace ApplicationService.Startup
         /// <returns>ユーザに紐づく全端末情報(削除済みデータを除く)</returns>
         private IList<Device> GetAllDevices(string deviceId)
         {
+            Logger.Debug("StartupService#GetAllDevices:Enter");
+
             try
             {
                 string accessToken = this.volatileSettingRepository.GetVolatileSetting().AccessToken;
+                Logger.Debug("StartupService#GetAllDevices:return");
                 return this.devicesRepository.GetAllDevices(deviceId, accessToken);
             }
             catch (Exception e)
@@ -751,9 +813,12 @@ namespace ApplicationService.Startup
         /// <returns>契約情報の集合体</returns>
         private ContractsResult GetContractsAggregate(string deviceId)
         {
+            Logger.Debug("StartupService#GetContractsAggregate:Enter");
+
             try
             {
                 string accessToken = this.volatileSettingRepository.GetVolatileSetting().AccessToken;
+                Logger.Debug("StartupService#GetContractsAggregate:return");
                 return new ContractsResult(this.contractsAggregateRepository.GetContractsAggregate(deviceId, accessToken));
             }
             catch (Exception e)
@@ -770,14 +835,18 @@ namespace ApplicationService.Startup
         /// <returns>ユーザーフォントフォルダに存在するファイルパスの集合体</returns>
         private IEnumerable<string> GetFilePathsIntUserFontFile()
         {
+            Logger.Debug("StartupService#GetFilePathsIntUserFontFile:Enter");
+
             var local = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
             var userFontsDir = @$"{local}\Microsoft\Windows\Fonts";
             if (!Directory.Exists(userFontsDir))
             {
                 // 空のリストを返す
+                Logger.Debug("StartupService#GetFilePathsIntUserFontFile:return (空のリストを返す)");
                 return new List<string>();
             }
 
+            Logger.Debug("StartupService#GetFilePathsIntUserFontFile:Exit");
             return Directory.EnumerateFiles(userFontsDir, "*", SearchOption.TopDirectoryOnly);
         }
 
@@ -788,7 +857,9 @@ namespace ApplicationService.Startup
         /// <returns>フォーマットしたユーザID</returns>
         private string FormatUserID6digit0padding(string id)
         {
+            Logger.Debug("StartupService#FormatUserID6digit0padding:Enter");
             string formatedId = "000000" + id;
+            Logger.Debug("StartupService#FormatUserID6digit0padding:Exit");
             return formatedId.Substring(formatedId.Length - 6);
         }
 
@@ -799,7 +870,9 @@ namespace ApplicationService.Startup
         /// <returns>フォーマットしたフォントID</returns>
         private string FormatFontID7digit0padding(string id)
         {
+            Logger.Debug("StartupService#FormatFontID7digit0padding:Enter");
             string formatedId = "0000000" + id;
+            Logger.Debug("StartupService#FormatFontID7digit0padding:Exit");
             return formatedId.Substring(formatedId.Length - 7);
         }
     }

@@ -20,6 +20,8 @@ namespace ApplicationService.DeviceMode
     /// </summary>
     public class DeviceModeService : IDeviceModeService
     {
+        private const string RepairRegKeyList = "RepairRegKey.lst";
+
         /// <summary>
         /// ロガー
         /// </summary>
@@ -67,6 +69,9 @@ namespace ApplicationService.DeviceMode
         /// <returns>チェック結果メッセージを返す</returns>
         public IList<string> FixedTermCheck(bool isStartup)
         {
+            // リペアが必要なレジストリ一覧を取得する
+            IList<string> repairRegKeyList = this.CheckRepairRegistory();
+
             IList<string> messageList = new List<string>();
 
             IDictionary<int, string> letsKindNameMap = this.LetsKindNameMap();  // 契約情報が消える可能性があるため、先に名前を取得しておく
@@ -100,9 +105,9 @@ namespace ApplicationService.DeviceMode
                     }
                 }
 
-                if (uninstallFontList.Count > 0)
+                if (uninstallFontList.Count > 0 || repairRegKeyList.Count > 0)
                 {
-                    this.UninstallFonts(uninstallFontList, string.Empty);
+                    this.UninstallFonts(uninstallFontList, string.Empty, repairRegKeyList);
                 }
             }
 
@@ -201,9 +206,9 @@ namespace ApplicationService.DeviceMode
                     }
                 }
 
-                if (uninstallFontList.Count > 0)
+                if (uninstallFontList.Count > 0 || repairRegKeyList.Count > 0)
                 {
-                    messageList = this.UninstallFonts(uninstallFontList, "ライセンスを再度契約後、インストールしてください。");
+                    messageList = this.UninstallFonts(uninstallFontList, "ライセンスを再度契約後、インストールしてください。", repairRegKeyList);
                 }
             }
 
@@ -215,8 +220,14 @@ namespace ApplicationService.DeviceMode
         /// </summary>
         /// <param name="tempPath">一時フォルダ</param>
         /// <returns>チェック結果メッセージを返す</returns>
-        public IList<string> InstallFonts(string tempPath)
+        public IList<string> InstallFonts(string tempPath, IList<string> repairRegKeyList)
         {
+            if (repairRegKeyList.Count > 0)
+            {
+                string repairRegKeyListFile = System.IO.Path.Combine(tempPath, RepairRegKeyList);
+                File.AppendAllLines(repairRegKeyListFile, repairRegKeyList, Encoding.GetEncoding("shift_jis"));
+            }
+
             IList<string> messageList = new List<string>();
             List<string> fontNameList = new List<string>();
 
@@ -296,7 +307,7 @@ namespace ApplicationService.DeviceMode
                 }
             }
 
-            if (installfontcnt > 0)
+            if (installfontcnt > 0 || repairRegKeyList.Count > 0)
             {
                 // LETSUpdaterを起動してフォントをインストールする
                 this.RunFontOpeProgram("FontInstall", tempPath);
@@ -355,8 +366,9 @@ namespace ApplicationService.DeviceMode
         /// </summary>
         /// <param name="uninstallFontList">アンインストールフォントリスト</param>
         /// <param name="messageHead">メッセージ接頭辞</param>
+        /// <param name="repairRegKeyList">修復が必要なレジストリキーリスト</param>
         /// <returns>チェック結果メッセージを返す</returns>
-        public IList<string> UninstallFonts(IList<string> uninstallFontList, string messageHead)
+        public IList<string> UninstallFonts(IList<string> uninstallFontList, string messageHead, IList<string> repairRegKeyList)
         {
             List<string> messageList = new List<string>();
 
@@ -366,11 +378,17 @@ namespace ApplicationService.DeviceMode
             Directory.CreateDirectory(tempPath);
             try
             {
+                if (repairRegKeyList.Count > 0)
+                {
+                    string repairRegKeyListFile = System.IO.Path.Combine(tempPath, RepairRegKeyList);
+                    File.AppendAllLines(repairRegKeyListFile, repairRegKeyList, Encoding.GetEncoding("shift_jis"));
+                }
+
                 // 削除対象リストファイルを作成する
                 string uninstallFontListFile = System.IO.Path.Combine(tempPath, "UninstallFontInfo.lst");
                 File.AppendAllLines(uninstallFontListFile, uninstallFontList, Encoding.GetEncoding("shift_jis"));
 
-                // LETSUpdaterを起動してフォントをインストールする
+                // LETSUpdaterを起動してフォントをアンインストールする
                 this.RunFontOpeProgram("FontUninstall", tempPath);
 
                 // 結果ファイルを読み込む
@@ -384,7 +402,13 @@ namespace ApplicationService.DeviceMode
                     foreach (string resultLine in resultLines)
                     {
                         string[] resultInfo = resultLine.Split('\t');
-                        switch (resultInfo[3])
+                        string reslutCode = string.Empty;
+                        if (resultInfo.Length >= 4)
+                        {
+                            reslutCode = resultInfo[3];
+                        }
+
+                        switch (reslutCode)
                         {
                             case "OK":
                                 okList.Add(resultInfo[0]);
@@ -466,7 +490,90 @@ namespace ApplicationService.DeviceMode
                 this.DeleteFolder(tempPath);
             }
 
+            // 実ファイルがないフォント情報を削除する
+            this.DeviceModeFontListRepair();
+
             return messageList;
+        }
+
+        /// <summary>
+        /// ユーザレジストリに登録されているキーがないか確認する
+        /// </summary>
+        /// <returns>リペアが必要なレジストリキーリスト</returns>
+        public IList<string> CheckRepairRegistory()
+        {
+            List<string> usrRegList = new List<string>();
+
+            string registryFontsPath = @"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts";
+            var regkey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(registryFontsPath, false);
+            if (regkey != null)
+            {
+                DeviceModeFontList deviceModeFontList = this.DeviceModeFontListRepository.GetDeviceModeFontList();
+                foreach (DeviceModeFontInfo deviceModeFontInfo in deviceModeFontList.Fonts)
+                {
+                    string key = deviceModeFontInfo.RegistryKey;
+                    try
+                    {
+                        string value = (string)regkey.GetValue(key);
+                        if (!string.IsNullOrEmpty(value))
+                        {
+                            // ユーザキーにレジストリが存在した
+                            usrRegList.Add(key);
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        // 無視
+                        Logger.Error(e);
+                    }
+                }
+            }
+
+            return usrRegList;
+        }
+
+        /// <summary>
+        /// 実ファイルが存在しないフォント情報を削除する
+        /// </summary>
+        private int DeviceModeFontListRepair()
+        {
+            int removeCnt = 0;
+
+            try
+            {
+                List<int> removeList = new List<int>();
+                DeviceModeFontList deviceModeFontList = this.DeviceModeFontListRepository.GetDeviceModeFontList();
+                int idx = 0;
+                foreach (DeviceModeFontInfo deviceModeFontInfo in deviceModeFontList.Fonts)
+                {
+                    string fontPath = deviceModeFontInfo.FontFilePath;
+                    if (!File.Exists(fontPath))
+                    {
+                        Logger.Debug($"DeviceModeFontListRepair:ファイルが存在しない:{fontPath}");
+                        removeList.Add(idx);
+                    }
+
+                    idx++;
+                }
+
+                if (removeList.Count > 0)
+                {
+                    removeCnt = removeList.Count;
+                    removeList.Reverse();
+                    foreach (int i in removeList)
+                    {
+                        deviceModeFontList.Fonts.RemoveAt(i);
+                    }
+
+                    this.DeviceModeFontListRepository.SaveDeviceModeFontList(deviceModeFontList);
+                }
+            }
+            catch (Exception e)
+            {
+                Logger.Error(e);
+            }
+
+            return removeCnt;
         }
 
         /// <summary>
