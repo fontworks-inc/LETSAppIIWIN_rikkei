@@ -23,6 +23,7 @@ using Client.UI.Wrappers;
 using Core.Entities;
 using Core.Interfaces;
 using NLog;
+using Org.OpenAPITools.Client;
 using OS.Interfaces;
 using Prism.Ioc;
 using Prism.Unity;
@@ -40,6 +41,9 @@ namespace Client.UI.Views
         /// </summary>
         private static readonly Logger Logger = LogManager.GetLogger("nlog.config");
 
+        /// <summary>
+        /// 指定のプロセスを実施するサービス
+        /// </summary>
         private IDeviceModeSettingRepository deviceModeSettingRepository = null;
 
         private IDeviceModeFontListRepository deviceModeFontListRepository = null;
@@ -52,16 +56,26 @@ namespace Client.UI.Views
 
         private IUserStatusRepository userStatusRepository = null;
 
-        /// <summary>
-        /// 指定のプロセスを実施するサービス
-        /// </summary>
+        private IApplicationVersionService applicationVersionService = null;
+
+        private IClientApplicationVersionRepository clientApplicationVersionRepository = null;
+
+        private IApplicationDownloadService applicationDownloadService = null;
+
+        private IVolatileSettingRepository volatileSettingRepository = null;
+
+        private IApplicationUpdateService applicationUpdateService = null;
+
+        private IApplicationRuntimeRepository applicationRuntimeRepository = null;
+
         private IStartProcessService startProcessService;
 
         private IFontFileRepository fontInfoRepository = null;
-
         private Paragraph paragraph;
 
         private IDictionary<int, string> letsKindMap = new Dictionary<int, string>();
+
+        private System.Windows.Forms.Cursor cursor = null;
 
         private string applicationSettingFolder = System.IO.Path.Combine(
             AppDomain.CurrentDomain.BaseDirectory, "..", "config");
@@ -82,6 +96,12 @@ namespace Client.UI.Views
             this.deviceModeService = container.Resolve<IDeviceModeService>();
             this.startProcessService = container.Resolve<IStartProcessService>();
             this.userStatusRepository = container.Resolve<IUserStatusRepository>();
+            this.applicationVersionService = container.Resolve<IApplicationVersionService>();
+            this.clientApplicationVersionRepository = container.Resolve<IClientApplicationVersionRepository>();
+            this.applicationDownloadService = container.Resolve<IApplicationDownloadService>();
+            this.volatileSettingRepository = container.Resolve<IVolatileSettingRepository>();
+            this.applicationUpdateService = container.Resolve<IApplicationUpdateService>();
+            this.applicationRuntimeRepository = container.Resolve<IApplicationRuntimeRepository>();
 
             // ファイルパスクリア
             this.FilePathClear();
@@ -105,6 +125,8 @@ namespace Client.UI.Views
             {
                 this.FontFilePath.Content = string.Empty;
             }
+
+            this.SetAplVersion();
 
             // ライセンス情報初期表示
             this.LicenseInfoDisp();
@@ -144,6 +166,7 @@ namespace Client.UI.Views
             this.paragraph = new Paragraph();
             this.paragraph.FontFamily = new FontFamily("ＭＳ ゴシック");
             this.LicenseTerm.Document = new FlowDocument(this.paragraph);
+
             if (this.deviceModeLicenseInfoRepository != null)
             {
                 var now = DateTime.Now;
@@ -219,6 +242,8 @@ namespace Client.UI.Views
         /// </summary>
         private void DeviceIdFileButton_Click(object sender, RoutedEventArgs e)
         {
+            Logger.Warn($"DeviceIdFileButton_Click");
+
             this.FilePathClear();
 
             this.MenuButtonClear();
@@ -233,6 +258,8 @@ namespace Client.UI.Views
         /// </summary>
         private void LicenseRegistButton_Click(object sender, RoutedEventArgs e)
         {
+            Logger.Warn($"LicenseRegistButton_Click");
+
             this.FilePathClear();
 
             this.MenuButtonClear();
@@ -247,6 +274,8 @@ namespace Client.UI.Views
         /// </summary>
         private void FontInstallButton_Click(object sender, RoutedEventArgs e)
         {
+            Logger.Warn($"FontInstallButton_Click");
+
             this.FilePathClear();
 
             this.MenuButtonClear();
@@ -261,6 +290,8 @@ namespace Client.UI.Views
         /// </summary>
         private void FontUninstallButton_Click(object sender, RoutedEventArgs e)
         {
+            Logger.Warn($"FontUninstallButton_Click");
+
             this.FilePathClear();
 
             this.MenuButtonClear();
@@ -278,11 +309,13 @@ namespace Client.UI.Views
             this.LicenseRegistButton.IsEnabled = true;
             this.FontInstallButton.IsEnabled = true;
             this.FontUninstallButton.IsEnabled = true;
+            this.UpdateButton.IsEnabled = true;
 
             this.DeviceIdFileButton.Background = new SolidColorBrush(Colors.White);
             this.LicenseRegistButton.Background = new SolidColorBrush(Colors.White);
             this.FontInstallButton.Background = new SolidColorBrush(Colors.White);
             this.FontUninstallButton.Background = new SolidColorBrush(Colors.White);
+            this.UpdateButton.Background = new SolidColorBrush(Colors.White);
 
             this.DeviceIdFileButton.Visibility = Visibility.Hidden;
             var deviceModeSetting = this.deviceModeSettingRepository.GetDeviceModeSetting();
@@ -296,6 +329,7 @@ namespace Client.UI.Views
                     this.LicenseRegistButton.IsEnabled = false;
                     this.FontInstallButton.IsEnabled = false;
                     this.FontUninstallButton.IsEnabled = false;
+                    this.UpdateButton.IsEnabled = false;
                 }
             }
         }
@@ -341,6 +375,7 @@ namespace Client.UI.Views
             this.LicenseRegistPanel.Visibility = Visibility.Hidden;
             this.FontInstallPanel.Visibility = Visibility.Hidden;
             this.FontUninstallPanel.Visibility = Visibility.Hidden;
+            this.UpdatePanel.Visibility = Visibility.Hidden;
         }
 
         /// <summary>
@@ -348,6 +383,8 @@ namespace Client.UI.Views
         /// </summary>
         private void LicenseOnlineButton_Click(object sender, RoutedEventArgs e)
         {
+            Logger.Warn($"LicenseOnlineButton_Click");
+
             // オンラインでライセンス情報を取得する
             var deviceModeSetting = this.deviceModeSettingRepository.GetDeviceModeSetting();
             this.ErrorMessage.Text = string.Empty;
@@ -366,11 +403,43 @@ namespace Client.UI.Views
                 string letsKinds = this.LicenseInfoDisp();
                 if (string.IsNullOrEmpty(letsKinds))
                 {
-                   this.ToastShow("ライセンス登録", "デバイスに対応するライセンスがありません。ライセンスキーファイルが適切であるか確認してください。");
+                    this.ToastShow("ライセンス登録", "デバイスに対応するライセンスがありません。ライセンスキーファイルが適切であるか確認してください。");
+                    Logger.Warn("デバイスに対応するライセンスがありません。ライセンスキーファイルが適切であるか確認してください。");
                 }
                 else
                 {
                     this.ToastShow("ライセンス登録", $"ライセンスを更新しました。 LETS種別：{letsKinds}");
+                    Logger.Warn($"ライセンスを更新しました。 LETS種別：{letsKinds}");
+                }
+            }
+            catch (ApiException ex)
+            {
+                Logger.Error(ex.StackTrace);
+
+                switch (ex.ErrorCode)
+                {
+                    case 1002:
+                        this.ErrorMessage.Text = "認証エラーが発生しました。";
+                        this.ErrorMessage.Visibility = Visibility.Visible;
+                        break;
+
+                    case 1009:
+                        this.ErrorMessage.Text = "割当数上限超過エラーが発生しました。";
+                        this.ErrorMessage.Visibility = Visibility.Visible;
+                        break;
+
+                    default:
+                        if (ex.ErrorCode == 0)
+                        {
+                            this.ErrorMessage.Text = $"エラーが発生しました。({ex.Message})";
+                        }
+                        else
+                        {
+                            this.ErrorMessage.Text = $"エラーが発生しました。({ex.ErrorCode}:{ex.Message})";
+                        }
+
+                        this.ErrorMessage.Visibility = Visibility.Visible;
+                        break;
                 }
             }
             catch (Exception ex)
@@ -386,6 +455,8 @@ namespace Client.UI.Views
         /// </summary>
         private void LicenseKeyFileButton_Click(object sender, RoutedEventArgs e)
         {
+            Logger.Warn($"LicenseKeyFileButton_Click");
+
             var dialog = new OpenFileDialog();
             dialog.Filter = "データファイル (*.csv)|*.csv|全てのファイル (*.*)|*.*";
             if (!string.IsNullOrEmpty(this.LicenseKeyFilePath.Content.ToString()))
@@ -409,6 +480,8 @@ namespace Client.UI.Views
         /// </summary>
         private void RegistButton_Click(object sender, RoutedEventArgs e)
         {
+            Logger.Warn($"RegistButton_Click");
+
             // ライセンスファイルからライセンス情報を取得し、設定ファイル保存と画面表示をおこなう
             var deviceModeSetting = this.deviceModeSettingRepository.GetDeviceModeSetting();
             string filePath = deviceModeSetting.LicenceFileKeyPath;
@@ -525,6 +598,8 @@ namespace Client.UI.Views
         /// </summary>
         private void SelectFontFileButton_Click(object sender, RoutedEventArgs e)
         {
+            Logger.Warn($"SelectFontFileButton_Click");
+
             var dialog = new OpenFileDialog();
             dialog.Filter = "ZIPファイル (*.zip)|*.zip|全てのファイル (*.*)|*.*";
             if (!string.IsNullOrEmpty(this.FontFilePath.Content.ToString()))
@@ -548,6 +623,8 @@ namespace Client.UI.Views
         /// </summary>
         private void InstallButton_Click(object sender, RoutedEventArgs e)
         {
+            Logger.Warn($"InstallButton_Click");
+
             // 一時フォルダを作成する
             string tempPath = System.IO.Path.GetTempPath();
             tempPath = System.IO.Path.Combine(tempPath, Guid.NewGuid().ToString());
@@ -622,6 +699,8 @@ namespace Client.UI.Views
         /// </summary>
         private void UninstallButton_Click(object sender, RoutedEventArgs e)
         {
+            Logger.Warn($"UninstallButton_Click");
+
             // リペアが必要なレジストリ一覧を取得する
             IList<string> repairRegKeyList = this.deviceModeService.CheckRepairRegistory();
 
@@ -679,6 +758,8 @@ namespace Client.UI.Views
         /// </summary>
         private void DeviceIdFileCreateButton_Click(object sender, RoutedEventArgs e)
         {
+            Logger.Warn($"DeviceIdFileCreateButton_Click");
+
             var dialog = new SaveFileDialog();
             dialog.Filter = "データファイル (*.csv)|*.csv|全てのファイル (*.*)|*.*";
             dialog.OverwritePrompt = true;
@@ -774,9 +855,344 @@ namespace Client.UI.Views
         /// </summary>
         private void HelpButton_Click(object sender, RoutedEventArgs e)
         {
+            Logger.Warn($"HelpButton_Click");
+
             string helpPath = System.IO.Path.Combine(this.applicationSettingFolder, "LETS-for-Device-help.pdf");
 
             Process.Start(new ProcessStartInfo("cmd", $"/c start {helpPath}") { CreateNoWindow = true });
+        }
+
+        private void SetAplVersion()
+        {
+            this.AppVerLabel.Content = $"ご利用中のバージョン：{this.applicationVersionService.GetVerison()}";
+        }
+
+        /// <summary>
+        /// アップデートボタン処理
+        /// </summary>
+        private void UpdateButton_Click(object sender, RoutedEventArgs e)
+        {
+            Logger.Warn($"UpdateButton_Click");
+
+            this.FilePathClear();
+
+            this.MenuButtonClear();
+            this.UpdateButton.Background = new SolidColorBrush(Colors.LightGray);
+
+            this.AllPanelHIdden();
+            this.UpdatePanel.Visibility = Visibility.Visible;
+        }
+
+        /// <summary>
+        /// 最新のバージョンを確認ボタン処理
+        /// </summary>
+        private void ConfirmVersionButton_Click(object sender, RoutedEventArgs e)
+        {
+            Logger.Warn($"ConfirmVersionButton_Click");
+
+            ClientApplicationUpdateInfomation clientApplicationUpdateInfomation = null;
+            try
+            {
+                DeviceModeSetting deviceModeSetting = this.deviceModeSettingRepository.GetDeviceModeSetting();
+                Logger.Warn($"ConfirmVersionButton_Click:deviceModeSetting.OfflineDeviceID={deviceModeSetting.OfflineDeviceID},deviceModeSetting.IndefiniteAccessToken={deviceModeSetting.IndefiniteAccessToken},deviceModeSetting={deviceModeSetting}");
+                clientApplicationUpdateInfomation = this.clientApplicationVersionRepository.GetClientApplicationDeviceUpdateInfomation(deviceModeSetting.OfflineDeviceID, deviceModeSetting.IndefiniteAccessToken);
+                // ダミーのアップデート情報を返す(単体検査用)
+                //ClientApplicationVersion clientApplicationVersion = new ClientApplicationVersion("56", "3.1.1", "https://dev-lets.fontworks.co.jp/download/app-for-device/1/3.1.1-75");
+                //clientApplicationUpdateInfomation = new ClientApplicationUpdateInfomation(clientApplicationVersion, false);
+            }
+            catch (ApiException ex)
+            {
+                Logger.Error(ex.StackTrace);
+
+                string errmsg = string.Empty;
+
+                switch (ex.ErrorCode)
+                {
+                    case 1002:
+                        errmsg = "認証エラーが発生しました。";
+                        break;
+
+                    case 1009:
+                        errmsg = "割当数上限超過エラーが発生しました。";
+                        break;
+
+                    default:
+                        if (ex.ErrorCode == 0)
+                        {
+                            errmsg = $"インターネットに接続していません{Environment.NewLine}{Environment.NewLine}最新のバージョンが確認できませんでした{Environment.NewLine}インターネット環境に接続した上で{Environment.NewLine}もう一度「最新のバージョンを確認」を押してください";
+                        }
+                        else
+                        {
+                            errmsg = $"エラーが発生しました。({ex.ErrorCode}:{ex.Message})";
+                        }
+
+                        break;
+                }
+
+                System.Windows.Forms.MessageBox.Show(
+                    $"{errmsg}",
+                    "LETS",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+                return;
+            }
+            catch (Exception ex)
+            {
+                Logger.Error(ex.StackTrace);
+
+                // ダイアログを表示する
+                DialogResult result = System.Windows.Forms.MessageBox.Show(
+                    $"インターネットに接続していません{Environment.NewLine}{Environment.NewLine}最新のバージョンが確認できませんでした{Environment.NewLine}インターネット環境に接続した上で{Environment.NewLine}もう一度「最新のバージョンを確認」を押してください",
+                    "LETS",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+                //string message = ex.Message;
+                //if (message.Contains("接続できませんでした") || message.Contains("不明です"))
+                //{
+                //    // ダイアログを表示する
+                //    DialogResult result = System.Windows.Forms.MessageBox.Show(
+                //        $"インターネットに接続していません{Environment.NewLine}{Environment.NewLine}最新のバージョンが確認できませんでした{Environment.NewLine}インターネット環境に接続した上で{Environment.NewLine}もう一度「最新のバージョンを確認」を押してください",
+                //        "LETS",
+                //        MessageBoxButtons.OK,
+                //        MessageBoxIcon.Error);
+                //}
+                //else
+                //{
+                //    System.Windows.Forms.MessageBox.Show(
+                //        $"エラーが発生しました。{Environment.NewLine}{ex.Message}",
+                //        "LETS",
+                //        MessageBoxButtons.OK,
+                //        MessageBoxIcon.Error);
+                //}
+
+                return;
+            }
+
+            if (this.ExistUpdateVersion(clientApplicationUpdateInfomation))
+            {
+                // ダイアログを表示する
+                string newVer = clientApplicationUpdateInfomation.ClientApplicationVersion.Version;
+                Logger.Debug($"ConfirmVersionButton_Click:利用可能なアップデートがあります newVer={newVer}");
+                DialogResult result = System.Windows.Forms.MessageBox.Show(
+                    $"利用可能なアップデートがあります{Environment.NewLine}　　{newVer}{Environment.NewLine}{Environment.NewLine}更新を行いますか？",
+                    "LETS",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question);
+                if (result == DialogResult.Yes)
+                {
+                    Logger.Debug($"ConfirmVersionButton_Click:DialogResult.Yes");
+
+                    // カーソルを待ち状態にする
+                    this.WaitCursor();
+
+                    // 更新情報保存
+                    this.SaveUpdateInfo(clientApplicationUpdateInfomation);
+
+                    // ダウンロード処理実施
+                    this.applicationDownloadService.StartDownloading(this.UpdateProgramDownloadCompleted, null);
+
+                    // ボタンを使えなくする
+                    this.LicenseRegistButton.IsEnabled = false;
+                    this.LicenseRegistButton.IsEnabled = false;
+                    this.FontInstallButton.IsEnabled = false;
+                    this.FontUninstallButton.IsEnabled = false;
+                    this.UpdateButton.IsEnabled = false;
+
+                    this.ConfirmVersionButton.IsEnabled = false;
+
+                    this.UpdateProgress.Content = "更新ファイルダウンロード中";
+                    this.UpdateProgress.Visibility = Visibility.Visible;
+                    this.Blink();
+
+                    // あとはダウンロード完了イベントが呼び出されているはずなので、アップデートプログラムに制御が移行する
+                }
+            }
+            else
+            {
+                // ダイアログを表示する
+                DialogResult result = System.Windows.Forms.MessageBox.Show(
+                    $"ご利用のバージョンは最新です{Environment.NewLine}{Environment.NewLine}既に最新のLETオフライン専用アプリが{Environment.NewLine}インストールされています",
+                    "LETS",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
+            }
+        }
+
+        private void WaitCursor()
+        {
+            if (System.Windows.Forms.Cursor.Current == System.Windows.Forms.Cursors.WaitCursor)
+            {
+                return;
+            }
+
+            // カーソルを待ち状態にする
+            this.cursor = System.Windows.Forms.Cursor.Current;
+            System.Windows.Forms.Cursor.Current = System.Windows.Forms.Cursors.WaitCursor;
+        }
+
+        private void NormalCursor()
+        {
+            if (this.cursor != null)
+            {
+                System.Windows.Forms.Cursor.Current = this.cursor;
+                this.cursor = null;
+            }
+        }
+
+        private bool blink_loop = false;
+
+        private async void Blink()
+        {
+            this.blink_loop = true;
+
+            while (this.blink_loop)
+            {
+                await System.Threading.Tasks.Task.Delay(700);
+                this.UpdateProgress.Visibility = this.UpdateProgress.Visibility == Visibility.Visible ? Visibility.Hidden : Visibility.Visible;
+            }
+        }
+
+        private void SaveUpdateInfo(ClientApplicationUpdateInfomation clientApplicationUpdateInfomation)
+        {
+            Logger.Debug($"SaveUpdateInfo:Enter ");
+
+            // 次バージョンの更新プログラムがダウンロードされていない場合の処理
+            Installer installer = new Installer()
+            {
+                Version = clientApplicationUpdateInfomation.ClientApplicationVersion.Version,
+                ApplicationUpdateType = clientApplicationUpdateInfomation.ApplicationUpdateType,
+                Url = clientApplicationUpdateInfomation.ClientApplicationVersion.Url,
+            };
+
+            ApplicationRuntime applicationRuntime = this.applicationRuntimeRepository.GetApplicationRuntime();
+            if (applicationRuntime == null)
+            {
+                applicationRuntime = new ApplicationRuntime();
+            }
+
+            applicationRuntime.NextVersionInstaller = installer;
+
+            this.applicationRuntimeRepository.SaveApplicationRuntime(applicationRuntime);
+        }
+
+        /// <summary>
+        /// 更新プログラムダウンロード完了
+        /// </summary>
+        public void UpdateProgramDownloadCompleted()
+        {
+            Logger.Debug($"UpdateProgramDownloadCompleted:Enter");
+
+            // アップデート実行
+            // カーソルを待ち状態にする
+            this.WaitCursor();
+
+            // [共通保存：更新プログラム情報.ダウンロード状態]に「ダウンロード完了」と設定する
+            ApplicationRuntime applicationRuntime = this.applicationRuntimeRepository.GetApplicationRuntime();
+            applicationRuntime.NextVersionInstaller.DownloadStatus = DownloadStatus.Completed;
+            this.applicationRuntimeRepository.SaveApplicationRuntime(applicationRuntime);
+
+            // メモリの「ダウンロード中」を削除する
+            VolatileSetting volatileSetting = this.volatileSettingRepository.GetVolatileSetting();
+            volatileSetting.IsDownloading = false;
+
+            try
+            {
+                this.applicationUpdateService.Update();
+                this.UpdateProgress.Content = "アップデート中";
+            }
+            catch (Exception e)
+            {
+                this.blink_loop = false;
+
+                this.UpdateProgress.Visibility = Visibility.Hidden;
+                Logger.Error(e.StackTrace);
+
+                this.FilePathClear();
+
+                this.MenuButtonClear();
+                this.UpdateButton.Background = new SolidColorBrush(Colors.LightGray);
+
+                this.AllPanelHIdden();
+                this.UpdatePanel.Visibility = Visibility.Visible;
+
+                this.NormalCursor();
+
+                return;
+            }
+
+            //this.MenuButtonClear();
+            //this.ConfirmVersionButton.IsEnabled = false;
+            //System.Windows.Forms.Cursor.Current = this.cursor;
+        }
+
+        private bool ExistUpdateVersion(ClientApplicationUpdateInfomation clientApplicationUpdateInfomation)
+        {
+            Logger.Debug($"ExistUpdateVersion:enter");
+            if (clientApplicationUpdateInfomation != null && clientApplicationUpdateInfomation.ClientApplicationVersion != null)
+            {
+                Logger.Debug($"ExistUpdateVersion:enter:clientApplicationUpdateInfomation != null && clientApplicationUpdateInfomation.ClientApplicationVersion != null");
+                ClientApplicationVersion clientApplicationVersion = clientApplicationUpdateInfomation.ClientApplicationVersion;
+                if (!string.IsNullOrEmpty(clientApplicationVersion.Version))
+                {
+                    Logger.Debug($"ExistUpdateVersion:!string.IsNullOrEmpty(clientApplicationVersion.Version)");
+                    string currentAplVer = this.applicationVersionService.GetVerison();
+                    Logger.Debug($"ExistUpdateVersion:clientApplicationVersion.Version=[{clientApplicationVersion.Version}]");
+                    Logger.Debug($"ExistUpdateVersion:currentAplVer=[{currentAplVer}]");
+                    if (this.IsNewVersion(clientApplicationVersion.Version, currentAplVer))
+                    {
+                        Logger.Debug($"ExistUpdateVersion:true");
+                        return true;
+                    }
+                }
+            }
+
+            Logger.Debug($"ExistUpdateVersion:false");
+            return false;
+        }
+
+        private bool IsNewVersion(string updVer, string crtVer)
+        {
+            string[] upd = updVer.Split('.');
+            string[] crt = crtVer.Split('.');
+
+            int cnt = Math.Max(upd.Length, crt.Length);
+
+            for (int i = 0; i < cnt; i++)
+            {
+                int updNo = 0;
+                int crtNo = 0;
+
+                if (upd.Length > i)
+                {
+                    try
+                    {
+                        updNo = Convert.ToInt32(upd[i]);
+                    }
+                    catch (FormatException)
+                    {
+                        updNo = 0;
+                    }
+                }
+
+                if (crt.Length > i)
+                {
+                    try
+                    {
+                        crtNo = Convert.ToInt32(crt[i]);
+                    }
+                    catch (FormatException)
+                    {
+                        crtNo = 0;
+                    }
+                }
+
+                if (updNo > crtNo)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }

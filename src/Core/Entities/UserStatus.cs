@@ -1,4 +1,6 @@
-﻿namespace Core.Entities
+﻿using System;
+
+namespace Core.Entities
 {
     /// <summary>
     /// ユーザ別ステータス情報を表すクラス
@@ -27,6 +29,11 @@
         public string RefreshToken { get; set; } = string.Empty;
 
         /// <summary>
+        /// リフレッシュトークン次回取得日時
+        /// </summary>
+        public DateTime RefreshTokenUpdateSchedule { get; set; } = DateTime.MaxValue;
+
+        /// <summary>
         /// SSE接続時に使用するLast-Event-ID
         /// </summary>
         public int? LastEventId { get; set; } = null;
@@ -36,5 +43,6 @@
         /// </summary>
         /// <remarks>デバイスモードの時にtrueを返す</remarks>
         public bool IsDeviceMode { get; set; } = false;
+
     }
 }

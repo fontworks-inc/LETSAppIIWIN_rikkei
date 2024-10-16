@@ -26,8 +26,14 @@ namespace Core.Interfaces
         /// </summary>
         /// <param name="deviceId">デバイスID</param>
         /// <param name="accessToken">アクセストークン</param>
-        /// <returns>ユーザ別フォント情報</returns>
+        /// <returns>クライアントアプリバージョン情報</returns>
         ClientApplicationVersion GetClientApplicationVersion(string deviceId, string accessToken);
+
+        /// <summary>
+        /// デバイスモードクライアントアプリケーションの更新情報を取得する
+        /// </summary>
+        /// <returns>更新情報</returns>
+        ClientApplicationUpdateInfomation GetClientApplicationDeviceUpdateInfomation(string offlineDeviceId, string indefiniteAccessToken);
 
         /// <summary>
         /// クライアントアプリケーションの起動バージョン情報を保存する

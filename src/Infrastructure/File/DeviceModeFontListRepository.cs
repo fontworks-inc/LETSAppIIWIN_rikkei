@@ -99,11 +99,18 @@ namespace Infrastructure.File
             }
 
             System.IO.File.WriteAllText(uninstfontsPath, "REM フォントファイル削除" + Environment.NewLine, System.Text.Encoding.GetEncoding("shift_jis"));
+            bool firstLine = true;
             foreach (DeviceModeFontInfo f in fonts)
             {
                 if (string.IsNullOrEmpty(f.FontFilePath))
                 {
                     continue;
+                }
+
+                if (firstLine)
+                {
+                    this.writeBatRunas(uninstfontsPath);
+                    firstLine = false;
                 }
 
                 System.IO.File.AppendAllText(uninstfontsPath, $@"DEL ""{f.FontFilePath}""" + Environment.NewLine, System.Text.Encoding.GetEncoding("shift_jis"));
@@ -120,6 +127,7 @@ namespace Infrastructure.File
             }
 
             System.IO.File.WriteAllText(regfilePath, "REM レジストリ削除" + Environment.NewLine, System.Text.Encoding.GetEncoding("shift_jis"));
+            firstLine = true;
             foreach (DeviceModeFontInfo f in fonts)
             {
                 if (string.IsNullOrEmpty(f.FontFilePath))
@@ -132,6 +140,12 @@ namespace Infrastructure.File
                     continue;
                 }
 
+                if (firstLine)
+                {
+                    this.writeBatRunas(uninstfontsPath);
+                    firstLine = false;
+                }
+
                 System.IO.File.AppendAllText(regfilePath, $@"reg delete ""SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts"" /v ""{f.RegistryKey}"" /f" + Environment.NewLine, System.Text.Encoding.GetEncoding("shift_jis"));
                 System.IO.File.AppendAllText(regfilePath, $@"reg delete ""HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts"" /v ""{f.RegistryKey}"" /f" + Environment.NewLine, System.Text.Encoding.GetEncoding("shift_jis"));
             }
@@ -141,6 +155,16 @@ namespace Infrastructure.File
             this.SetHidden(regfilePath, true);
 
             Logger.Debug("OutputLetsFontsList:Exit");
+        }
+
+        private void writeBatRunas(string fnm)
+        {
+            //System.IO.File.AppendAllText(fnm, "cd /d %~dp0" + Environment.NewLine, System.Text.Encoding.GetEncoding("shift_jis"));
+            //System.IO.File.AppendAllText(fnm, "whoami /priv | find \"SeDebugPrivilege\" > nul" + Environment.NewLine, System.Text.Encoding.GetEncoding("shift_jis"));
+            //System.IO.File.AppendAllText(fnm, "if %errorlevel% neq 0 (" + Environment.NewLine, System.Text.Encoding.GetEncoding("shift_jis"));
+            //System.IO.File.AppendAllText(fnm, "      @powershell start-process %~0 -verb runas" + Environment.NewLine, System.Text.Encoding.GetEncoding("shift_jis"));
+            //System.IO.File.AppendAllText(fnm, "      exit" + Environment.NewLine, System.Text.Encoding.GetEncoding("shift_jis"));
+            //System.IO.File.AppendAllText(fnm, "  )" + Environment.NewLine, System.Text.Encoding.GetEncoding("shift_jis"));
         }
 
         /// <summary>

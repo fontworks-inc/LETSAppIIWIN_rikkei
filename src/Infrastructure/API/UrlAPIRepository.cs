@@ -1,6 +1,7 @@
 ﻿using System;
 using Core.Entities;
 using Core.Interfaces;
+using NLog;
 using Org.OpenAPITools.Api;
 using Org.OpenAPITools.Client;
 using Org.OpenAPITools.Model;
@@ -12,6 +13,11 @@ namespace Infrastructure.API
     /// </summary>
     public class UrlAPIRepository : APIRepositoryBase, IUrlRepository
     {
+        /// <summary>
+        /// ロガー
+        /// </summary>
+        private static readonly Logger Logger = LogManager.GetLogger("nlog.config");
+
         /// <summary>
         /// インスタンスの初期化を行う
         /// </summary>
@@ -197,6 +203,49 @@ namespace Infrastructure.API
         }
 
         /// <summary>
+        /// フォント一覧画面URLを取得する
+        /// </summary>
+        /// <param name="deviceId">デバイスID</param>
+        /// <param name="accessToken">アクセストークン</param>
+        /// <returns>フォント一覧画面URL</returns>
+        /// <remarks>FUNCTION_08_06_01(フォント一覧画面URLの取得API)</remarks>
+        public Core.Entities.Url GetHelpUrl(string deviceId, string accessToken)
+        {
+            this.ApiParam[APIParam.DeviceId] = deviceId;
+            this.ApiParam[APIParam.AccessToken] = accessToken;
+
+            Core.Entities.Url response = null;
+
+            // API通信を行う(リトライ込み)を行う（共通処理）
+            try
+            {
+                this.Invoke(this.CallGetHelpUrl);
+
+                // 戻り値のセット（個別処理）
+                var ret = (UrlResponse)this.ApiResponse;
+                if (ret.Code == (int)ResponseCode.Succeeded)
+                {
+                    response = new Core.Entities.Url(url: ret.Data.Url);
+                }
+                else
+                {
+                    ApiException apiException= new ApiException(ret.Code, ret.Message);
+                    Logger.Error($"ret.Code={ret.Code}, ret.Message={ret.Message}{Environment.NewLine}{apiException.StackTrace}");
+                    throw apiException;
+                }
+            }
+            catch (ApiException e)
+            {
+                // 通信に失敗or通信しなかった
+                // nullを返す
+                Logger.Error(e.StackTrace);
+                throw;
+            }
+
+            return response;
+        }
+
+        /// <summary>
         /// パスワード再設定ページのURLの取得呼び出し
         /// </summary>
         private void CallGetPasswordResetUrl()
@@ -262,6 +311,20 @@ namespace Infrastructure.API
             config.AccessToken = (string)this.ApiParam[APIParam.AccessToken];
             FontApi apiInstance = new FontApi(config);
             this.ApiResponse = apiInstance.GetFontListUrl((string)this.ApiParam[APIParam.DeviceId], config.UserAgent);
+        }
+
+        /// <summary>
+        /// ヘルプ画面URLの取得呼び出し
+        /// </summary>
+        private void CallGetHelpUrl()
+        {
+            Configuration config = new Configuration();
+            config.BasePath = this.BasePath;
+            config.UserAgent = (string)this.ApiParam[APIParam.UserAgent];
+            config.WebProxy = this.APIConfiguration.GetWebProxy(this.BasePath);
+            config.AccessToken = (string)this.ApiParam[APIParam.AccessToken];
+            CustomerApi apiInstance = new CustomerApi(config);
+            this.ApiResponse = apiInstance.GetHelpUrl((string)this.ApiParam[APIParam.DeviceId], config.UserAgent);
         }
     }
 }

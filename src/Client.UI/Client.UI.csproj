@@ -8,8 +8,8 @@
     <EnableDefaultItems Condition=" '$(EnableDefaultItems)' == '' ">false</EnableDefaultItems>
     <EnableDefaultCompileItems Condition=" '$(EnableDefaultCompileItems)' == '' ">false</EnableDefaultCompileItems>
     <ApplicationIcon>LETS.ico</ApplicationIcon>
-    <Version>3.0.3</Version>
-    <NoWin32Manifest>true</NoWin32Manifest>
+    <Version>3.1.1</Version>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
     <DebugType>none</DebugType>
@@ -30,6 +30,10 @@
     <Compile Include="Components\MenuItem\MenuItemAnnouncePage.cs" />
     <Compile Include="Components\MenuItem\MenuItemBase.cs" />
     <Compile Include="Components\MenuItem\MenuItemDownloadStatus.cs" />
+    <Compile Include="Components\MenuItem\MenuItemHelp.cs" />
+    <Compile Include="Components\MenuItem\MenuItemVersionInfo.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Components\MenuItem\MenuItemFontUpdate.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -89,6 +93,13 @@
     </Content>
     <None Include="7-zip32.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="app.manifest" />
+    <None Include="LOGforDEBUG.bat">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="LOGforRELEASE.bat">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="nlog.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -169,6 +180,12 @@
     <None Include="References\System.Drawing.Common.dll" />
     <None Include="References\System.Drawing.dll" />
     <None Include="References\System.Windows.Forms.dll" />
+    <None Include="_nlog.config_debug">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="_nlog.config_release">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Reference Include="PresentationCore">

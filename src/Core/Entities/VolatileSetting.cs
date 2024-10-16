@@ -101,5 +101,11 @@ namespace Core.Entities
         /// ProxyServer
         /// </summary>
         public string ProxyServer { get; set; } = string.Empty;
+
+        /// <summary>
+        /// フォント同期実行
+        /// </summary>
+        public bool IsFontUpdating { get; set; } = false;
+
     }
 }

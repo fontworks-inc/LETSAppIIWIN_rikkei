@@ -149,7 +149,7 @@ namespace Client.UI.ViewModels
             catch (GetFontListPageUrlException e)
             {
                 // 配信サーバアクセスでエラーが発生したときは、画面を閉じ以後の処理を行わない
-                Logger.Error(e);
+                Logger.Error(e.StackTrace);
             }
             finally
             {

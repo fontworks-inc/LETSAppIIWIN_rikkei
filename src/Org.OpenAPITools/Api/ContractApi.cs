@@ -571,7 +571,6 @@ namespace Org.OpenAPITools.Api
             localVarRequestOptions.HeaderParameters.Add("User-Agent", Org.OpenAPITools.Client.ClientUtils.ParameterToString(userAgent)); // header parameter
             localVarRequestOptions.Data = inlineObjectUpdateLicense;
 
-
             // make the HTTP request
             var localVarResponse = this.Client.Post<UpdateLicenseResponse>("/api/v1/update-license", localVarRequestOptions, this.Configuration);
 

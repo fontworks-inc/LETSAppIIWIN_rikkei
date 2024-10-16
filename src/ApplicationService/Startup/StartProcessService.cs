@@ -40,6 +40,8 @@ namespace ApplicationService.Startup
         /// <param name="runAdmin">管理者権限実行フラグ</param>
         public Process StartProcessAdministrator(string directoryPath, string fileName, string[] arg, bool runAdmin)
         {
+            Logger.Debug($"StartProcessAdministrator:Enter directoryPath={directoryPath}, fileName={fileName}, arg={string.Join(',', arg)}");
+
             var proc = new System.Diagnostics.Process();
 
             proc.StartInfo.FileName = Path.Combine(directoryPath, fileName);
@@ -57,7 +59,11 @@ namespace ApplicationService.Startup
 
             try
             {
-                proc.Start();
+                if (!proc.Start())
+                {
+                    Logger.Debug($"StartProcessAdministrator:pros.Start = false");
+                    Logger.Debug($" proc.ExitCode={proc.ExitCode}");
+                }
             }
             catch (Win32Exception ex)
             {

@@ -42,6 +42,11 @@ namespace ApplicationService.Interfaces
         public delegate void FontDownloadCancelledEvent(InstallFont font);
 
         /// <summary>
+        /// フォント同期完了時ののイベント
+        /// </summary>
+        public delegate void FontUpdateComplateEvent();
+
+        /// <summary>
         /// フォントの同期処理を実施する
         /// </summary>
         /// <param name="font">アクティベート対象フォント</param>

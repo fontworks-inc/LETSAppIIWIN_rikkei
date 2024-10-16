@@ -43,6 +43,13 @@ namespace ApplicationService.Interfaces
     /// </summary>
     public delegate void DetectionFontCopyEvent();
 
+    ///// <summary>
+    ///// エラーダイアログ表示用のイベント
+    ///// </summary>
+    ///// <param name="text">本文</param>
+    ///// <param name="caption">タイトル</param>
+    //public delegate void ShowErrorDialogEvent(string text, string caption);
+
     /// <summary>
     /// 起動時処理に関するサービスのインターフェース
     /// </summary>

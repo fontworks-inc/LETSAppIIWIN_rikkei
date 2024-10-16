@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Windows.Forms;
 using ApplicationService.Interfaces;
 using Client.UI.Wrappers;
+using Core.Entities;
 using Core.Interfaces;
 using NLog;
 
@@ -70,7 +71,7 @@ namespace Client.UI.Components.MenuItem
         {
             this.fontUpdate.Click += (s, e) =>
             {
-                this.OnFontMenuItemClick();
+                this.OnFontUpdateMenuItemClick();
             };
             this.resourceWrapper = resourceWrapper;
             this.volatileSettingRepository = volatileSettingRepository;
@@ -110,14 +111,14 @@ namespace Client.UI.Components.MenuItem
         /// </summary>
         protected override void SetMenu()
         {
-            //this.QuickMenu.ContextMenu.Items.Add(this.separator);
+            this.QuickMenu.ContextMenu.Items.Add(this.separator);
             this.QuickMenu.ContextMenu.Items.Add(this.fontUpdate);
         }
 
         /// <summary>
-        /// フォントメニュークリック時処理
+        /// フォント同期メニュークリック時処理
         /// </summary>
-        private void OnFontMenuItemClick()
+        private void OnFontUpdateMenuItemClick()
         {
             try
             {
@@ -126,29 +127,17 @@ namespace Client.UI.Components.MenuItem
                     return;
                 }
 
+                Logger.Debug($"クイックメニュー－フォント同期");
+                VolatileSetting volatileSetting = this.volatileSettingRepository.GetVolatileSetting();
+                volatileSetting.IsFontUpdating = true;
+
                 this.fontManagerService.CheckFontsList();
             }
             catch (Exception e)
             {
                 // エラーがあった場合は通知を表示
-                Logger.Error(e, this.resourceWrapper.GetString("MENU_FONT_ERROR_CAPTION"));
-                ToastNotificationWrapper.Show(this.resourceWrapper.GetString("MENU_FONT_ERROR_CAPTION"), e.Message);
-            }
-        }
-
-        /// <summary>
-        /// APIからフォント一覧ページのURLを取得
-        /// </summary>
-        private string GetFontListPageUrl(string deviceId, string accessToken)
-        {
-            try
-            {
-                return this.urlRepository.GetFontListPageUrl(deviceId, accessToken).ToString();
-            }
-            catch (Exception e)
-            {
-                Logger.Error(e);
-                throw new Exception(this.resourceWrapper.GetString("MENU_FONT_ERROR_TEXT"), e);
+                Logger.Error(e, this.resourceWrapper.GetString("MENU_FONT_UPDATE_ERROR_CAPTION"));
+                ToastNotificationWrapper.Show(this.resourceWrapper.GetString("MENU_FONT_UPDATE_ERROR_CAPTION"), e.Message);
             }
         }
     }

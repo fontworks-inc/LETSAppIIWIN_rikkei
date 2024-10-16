@@ -44,6 +44,19 @@ namespace Infrastructure.File
         }
 
         /// <summary>
+        /// クライアントアプリケーションの更新情報を取得する
+        /// </summary>
+        /// <param name="deviceId">デバイスID</param>
+        /// <param name="accessToken">アクセストークン</param>
+        /// <returns>更新情報</returns>
+        public ClientApplicationUpdateInfomation GetClientApplicationDeviceUpdateInfomation(string offlineDeviceId, string indefiniteAccessToken)
+        {
+            ClientApplicationUpdateInfomation clientApplicationUpdateInfomation = this.clientApplicationVersionAPIRepository.GetClientApplicationDeviceUpdateInfomation(offlineDeviceId, indefiniteAccessToken);
+
+            return clientApplicationUpdateInfomation;
+        }
+
+        /// <summary>
         /// クライアントアプリケーションの起動バージョン情報を取得する
         /// </summary>
         /// <returns>ユーザ別フォント情報</returns>

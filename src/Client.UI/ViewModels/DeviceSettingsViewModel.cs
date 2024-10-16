@@ -295,7 +295,7 @@ namespace Client.UI.ViewModels
             {
                 // 配信サーバアクセスでエラーが発生したときは、画面を閉じ以後の処理を行わない
                 var exception = new Exception(this.resouceWrapper.GetString("LOG_ERR_DeviceSettingsViewModel_LoginCompleted_Exception"), ex);
-                Logger.Error(exception);
+                Logger.Error(exception.StackTrace);
                 this.loginWindow.Close();
             }
         }
@@ -327,7 +327,7 @@ namespace Client.UI.ViewModels
             {
                 // 配信サーバアクセスでエラーが発生したときは、画面を閉じ以後の処理を行わない
                 var exception = new Exception(this.resouceWrapper.GetString("LOG_ERR_DeviceSettingsViewModel_ActivateUserDevice_Exception"), ex);
-                Logger.Error(exception);
+                Logger.Error(exception.StackTrace);
                 this.loginWindow.Close();
                 return null;
             }
@@ -365,7 +365,7 @@ namespace Client.UI.ViewModels
             {
                 // 配信サーバアクセスでエラーが発生したときは、画面を閉じ以後の処理を行わない
                 var exception = new Exception(this.resouceWrapper.GetString("LOG_ERR_DeviceSettingsViewModel_InitializeDeviceList_Exception"), ex);
-                Logger.Error(exception);
+                Logger.Error(exception.StackTrace);
                 this.loginWindow.Close();
                 return false;
             }

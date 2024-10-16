@@ -91,6 +91,12 @@ namespace InstallerUtil
                     string[] dellines = this.UninstallFontsAllUser(letsfolder, pids);
                     File.WriteAllText(uninstallfontsbat, "REM フォントファイル削除" + Environment.NewLine, System.Text.Encoding.GetEncoding("shift_jis"));
                     File.AppendAllText(uninstallfontsbat, "@ECHO OFF" + Environment.NewLine, System.Text.Encoding.GetEncoding("shift_jis"));
+
+                    if (dellines.Length > 0)
+                    {
+                        writeBatRunas(uninstallfontsbat);
+                    }
+
                     foreach (string l in dellines)
                     {
                         File.AppendAllText(uninstallfontsbat, l + Environment.NewLine);
@@ -112,6 +118,9 @@ namespace InstallerUtil
                 {
                     File.WriteAllText(uninstallfontsbat, "REM フォントファイル削除" + Environment.NewLine, System.Text.Encoding.GetEncoding("shift_jis"));
                     File.AppendAllText(uninstallfontsbat, "@ECHO OFF" + Environment.NewLine, System.Text.Encoding.GetEncoding("shift_jis"));
+
+                    //writeBatRunas(uninstallfontsbat);
+
                     File.AppendAllText(uninstallfontsbat, @"Del /F ""%~dp0%~nx0""" + "\n");
                     if (File.Exists(destfile))
                     {
@@ -127,6 +136,16 @@ namespace InstallerUtil
 
             //デバイス情報ファイルの削除
             DeleteDevInfo($@"{letsfolder}\config");
+        }
+
+        private void    writeBatRunas(string fnm)
+        {
+            //File.AppendAllText(fnm, "cd /d %~dp0" + Environment.NewLine, System.Text.Encoding.GetEncoding("shift_jis"));
+            //File.AppendAllText(fnm, "whoami /priv | find \"SeDebugPrivilege\" > nul" + Environment.NewLine, System.Text.Encoding.GetEncoding("shift_jis"));
+            //File.AppendAllText(fnm, "if %errorlevel% neq 0 (" + Environment.NewLine, System.Text.Encoding.GetEncoding("shift_jis"));
+            //File.AppendAllText(fnm, "      @powershell start-process %~0 -verb runas" + Environment.NewLine, System.Text.Encoding.GetEncoding("shift_jis"));
+            //File.AppendAllText(fnm, "      exit" + Environment.NewLine, System.Text.Encoding.GetEncoding("shift_jis"));
+            //File.AppendAllText(fnm, "  )" + Environment.NewLine, System.Text.Encoding.GetEncoding("shift_jis"));
         }
 
         private string[] UninstallFontsAllUser(string letsfolder, string[] pids)

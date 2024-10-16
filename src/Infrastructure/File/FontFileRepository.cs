@@ -55,7 +55,7 @@ namespace Infrastructure.File
             }
             catch (Exception e)
             {
-                Logger.Error(e);
+                Logger.Error(e.StackTrace);
             }
 
             // 正常終了の0以外の場合

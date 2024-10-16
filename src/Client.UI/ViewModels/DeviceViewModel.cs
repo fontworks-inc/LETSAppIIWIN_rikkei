@@ -270,7 +270,7 @@ namespace Client.UI.ViewModels
                     string.Format(
                         this.resouceWrapper.GetString("LOG_ERR_DeviceViewModel_DeactivateDevice_Exception"),
                         this.Name), ex);
-                Logger.Error(exception);
+                Logger.Error(exception.StackTrace);
                 this.loginWindow.Close();
                 return false;
             }

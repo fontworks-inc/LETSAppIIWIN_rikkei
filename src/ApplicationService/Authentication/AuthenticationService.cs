@@ -165,6 +165,7 @@ namespace ApplicationService.Authentication
                 ResponseCode code = authenticationInformationResponse.GetResponseCode();
                 if (code == ResponseCode.Succeeded)
                 {
+                    //authenticationInformationResponse.Data.GroupType = 1;   //デバイスモードデバッグ用
                     if (authenticationInformationResponse.Data.GroupType == 1)
                     {
                         // グループ区分を判定し、デバイスモードならば、ここで終了
@@ -274,6 +275,11 @@ namespace ApplicationService.Authentication
             // [ユーザー別保存]に「リフレッシュトークン」と「ログイン中」を保存
             userStatus.RefreshToken = authenticationInformation.RefreshToken;
             userStatus.IsLoggingIn = true;
+
+            // リフレッシュトークン次回取得日時に現在日時+7日+(0～6日)を設定
+            int addDays = 7 + new Random().Next(7);
+            userStatus.RefreshTokenUpdateSchedule = DateTime.Now.AddDays(addDays);
+
             this.userStatusRepository.SaveStatus(userStatus);
 
             if (!isFirstLogined)

@@ -143,6 +143,11 @@ namespace ApplicationService.Fonts
         public FontDownloadFailedEvent FontDownloadFailedEvent { get; set; }
 
         /// <summary>
+        /// フォント同期完了のイベント
+        /// </summary>
+        public FontUpdateComplateEvent FontUpdateComplateEvent { get; set; }
+
+        /// <summary>
         /// ダウンロード失敗時のイベント
         /// </summary>
         /// <param name="font">失敗したフォント</param>
@@ -310,6 +315,13 @@ namespace ApplicationService.Fonts
             {
                 // インストール対象フォントが存在しない
                 Logger.Debug("FontManagerService#Synchronize:return インストール対象フォントが存在しない");
+                VolatileSetting volatileSetting = this.volatileSettingRepository.GetVolatileSetting();
+                if (volatileSetting.IsFontUpdating)
+                {
+                    this.FontUpdateComplateEvent();
+                    volatileSetting.IsFontUpdating = false;
+                }
+
                 return;
             }
 
@@ -351,6 +363,12 @@ namespace ApplicationService.Fonts
                         Logger.Info("ダウンロード終了");
                         this.isExecutingDownload = false;
                         this.isFirstDownloadCompleted = true;
+                        VolatileSetting volatileSetting = this.volatileSettingRepository.GetVolatileSetting();
+                        if (volatileSetting.IsFontUpdating)
+                        {
+                            this.FontUpdateComplateEvent();
+                            volatileSetting.IsFontUpdating = false;
+                        }
                     }
                 });
             }
@@ -467,6 +485,15 @@ namespace ApplicationService.Fonts
                         Logger.Debug("CheckFontsList:Update");
                         this.UpdateFontsList(userFontsDir);
                         this.Synchronize(false);
+                    }
+                    else
+                    {
+                        VolatileSetting volatileSetting = this.volatileSettingRepository.GetVolatileSetting();
+                        if (volatileSetting.IsFontUpdating)
+                        {
+                            volatileSetting.IsFontUpdating = false;
+                            this.FontUpdateComplateEvent();
+                        }
                     }
                 }
                 catch (Exception e)
@@ -792,6 +819,18 @@ namespace ApplicationService.Fonts
                          */
                         if (installFont.NeedFontVersionUpdate || !matchVersion)
                         {
+                            try
+                            {
+                                Logger.Debug("installFont.NeedFontVersionUpdate || !matchVersion");
+                                Logger.Debug($"  installFont.NeedFontVersionUpdate={installFont.NeedFontVersionUpdate}");
+                                Logger.Debug($"  installFont.Version=[{installFont.Version}]");
+                                Logger.Debug($"  userFont.Version=[{userFont.Version}]");
+                            }
+                            catch (Exception e)
+                            {
+                                Logger.Debug(e.StackTrace);
+                            }
+
                             if (!this.FontExitsInUserFonts(installFont.FileName))
                             {
                                 // ユーザーフォントフォルダにフォントファイルがない場合、インストール対象に加える
@@ -913,13 +952,13 @@ namespace ApplicationService.Fonts
 
                     // フォントダウンロード
                     bool isInstall = false;
-                    VolatileSetting memory = this.volatileSettingRepository.GetVolatileSetting();
+                    VolatileSetting volatileSetting = this.volatileSettingRepository.GetVolatileSetting();
                     try
                     {
                         double compFileSize = 0;
                         double totalFileSize = installFontList.Sum(font => font.FileSize);
 
-                        memory.IsDownloading = true;
+                        volatileSetting.IsDownloading = true;
 
                         foreach (InstallFont installFont in installFontList)
                         {
@@ -948,12 +987,20 @@ namespace ApplicationService.Fonts
                                     if (this.fontActivationService.Install(f))
                                     {
                                         isInstall = true;
-                                        var notifyList = memory.NotificationFonts;
+                                        var notifyList = volatileSetting.NotificationFonts;
                                         notifyList.Add(installFont);
                                     }
                                 }
 
-                                memory.InstallTargetFonts.Remove(installFont);
+                                volatileSetting.InstallTargetFonts.Remove(installFont);
+
+                                if (volatileSetting.IsFontUpdating) {
+                                    if (volatileSetting.InstallTargetFonts.Count <= 0)
+                                    {
+                                        this.FontUpdateComplateEvent();
+                                        volatileSetting.IsFontUpdating = false;
+                                    }
+                                }
                             }
                             catch (Exception ex)
                             {
@@ -968,18 +1015,18 @@ namespace ApplicationService.Fonts
                     }
                     finally
                     {
-                        memory.IsDownloading = false;
-                        memory.CompletedDownload = true;
+                        volatileSetting.IsDownloading = false;
+                        volatileSetting.CompletedDownload = true;
                     }
 
                     if (isInstall)
                     {
                         if (this.userStatusRepository.GetStatus().IsLoggingIn)
                         {
-                            this.FontDownloadCompletedEvent(memory.NotificationFonts);
+                            this.FontDownloadCompletedEvent(volatileSetting.NotificationFonts);
                         }
 
-                        memory.NotificationFonts.Clear();
+                        volatileSetting.NotificationFonts.Clear();
                     }
                 }
             }

@@ -42,5 +42,13 @@ namespace Core.Interfaces
         /// <param name="accessToken">アクセストークン</param>
         /// <returns>フォント一覧画面URL</returns>
         Url GetFontListPageUrl(string deviceId, string accessToken);
+
+        /// <summary>
+        /// ヘルプURLを取得する
+        /// </summary>
+        /// <param name="deviceId">デバイスID</param>
+        /// <param name="accessToken">アクセストークン</param>
+        /// <returns>ヘルプURL</returns>
+        Url GetHelpUrl(string deviceId, string accessToken);
     }
 }

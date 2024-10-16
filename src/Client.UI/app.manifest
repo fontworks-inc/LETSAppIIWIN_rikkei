@@ -16,8 +16,8 @@
             アプリケーションが下位互換性を保つためにこの仮想化を要求する場合、この要素を
             削除します。
         -->
-		  <requestedExecutionLevel level="requireAdministrator" uiAccess="false" />
-	  </requestedPrivileges>
+        <requestedExecutionLevel level="asInvoker" uiAccess="false" />
+      </requestedPrivileges>
     </security>
   </trustInfo>
 
@@ -45,14 +45,17 @@
     </application>
   </compatibility>
 
-  <!-- アプリケーションが DPI 対応であり、それ以上の DPI で Windows によって自動的にスケーリングされないことを
+  <!-- アプリケーションが DPI 対応であり、Windows によってそれ以上の DPI には自動的に拡大縮小されないことを
        示します。Windows Presentation Foundation (WPF) アプリケーションは自動的に DPI に対応し、オプトインする必要は
-       ありません。さらに、この設定にオプトインする .NET Framework 4.6 を対象とする Windows Forms アプリケーションは、
-       app.config ファイルで 'EnableWindowsFormsHighDpiAutoResizing' 設定を 'true' に設定する必要があります。-->
+       ありません。さらに、この設定にオプトインする .NET Framework 4.6 を対象とする Windows フォーム アプリケーションは、
+       app.config ファイルで 'EnableWindowsFormsHighDpiAutoResizing' 設定を 'true' に設定する必要があります。
+       
+       アプリケーションを長いパス対応にします。https://docs.microsoft.com/windows/win32/fileio/maximum-file-path-limitation をご覧ください -->
   <!--
   <application xmlns="urn:schemas-microsoft-com:asm.v3">
     <windowsSettings>
       <dpiAware xmlns="http://schemas.microsoft.com/SMI/2005/WindowsSettings">true</dpiAware>
+      <longPathAware xmlns="http://schemas.microsoft.com/SMI/2016/WindowsSettings">true</longPathAware>
     </windowsSettings>
   </application>
   -->

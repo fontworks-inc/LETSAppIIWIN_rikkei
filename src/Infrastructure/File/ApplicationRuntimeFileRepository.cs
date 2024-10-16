@@ -54,6 +54,12 @@ namespace Infrastructure.File
         /// <param name="applicationRuntime">アプリケーション共通保存情報</param>
         public void SaveApplicationRuntime(ApplicationRuntime applicationRuntime)
         {
+            Logger.Debug($"SaveApplicationRuntime:Enter");
+            if (applicationRuntime != null && applicationRuntime.NextVersionInstaller != null)
+            {
+                Logger.Debug($"SaveApplicationRuntime:applicationRuntime.NextVersionInstaller.DownloadStatus={applicationRuntime.NextVersionInstaller.DownloadStatus}");
+            }
+
             this.WriteAll(JsonSerializer.Serialize(applicationRuntime));
             this.SetFileAccessEveryone(this.FilePath);
         }

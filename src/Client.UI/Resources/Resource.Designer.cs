@@ -1408,6 +1408,51 @@ namespace Client.UI.Resources {
         }
         
         /// <summary>
+        ///   フォント同期 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string MENU_FONT_UPDATE_ERROR_CAPTION {
+            get {
+                return ResourceManager.GetString("MENU_FONT_UPDATE_ERROR_CAPTION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   フォント同期に失敗しました に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string MENU_FONT_UPDATE_ERROR_TEXT {
+            get {
+                return ResourceManager.GetString("MENU_FONT_UPDATE_ERROR_TEXT", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   ヘルプ に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string MENU_HELP {
+            get {
+                return ResourceManager.GetString("MENU_HELP", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   ヘルプの情報取得 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string MENU_HELP_ERROR_CAPTION {
+            get {
+                return ResourceManager.GetString("MENU_HELP_ERROR_CAPTION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   ヘルプの情報取得に失敗しました に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string MENU_HELP_ERROR_TEXT {
+            get {
+                return ResourceManager.GetString("MENU_HELP_ERROR_TEXT", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   MailAddress に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string MENU_LOGIN_MAILADDRESS {
@@ -1485,6 +1530,42 @@ namespace Client.UI.Resources {
         internal static string MENU_UPDATE_LOADING {
             get {
                 return ResourceManager.GetString("MENU_UPDATE_LOADING", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   バージョン情報の取得に失敗しました に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string MENU_VERSION_ERROR_CAPTION {
+            get {
+                return ResourceManager.GetString("MENU_VERSION_ERROR_CAPTION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   バージョン情報の取得が取得できません に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string MENU_VERSION_ERROR_TEXT {
+            get {
+                return ResourceManager.GetString("MENU_VERSION_ERROR_TEXT", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   バージョン情報 に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string MENU_VERSION_INFO {
+            get {
+                return ResourceManager.GetString("MENU_VERSION_INFO", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   LETSデスクトップアプリ に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string MENU_VERSION_INFO_CAPTION {
+            get {
+                return ResourceManager.GetString("MENU_VERSION_INFO_CAPTION", resourceCulture);
             }
         }
         

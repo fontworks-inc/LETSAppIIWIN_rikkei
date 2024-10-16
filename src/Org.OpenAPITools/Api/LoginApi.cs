@@ -9,6 +9,7 @@
  */
 
 
+using Core.Entities;
 using Org.OpenAPITools.Client;
 using Org.OpenAPITools.Model;
 using System;
@@ -2139,6 +2140,156 @@ namespace Org.OpenAPITools.Api
             if (this.ExceptionFactory != null)
             {
                 Exception _exception = this.ExceptionFactory("PostAuthenticateAccount", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// リフレッシュトークン再取得API 
+        /// </summary>
+        /// <exception cref="Org.OpenAPITools.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="X_LETS_DEVICEID">デバイス固有のIDを設定する。</param>
+        /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
+        /// <param name="inlineObjectNull"></param>
+        /// <returns>AccessTokenResponse</returns>
+        public RefreshTokenResponse RefreshToken(string X_LETS_DEVICEID, string userAgent, Object body)
+        {
+            Org.OpenAPITools.Client.ApiResponse<RefreshTokenResponse> localVarResponse = RefreshTokenWithHttpInfo(X_LETS_DEVICEID, userAgent, body);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// リフレッシュトークン再取得API 
+        /// </summary>
+        /// <exception cref="Org.OpenAPITools.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="X_LETS_DEVICEID">デバイス固有のIDを設定する。</param>
+        /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
+        /// <param name="body"></param>
+        /// <returns>ApiResponse of AccessTokenResponse</returns>
+        public Org.OpenAPITools.Client.ApiResponse<RefreshTokenResponse> RefreshTokenWithHttpInfo(string X_LETS_DEVICEID, string userAgent, Object body)
+        {
+            // verify the required parameter 'X_LETS_DEVICEID' is set
+            if (X_LETS_DEVICEID == null)
+                throw new Org.OpenAPITools.Client.ApiException(400, "Missing required parameter 'X_LETS_DEVICEID' when calling LoginApi->RefreshToken");
+
+            // verify the required parameter 'userAgent' is set
+            if (userAgent == null)
+                throw new Org.OpenAPITools.Client.ApiException(400, "Missing required parameter 'userAgent' when calling LoginApi->RefreshToken");
+
+            // verify the required parameter 'body' is set
+            if (body == null)
+                throw new Org.OpenAPITools.Client.ApiException(400, "Missing required parameter 'body' when calling LoginApi->RefreshToken");
+
+            Org.OpenAPITools.Client.RequestOptions localVarRequestOptions = new Org.OpenAPITools.Client.RequestOptions();
+
+            String[] _contentTypes = new String[] {
+                "application/json; charset=utf-8"
+            };
+
+            // to determine the Accept header
+            String[] _accepts = new String[] {
+                "application/json; charset=utf-8"
+            };
+
+            var localVarContentType = Org.OpenAPITools.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = Org.OpenAPITools.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.HeaderParameters.Add("X-LETS-DEVICEID", Org.OpenAPITools.Client.ClientUtils.ParameterToString(X_LETS_DEVICEID)); // header parameter
+            localVarRequestOptions.HeaderParameters.Add("User-Agent", Org.OpenAPITools.Client.ClientUtils.ParameterToString(userAgent)); // header parameter
+
+            localVarRequestOptions.Data = body;
+
+            // authentication (BearerAuth) required
+            // bearer authentication required
+            if (!String.IsNullOrEmpty(this.Configuration.AccessToken))
+            {
+                localVarRequestOptions.HeaderParameters.Add("Authorization", "Bearer " + this.Configuration.AccessToken);
+            }
+
+            // make the HTTP request
+            var localVarResponse = this.Client.Post<RefreshTokenResponse>("/api/v1/refresh-token", localVarRequestOptions, this.Configuration);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("RefreshToken", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// リフレッシュトークン再取得API 
+        /// </summary>
+        /// <exception cref="Org.OpenAPITools.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="X_LETS_DEVICEID">デバイス固有のIDを設定する。</param>
+        /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
+        /// <param name="inlineObject3"></param>
+        /// <returns>Task of AccessTokenResponse</returns>
+        public async System.Threading.Tasks.Task<RefreshTokenResponse> RefreshTokenAsync(string X_LETS_DEVICEID, string userAgent, Object body)
+        {
+            Org.OpenAPITools.Client.ApiResponse<RefreshTokenResponse> localVarResponse = await RefreshTokenAsyncWithHttpInfo(X_LETS_DEVICEID, userAgent, body);
+            return localVarResponse.Data;
+
+        }
+
+        /// <summary>
+        /// リフレッシュトークン再取得API 
+        /// </summary>
+        /// <exception cref="Org.OpenAPITools.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="X_LETS_DEVICEID">デバイス固有のIDを設定する。</param>
+        /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
+        /// <param name="inlineObject3"></param>
+        /// <returns>Task of ApiResponse (RefreshTokenResponse)</returns>
+        public async System.Threading.Tasks.Task<Org.OpenAPITools.Client.ApiResponse<RefreshTokenResponse>> RefreshTokenAsyncWithHttpInfo(string X_LETS_DEVICEID, string userAgent, Object body)
+        {
+            // verify the required parameter 'X_LETS_DEVICEID' is set
+            if (X_LETS_DEVICEID == null)
+                throw new Org.OpenAPITools.Client.ApiException(400, "Missing required parameter 'X_LETS_DEVICEID' when calling LoginApi->RefreshToken");
+
+            // verify the required parameter 'userAgent' is set
+            if (userAgent == null)
+                throw new Org.OpenAPITools.Client.ApiException(400, "Missing required parameter 'userAgent' when calling LoginApi->RefreshToken");
+
+            // verify the required parameter 'inlineObject3' is set
+            if (body == null)
+                throw new Org.OpenAPITools.Client.ApiException(400, "Missing required parameter 'inlineObject3' when calling LoginApi->RefreshToken");
+
+
+            Org.OpenAPITools.Client.RequestOptions localVarRequestOptions = new Org.OpenAPITools.Client.RequestOptions();
+
+            String[] _contentTypes = new String[] {
+                "application/json; charset=utf-8"
+            };
+
+            // to determine the Accept header
+            String[] _accepts = new String[] {
+                "application/json; charset=utf-8"
+            };
+
+            foreach (var _contentType in _contentTypes)
+                localVarRequestOptions.HeaderParameters.Add("Content-Type", _contentType);
+
+            foreach (var _accept in _accepts)
+                localVarRequestOptions.HeaderParameters.Add("Accept", _accept);
+
+            localVarRequestOptions.HeaderParameters.Add("X-LETS-DEVICEID", Org.OpenAPITools.Client.ClientUtils.ParameterToString(X_LETS_DEVICEID)); // header parameter
+            localVarRequestOptions.HeaderParameters.Add("User-Agent", Org.OpenAPITools.Client.ClientUtils.ParameterToString(userAgent)); // header parameter
+            localVarRequestOptions.Data = body;
+
+
+            // make the HTTP request
+
+            var localVarResponse = await this.AsynchronousClient.PostAsync<RefreshTokenResponse>("/api/v1/refresh-token", localVarRequestOptions, this.Configuration);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("RefreshToken", localVarResponse);
                 if (_exception != null) throw _exception;
             }
 

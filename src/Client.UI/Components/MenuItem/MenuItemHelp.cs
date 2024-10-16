@@ -9,9 +9,9 @@ using NLog;
 namespace Client.UI.Components.MenuItem
 {
     /// <summary>
-    /// クイックメニュー－フォント
+    /// クイックメニュー－ヘルプ
     /// </summary>
-    public class MenuItemFontListPage : MenuItemBase
+    public class MenuItemHelp : MenuItemBase
     {
         /// <summary>
         /// ロガー
@@ -38,8 +38,8 @@ namespace Client.UI.Components.MenuItem
         /// </summary>
         private readonly IUrlRepository urlRepository;
 
-        /// <summary>フォント</summary>
-        private ToolStripMenuItem font;
+        /// <summary>ヘルプ</summary>
+        private ToolStripMenuItem showHelp;
 
         /// <summary>セパレータ</summary>
         private ToolStripSeparator separator;
@@ -52,7 +52,7 @@ namespace Client.UI.Components.MenuItem
         /// <param name="volatileSettingRepository">メモリで保持する情報を格納するリポジトリ</param>
         /// <param name="userStatusRepository">ユーザ別ステータス情報を格納するリポジトリ</param>
         /// <param name="urlRepository">URLアドレスを格納するリポジトリ</param>
-        public MenuItemFontListPage(
+        public MenuItemHelp(
             QuickMenuComponent quickMenu,
             IResourceWrapper resourceWrapper,
             IVolatileSettingRepository volatileSettingRepository,
@@ -60,9 +60,9 @@ namespace Client.UI.Components.MenuItem
             IUrlRepository urlRepository)
              : base(quickMenu)
         {
-            this.font.Click += (s, e) =>
+            this.showHelp.Click += (s, e) =>
             {
-                this.OnFontMenuItemClick();
+                this.OnHelpMenuItemClick();
             };
             this.resourceWrapper = resourceWrapper;
             this.volatileSettingRepository = volatileSettingRepository;
@@ -80,7 +80,7 @@ namespace Client.UI.Components.MenuItem
                 return new List<ToolStripItem>()
                 {
                     this.separator,
-                    this.font,
+                    this.showHelp,
                 };
             }
         }
@@ -91,7 +91,7 @@ namespace Client.UI.Components.MenuItem
         protected override void InitializeComponent()
         {
             this.separator = this.CreateSeparator();
-            this.font = this.Create("MENU_FONT", this.Resource.GetString("MENU_FONT"));
+            this.showHelp = this.Create("MENU_HELP", this.Resource.GetString("MENU_HELP"));
 
             this.SetMenu();
         }
@@ -102,16 +102,18 @@ namespace Client.UI.Components.MenuItem
         protected override void SetMenu()
         {
             this.QuickMenu.ContextMenu.Items.Add(this.separator);
-            this.QuickMenu.ContextMenu.Items.Add(this.font);
+            this.QuickMenu.ContextMenu.Items.Add(this.showHelp);
         }
 
         /// <summary>
-        /// フォントメニュークリック時処理
+        /// ヘルプメニュークリック時処理
         /// </summary>
-        private void OnFontMenuItemClick()
+        private void OnHelpMenuItemClick()
         {
             try
             {
+                Logger.Debug($"クイックメニュー－ヘルプ");
+
                 // デバイスIDを取得
                 string deviceId = this.userStatusRepository.GetStatus().DeviceId;
 
@@ -119,7 +121,7 @@ namespace Client.UI.Components.MenuItem
                 string accessToken = this.volatileSettingRepository.GetVolatileSetting().AccessToken;
 
                 // URLの取得
-                string url = this.GetFontListPageUrl(deviceId, accessToken);
+                string url = this.GetHelpUrl(deviceId, accessToken);
 
                 // ブラウザ起動：フォント一覧ページを表示する
                 // NET Frameworkでは、Process.Start(url);で既定のブラウザが開いたが.NET CoreではNGになったよう
@@ -130,24 +132,24 @@ namespace Client.UI.Components.MenuItem
             catch (Exception e)
             {
                 // エラーがあった場合は通知を表示
-                Logger.Error(e, this.resourceWrapper.GetString("MENU_FONT_ERROR_CAPTION"));
-                ToastNotificationWrapper.Show(this.resourceWrapper.GetString("MENU_FONT_ERROR_CAPTION"), e.Message);
+                Logger.Error(e, this.resourceWrapper.GetString("MENU_HELP_ERROR_CAPTION"));
+                ToastNotificationWrapper.Show(e.Message, this.resourceWrapper.GetString("MENU_HELP_ERROR_CAPTION"));
             }
         }
 
         /// <summary>
         /// APIからフォント一覧ページのURLを取得
         /// </summary>
-        private string GetFontListPageUrl(string deviceId, string accessToken)
+        private string GetHelpUrl(string deviceId, string accessToken)
         {
             try
             {
-                return this.urlRepository.GetFontListPageUrl(deviceId, accessToken).ToString();
+                return this.urlRepository.GetHelpUrl(deviceId, accessToken).ToString();
             }
             catch (Exception e)
             {
                 Logger.Error(e.StackTrace);
-                throw new Exception(this.resourceWrapper.GetString("MENU_FONT_ERROR_TEXT"), e);
+                throw new Exception(this.resourceWrapper.GetString("MENU_HELP_ERROR_TEXT"), e);
             }
         }
     }

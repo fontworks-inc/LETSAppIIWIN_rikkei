@@ -146,7 +146,7 @@ namespace Client.UI.Components.MenuItem
             }
             catch (Exception e)
             {
-                Logger.Error(e);
+                Logger.Error(e.StackTrace);
                 throw new Exception(this.resourceWrapper.GetString("MENU_ACCOUNT_ERROR_TEXT"), e);
             }
         }

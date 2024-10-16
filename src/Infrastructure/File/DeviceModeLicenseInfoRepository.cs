@@ -54,11 +54,14 @@ namespace Infrastructure.File
         /// <returns>設定情報(デバイスモード時)</returns>
         public Core.Entities.DeviceModeLicenseInfo GetDeviceModeLicenseInfo()
         {
+            Logger.Debug($"GetDeviceModeLicenseInfo:Enter");
+
             if (System.IO.File.Exists(this.FilePath))
             {
                 // ファイルが存在する場合、内容を返す
                 try
                 {
+                    Logger.Debug($"GetDeviceModeLicenseInfo:ファイルが存在する場合、内容を返す");
                     string jsonString = this.ReadAll();
                     return JsonSerializer.Deserialize<DeviceModeLicenseInfo>(jsonString);
                 }
@@ -71,6 +74,7 @@ namespace Infrastructure.File
             else
             {
                 // ファイルが存在しない場合、新規のオブジェクトを返す
+                Logger.Debug($"GetDeviceModeLicenseInfo:ファイルが存在しない場合、新規のオブジェクトを返す");
                 return new DeviceModeLicenseInfo();
             }
         }
@@ -81,6 +85,8 @@ namespace Infrastructure.File
         /// <returns>設定情報(デバイスモード時)</returns>
         public Core.Entities.DeviceModeLicenseInfo GetDeviceModeLicenseInfo(bool fromOnline, string offlineDeviceId, string indefiniteAccessToken, string licenceFileKeyPath, string licenseDecryptionKey)
         {
+            Logger.Debug($"GetDeviceModeLicenseInfo:Enter fromOnline={fromOnline}, offlineDeviceId={offlineDeviceId}, indefiniteAccessToken={indefiniteAccessToken}, licenceFileKeyPath={licenceFileKeyPath}, licenseDecryptionKey={licenseDecryptionKey}");
+
             if (fromOnline)
             {
                 DeviceModeLicenseInfo deviceModeLicenseInfo = this.deviceModeLisenceInfoAPIRepository.GetDeviceModeLicenseInfo(true, offlineDeviceId, indefiniteAccessToken, licenceFileKeyPath, licenseDecryptionKey);
@@ -103,6 +109,8 @@ namespace Infrastructure.File
         /// <param name="info">設定情報(デバイスモード時)</param>
         public void SaveDeviceModeLicenseInfo(Core.Entities.DeviceModeLicenseInfo info)
         {
+            Logger.Debug($"SaveDeviceModeLicenseInfo:Enter info.DeviceModeLicenceList.Count={info.DeviceModeLicenceList.Count}, info.ZipPassword={info.ZipPassword}");
+
             lock (saveLockObject)
             {
                 this.WriteAll(JsonSerializer.Serialize(info));

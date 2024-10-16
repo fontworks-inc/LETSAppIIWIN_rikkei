@@ -173,8 +173,8 @@ namespace Client.UI
 
             // 認証情報
             Logger.Debug("Shell#RegisterTypes:認証情報");
-            containerRegistry.RegisterInstance<IAuthenticationInformationRepository>(
-               new AuthenticationInformationAPIRepository(apiConfiguration));
+            var authenticationInformationRepository = new AuthenticationInformationAPIRepository(apiConfiguration);
+            containerRegistry.RegisterInstance<IAuthenticationInformationRepository>(authenticationInformationRepository);
 
             // URL情報
             Logger.Debug("Shell#RegisterTypes:URL情報");
@@ -198,6 +198,7 @@ namespace Client.UI
             // デバイスモード時設定ファイル
             // 設定情報(デバイスモード時)
             Logger.Debug("Shell#RegisterTypes:設定情報(デバイスモード時)");
+            //Logger.Warn("Shell#RegisterTypes:設定情報(デバイスモード時)");
             var deviceModeSettingRepository = new DeviceModeSettingRepository(Path.Combine(ApplicationSettingFolder, "dev-setting.dat"));
             containerRegistry.RegisterInstance<IDeviceModeSettingRepository>(deviceModeSettingRepository);
 
@@ -339,6 +340,14 @@ namespace Client.UI
                 });
             };
 
+            fontManagerService.FontUpdateComplateEvent = () =>
+            {
+                Current.Dispatcher.Invoke(() =>
+                {
+                    this.componentManager.FontUpdateComplete();
+                });
+            };
+
             fontManagerService.FontDownloadCancelledEvent = (InstallFont font) =>
             {
                 Current.Dispatcher.Invoke(() =>
@@ -363,8 +372,17 @@ namespace Client.UI
                 clientApplicationVersionFileRepository,
                 unreadNoticeRepository,
                 fontSecurityRepository,
-                fontInfoRepository);
+                fontInfoRepository,
+                authenticationInformationRepository);
             containerRegistry.RegisterInstance<IStartupService>(startupService);
+
+            //startupService.ShowErrorDialogEvent = (string text, string caption) =>
+            //{
+            //    Current.Dispatcher.Invoke(() =>
+            //    {
+            //        ToastNotificationWrapper.Show(text, caption);
+            //    });
+            //};
 
             // 定期確認処理
             Logger.Debug("Shell#RegisterTypes:定期確認処理");
@@ -458,6 +476,19 @@ namespace Client.UI
                             ToastNotificationWrapper.Show("LETSオフライン専用アプリ", message);
                         }
                     }
+
+                    var applicationRuntimeRepository = container.Resolve<IApplicationRuntimeRepository>();
+                    var nextVersionInstaller = applicationRuntimeRepository.GetApplicationRuntime().NextVersionInstaller;
+                    if (nextVersionInstaller != null && nextVersionInstaller.DownloadStatus == DownloadStatus.Update)
+                    {
+                        var volatileSettingMemoryRepository = container.Resolve<IVolatileSettingRepository>();
+                        volatileSettingMemoryRepository.GetVolatileSetting().IsUpdated = true;
+                        ToastNotificationWrapper.Show("LETSオフライン専用アプリ", "アップデート完了");
+
+                        // アップデート完了時に共通保存情報をリセットする
+                        Logger.Debug("OnStartup Exit:ApplicationRuntime:Reset");
+                        applicationRuntimeRepository.SaveApplicationRuntime(new ApplicationRuntime());
+                    }
                 }
                 catch (InvalidOperationException invalidEx)
                 {
@@ -470,6 +501,7 @@ namespace Client.UI
                 }
                 catch (Exception ex)
                 {
+                    Logger.Debug("Shell#OnStartup:FixedTermCheck:Exception");
                     Logger.Error(ex.StackTrace);
                 }
 
@@ -501,7 +533,7 @@ namespace Client.UI
                     this.componentManager.QuickMenu.Manager.UpdateCompleted();
 
                     // アップデート完了時に共通保存情報をリセットする
-                    Logger.Debug("Exit:ApplicationRuntime:Reset");
+                    Logger.Debug("OnStartup Exit:ApplicationRuntime:Reset");
                     applicationRuntimeRepository.SaveApplicationRuntime(new ApplicationRuntime());
                 }
 
@@ -599,6 +631,7 @@ namespace Client.UI
                 }
 
                 System.IO.File.WriteAllText(clearUserDataPath, "REM ユーザー削除" + Environment.NewLine, System.Text.Encoding.GetEncoding("shift_jis"));
+                this.writeBatRunas(clearUserDataPath);
                 System.IO.File.AppendAllText(clearUserDataPath, $"rd /s /q {userDataDirectory}\n");
                 System.IO.File.AppendAllText(clearUserDataPath, @"Del /F ""%~dp0%~nx0""" + "\n");
                 this.SetFileAccessEveryone(clearUserDataPath);
@@ -613,6 +646,16 @@ namespace Client.UI
             Logger.Info("OutputClearUserData:Exit");
 
             Logger.Debug("Shell#OutputClearUserData:Exit");
+        }
+
+        private void writeBatRunas(string fnm)
+        {
+            //File.AppendAllText(fnm, "cd /d %~dp0" + Environment.NewLine, System.Text.Encoding.GetEncoding("shift_jis"));
+            //File.AppendAllText(fnm, "whoami /priv | find \"SeDebugPrivilege\" > nul" + Environment.NewLine, System.Text.Encoding.GetEncoding("shift_jis"));
+            //File.AppendAllText(fnm, "if %errorlevel% neq 0 (" + Environment.NewLine, System.Text.Encoding.GetEncoding("shift_jis"));
+            //File.AppendAllText(fnm, "      @powershell start-process %~0 -verb runas" + Environment.NewLine, System.Text.Encoding.GetEncoding("shift_jis"));
+            //File.AppendAllText(fnm, "      exit" + Environment.NewLine, System.Text.Encoding.GetEncoding("shift_jis"));
+            //File.AppendAllText(fnm, "  )" + Environment.NewLine, System.Text.Encoding.GetEncoding("shift_jis"));
         }
 
         /// <summary>

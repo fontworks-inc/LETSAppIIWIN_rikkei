@@ -32,7 +32,7 @@ namespace Client.UI.Wrappers
         /// <param name="description">メッセージ説明部</param>
         public static void Show(string mainMessage, string description)
         {
-            Logger.Debug("ToastNotificationWrapper#Show:Enter");
+            Logger.Debug($"ToastNotificationWrapper#Show:Enter [{mainMessage}][{description}]");
 
             // テンプレート(ToastImageAndText02)を使用してトースト通知のXMLを生成
             var xml = ToastNotificationManager.GetTemplateContent(ToastTemplateType.ToastImageAndText02);

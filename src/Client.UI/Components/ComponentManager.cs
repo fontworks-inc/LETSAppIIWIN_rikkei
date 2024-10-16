@@ -462,6 +462,14 @@ namespace Client.UI.Components
         }
 
         /// <summary>
+        /// フォント同期完了
+        /// </summary>
+        public void FontUpdateComplete()
+        {
+            ToastNotificationWrapper.Show("LETS フォント同期完了", "フォントの同期が完了しました");
+        }
+
+        /// <summary>
         /// フォントダウンロード中止
         /// </summary>
         /// <param name="font">フォント</param>

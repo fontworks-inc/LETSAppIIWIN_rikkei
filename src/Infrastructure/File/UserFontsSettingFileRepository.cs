@@ -148,10 +148,17 @@ namespace Infrastructure.File
             }
 
             System.IO.File.WriteAllText(uninstfontsPath, "REM フォントファイル削除" + Environment.NewLine, System.Text.Encoding.GetEncoding("shift_jis"));
+            bool firstLine = true;
             foreach (string f in letsFontPaths)
             {
                 if (!string.IsNullOrEmpty(f))
                 {
+                    if (firstLine)
+                    {
+                        this.writeBatRunas(uninstfontsPath);
+                        firstLine = false;
+                    }
+
                     System.IO.File.AppendAllText(uninstfontsPath, $@"DEL ""{f}""" + Environment.NewLine, System.Text.Encoding.GetEncoding("shift_jis"));
                 }
             }
@@ -166,6 +173,7 @@ namespace Infrastructure.File
                 this.SetHidden(regfilePath, false);
             }
 
+            firstLine = true;
             System.IO.File.WriteAllText(regfilePath, "REM レジストリ削除" + Environment.NewLine, System.Text.Encoding.GetEncoding("shift_jis"));
             if (string.IsNullOrEmpty(userProfileImagePath))
             {
@@ -173,6 +181,11 @@ namespace Infrastructure.File
                 {
                     if (!string.IsNullOrEmpty(r))
                     {
+                        if (firstLine)
+                        {
+                            this.writeBatRunas(uninstfontsPath);
+                            firstLine = false;
+                        }
                         System.IO.File.AppendAllText(regfilePath, $@"reg delete ""HKCU\Software\Microsoft\Windows NT\CurrentVersion\Fonts"" /v ""{r}"" /f" + Environment.NewLine, System.Text.Encoding.GetEncoding("shift_jis"));
                     }
                 }
@@ -184,6 +197,11 @@ namespace Infrastructure.File
                 {
                     if (!string.IsNullOrEmpty(r))
                     {
+                        if (firstLine)
+                        {
+                            this.writeBatRunas(uninstfontsPath);
+                            firstLine = false;
+                        }
                         System.IO.File.AppendAllText(regfilePath, $@"reg delete ""HKU\{userregid}\Software\Microsoft\Windows NT\CurrentVersion\Fonts"" /v ""{r}"" /f" + Environment.NewLine, System.Text.Encoding.GetEncoding("shift_jis"));
                     }
                 }
@@ -211,6 +229,16 @@ namespace Infrastructure.File
             this.SetHidden(clearUserDataPath, true);
 
             Logger.Debug("OutputLetsFontsList:Exit");
+        }
+
+        private void writeBatRunas(string fnm)
+        {
+            //System.IO.File.AppendAllText(fnm, "cd /d %~dp0" + Environment.NewLine, System.Text.Encoding.GetEncoding("shift_jis"));
+            //System.IO.File.AppendAllText(fnm, "whoami /priv | find \"SeDebugPrivilege\" > nul" + Environment.NewLine, System.Text.Encoding.GetEncoding("shift_jis"));
+            //System.IO.File.AppendAllText(fnm, "if %errorlevel% neq 0 (" + Environment.NewLine, System.Text.Encoding.GetEncoding("shift_jis"));
+            //System.IO.File.AppendAllText(fnm, "      @powershell start-process %~0 -verb runas" + Environment.NewLine, System.Text.Encoding.GetEncoding("shift_jis"));
+            //System.IO.File.AppendAllText(fnm, "      exit" + Environment.NewLine, System.Text.Encoding.GetEncoding("shift_jis"));
+            //System.IO.File.AppendAllText(fnm, "  )" + Environment.NewLine, System.Text.Encoding.GetEncoding("shift_jis"));
         }
 
         /// <summary>

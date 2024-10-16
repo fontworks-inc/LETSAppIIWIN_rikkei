@@ -46,11 +46,13 @@ namespace Infrastructure.File
         /// <returns>ユーザ別ステータス情報</returns>
         public UserStatus GetStatus()
         {
+            Logger.Debug($"UserStatus:{this.FilePath}");
             if (System.IO.File.Exists(this.FilePath))
             {
                 // ファイルが存在する場合、内容を返す
                 try
                 {
+                    Logger.Debug($"UserStatus:ファイルが存在する場合、内容を返す");
                     string jsonString = this.ReadAll();
                     return JsonSerializer.Deserialize<UserStatus>(jsonString);
                 }

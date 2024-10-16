@@ -69,7 +69,10 @@ namespace ApplicationService.DeviceMode
         /// <returns>チェック結果メッセージを返す</returns>
         public IList<string> FixedTermCheck(bool isStartup)
         {
+            Logger.Debug($"FixedTermCheck:Enter:isStartup={isStartup}");
+
             // リペアが必要なレジストリ一覧を取得する
+            Logger.Debug($"FixedTermCheck:リペアが必要なレジストリ一覧を取得する");
             IList<string> repairRegKeyList = this.CheckRepairRegistory();
 
             IList<string> messageList = new List<string>();
@@ -79,26 +82,33 @@ namespace ApplicationService.DeviceMode
             if (isStartup)
             {
                 // ① 設定ファイル存在チェック
+                Logger.Debug($"FixedTermCheck:① 設定ファイル存在チェック");
                 if (!this.DeviceModeSettingRepository.Exists())
                 {
+                    Logger.Debug($"FixedTermCheck:設定ファイルがありません。LETSアプリを再インストールしてください。");
                     throw new InvalidOperationException("設定ファイルがありません。LETSアプリを再インストールしてください。");
                 }
 
                 // ② 削除対象フォントの削除処理
+                Logger.Debug($"FixedTermCheck:② 削除対象フォントの削除処理");
+                Logger.Debug($"FixedTermCheck:Call:this.DeviceModeFontListRepository.GetDeviceModeFontList()");
                 DeviceModeFontList deviceModeFontList = this.DeviceModeFontListRepository.GetDeviceModeFontList();
                 List<string> uninstallFontList = new List<string>();
                 foreach (DeviceModeFontInfo deviceModeFontInfo in deviceModeFontList.Fonts)
                 {
                     if ((bool)deviceModeFontInfo.IsRemove)
                     {
+                        Logger.Debug($"FixedTermCheck:deviceModeFontInfo.IsRemove");
                         string letsKindName = string.Empty;
                         try
                         {
                             letsKindName = letsKindNameMap[(int)deviceModeFontInfo.LetsKind];
                         }
-                        catch (Exception)
+                        catch (Exception ex)
                         {
                             // NOP
+                            Logger.Error(ex.StackTrace);
+                            Logger.Debug("FixedTermCheck:Exception(1):{deviceModeFontInfo.LetsKind}");
                         }
 
                         uninstallFontList.Add(string.Join("\t", deviceModeFontInfo.FontFilePath, deviceModeFontInfo.RegistryKey, letsKindName, "Uninstall"));
@@ -107,20 +117,25 @@ namespace ApplicationService.DeviceMode
 
                 if (uninstallFontList.Count > 0 || repairRegKeyList.Count > 0)
                 {
+                    Logger.Debug($"FixedTermCheck:Call:this.UninstallFonts");
                     this.UninstallFonts(uninstallFontList, string.Empty, repairRegKeyList);
                 }
             }
 
             // ③ 定期確認処理(以後、24時間毎に実行)
             // ・「2.5.7.9ライセンス情報更新処理」をオンライン登録 = TRUEで呼び出す。
+            Logger.Debug($"FixedTermCheck:③ 定期確認処理(以後、24時間毎に実行)");
             try
             {
+                Logger.Debug($"FixedTermCheck:Call:this.DeviceModeSettingRepository.GetDeviceModeSetting()");
                 DeviceModeSetting deviceModeSetting = this.DeviceModeSettingRepository.GetDeviceModeSetting();
+                Logger.Debug($"FixedTermCheck:Call:this.DeviceModeLicenseInfoRepository.GetDeviceModeLicenseInfo");
                 this.DeviceModeLicenseInfoRepository.GetDeviceModeLicenseInfo(true, deviceModeSetting.OfflineDeviceID, deviceModeSetting.IndefiniteAccessToken, deviceModeSetting.LicenceFileKeyPath, deviceModeSetting.LicenseDecryptionKey);
             }
             catch (Exception ex)
             {
                 Logger.Error(ex.StackTrace);
+                Logger.Debug("FixedTermCheck:Exception(2)");
             }
 
             {
@@ -129,11 +144,14 @@ namespace ApplicationService.DeviceMode
                 // ・[ライセンス：有効期限]が過ぎているフォントをディアクティベートする
                 // ・[ライセンス：有効期限]が１ヶ月以上過ぎているフォントを削除する
                 // ・契約情報にないフォントを削除する
+                Logger.Debug($"FixedTermCheck:契約情報とフォントのインストール状態を合わせる");
                 DateTime now = DateTime.Now;
 
+                Logger.Debug($"FixedTermCheck:Call:this.DeviceModeLicenseInfoRepository.GetDeviceModeLicenseInfo");
                 DeviceModeLicenseInfo deviceModeLicenseInfo = this.DeviceModeLicenseInfoRepository.GetDeviceModeLicenseInfo();
 
                 // 契約切れ、契約なしの処理
+                Logger.Debug($"FixedTermCheck:契約切れ、契約なしの処理");
                 IList<int> overMonthLetsKind = new List<int>();
                 IList<int> expiredLetsKind = new List<int>();
                 IList<int> contractedLetsKind = new List<int>();
@@ -142,16 +160,19 @@ namespace ApplicationService.DeviceMode
                     if (deviceModeLicense.ExpireDate.AddMonths(1).AddDays(1) < now)
                     {
                         // 契約切れ1か月以上過ぎている
+                        Logger.Debug($"FixedTermCheck:契約切れ1か月以上過ぎている");
                         overMonthLetsKind.Add((int)deviceModeLicense.LetsKind);
                     }
                     else if (deviceModeLicense.ExpireDate.AddDays(1) < now)
                     {
                         // 契約切れしている
+                        Logger.Debug($"FixedTermCheck:契約切れしている");
                         expiredLetsKind.Add((int)deviceModeLicense.LetsKind);
                     }
                     else
                     {
                         // 契約が有効
+                        Logger.Debug($"FixedTermCheck:契約が有効");
                         contractedLetsKind.Add((int)deviceModeLicense.LetsKind);
                     }
                 }
@@ -167,9 +188,11 @@ namespace ApplicationService.DeviceMode
                         {
                             letsKindName = letsKindNameMap[(int)deviceModeFontInfo.LetsKind];
                         }
-                        catch (Exception)
+                        catch (Exception ex)
                         {
                             // NOP
+                            Logger.Error(ex.StackTrace);
+                            Logger.Debug("FixedTermCheck:Exception(3)");
                         }
 
                         uninstallFontList.Add(string.Join("\t", deviceModeFontInfo.FontFilePath, deviceModeFontInfo.RegistryKey, letsKindName, "Uninstall"));
@@ -182,9 +205,11 @@ namespace ApplicationService.DeviceMode
                         {
                             letsKindName = letsKindNameMap[(int)deviceModeFontInfo.LetsKind];
                         }
-                        catch (Exception)
+                        catch (Exception ex)
                         {
                             // NOP
+                            Logger.Error(ex.StackTrace);
+                            Logger.Debug("FixedTermCheck:Exception(4):{deviceModeFontInfo.LetsKind}");
                         }
 
                         uninstallFontList.Add(string.Join("\t", deviceModeFontInfo.FontFilePath, deviceModeFontInfo.RegistryKey, letsKindName, "Deactivate"));
@@ -197,9 +222,11 @@ namespace ApplicationService.DeviceMode
                         {
                             letsKindName = letsKindNameMap[(int)deviceModeFontInfo.LetsKind];
                         }
-                        catch (Exception)
+                        catch (Exception ex)
                         {
                             // NOP
+                            Logger.Error(ex.StackTrace);
+                            Logger.Debug("FixedTermCheck:Exception(5):{deviceModeFontInfo.LetsKind}");
                         }
 
                         uninstallFontList.Add(string.Join("\t", deviceModeFontInfo.FontFilePath, deviceModeFontInfo.RegistryKey, letsKindName, "Uninstall"));
@@ -208,10 +235,12 @@ namespace ApplicationService.DeviceMode
 
                 if (uninstallFontList.Count > 0 || repairRegKeyList.Count > 0)
                 {
+                    Logger.Debug($"FixedTermCheck:ライセンスを再度契約後、インストールしてください。");
                     messageList = this.UninstallFonts(uninstallFontList, "ライセンスを再度契約後、インストールしてください。", repairRegKeyList);
                 }
             }
 
+            Logger.Debug($"FixedTermCheck:Exit:{messageList}");
             return messageList;
         }
 
@@ -502,6 +531,8 @@ namespace ApplicationService.DeviceMode
         /// <returns>リペアが必要なレジストリキーリスト</returns>
         public IList<string> CheckRepairRegistory()
         {
+            Logger.Debug($"CheckRepairRegistory:Enter");
+
             List<string> usrRegList = new List<string>();
 
             string registryFontsPath = @"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts";
@@ -524,11 +555,13 @@ namespace ApplicationService.DeviceMode
                     catch (Exception e)
                     {
                         // 無視
-                        Logger.Error(e);
+                        Logger.Error(e.StackTrace);
+                        Logger.Debug($"CheckRepairRegistory:Exception");
                     }
                 }
             }
 
+            Logger.Debug($"CheckRepairRegistory:Exit:{usrRegList}");
             return usrRegList;
         }
 
@@ -570,7 +603,7 @@ namespace ApplicationService.DeviceMode
             }
             catch (Exception e)
             {
-                Logger.Error(e);
+                Logger.Error(e.StackTrace);
             }
 
             return removeCnt;
@@ -662,19 +695,20 @@ namespace ApplicationService.DeviceMode
 
         public bool IsAdministratorsMember()
         {
-            // ローカルコンピュータストアのPrincipalContextオブジェクトを作成する
-            using (PrincipalContext pc = new PrincipalContext(ContextType.Machine))
-            {
-                // 現在のユーザーのプリンシパルを取得する
-                UserPrincipal up = UserPrincipal.Current;
+            //// ローカルコンピュータストアのPrincipalContextオブジェクトを作成する
+            //using (PrincipalContext pc = new PrincipalContext(ContextType.Machine))
+            //{
+            //    // 現在のユーザーのプリンシパルを取得する
+            //    UserPrincipal up = UserPrincipal.Current;
 
-                // ローカルAdministratorsグループを探す
-                // S-1-5-32-544"はローカルAdministratorsグループを示すSID
-                GroupPrincipal gp = GroupPrincipal.FindByIdentity(pc, "S-1-5-32-544");
+            //    // ローカルAdministratorsグループを探す
+            //    // S-1-5-32-544"はローカルAdministratorsグループを示すSID
+            //    GroupPrincipal gp = GroupPrincipal.FindByIdentity(pc, "S-1-5-32-544");
 
-                // グループのメンバーであるか調べる
-                return up.IsMemberOf(gp);
-            }
+            //    // グループのメンバーであるか調べる
+            //    return up.IsMemberOf(gp);
+            //}
+            return true;
         }
 
         /// <summary>
@@ -682,16 +716,16 @@ namespace ApplicationService.DeviceMode
         /// </summary>
         private void RunFontOpeProgram(string opeKind, string tempPath)
         {
-            // アプリ実行ユーザの所属グループに「管理者グループ（SID : S-1-5-32-544）」が含まれているかチェックする
-            AppDomain.CurrentDomain.SetPrincipalPolicy(PrincipalPolicy.WindowsPrincipal);
-            WindowsPrincipal principal = (WindowsPrincipal)Thread.CurrentPrincipal;
-            List<Claim> userClaims = new List<Claim>(principal.UserClaims);
-            bool isAdministrator = userClaims.Where(claim => claim.Value.Equals("S-1-5-32-544")).Any();
-            if (!isAdministrator)
-            {
-                // 管理者グループではない場合、エラーを出力して処理を終了する
-                throw new UnauthorizedAccessException("管理者権限で起動してください");
-            }
+            //// アプリ実行ユーザの所属グループに「管理者グループ（SID : S-1-5-32-544）」が含まれているかチェックする
+            //AppDomain.CurrentDomain.SetPrincipalPolicy(PrincipalPolicy.WindowsPrincipal);
+            //WindowsPrincipal principal = (WindowsPrincipal)Thread.CurrentPrincipal;
+            //List<Claim> userClaims = new List<Claim>(principal.UserClaims);
+            //bool isAdministrator = userClaims.Where(claim => claim.Value.Equals("S-1-5-32-544")).Any();
+            //if (!isAdministrator)
+            //{
+            //    // 管理者グループではない場合、エラーを出力して処理を終了する
+            //    throw new UnauthorizedAccessException("管理者権限で起動してください");
+            //}
 
             // アップデータのディレクトリパスを作成する
             string directoryPath = Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory).Parent.FullName;
@@ -700,6 +734,7 @@ namespace ApplicationService.DeviceMode
             List<string> argList = new List<string>();
             argList.Add(opeKind);
             argList.Add(tempPath);
+            argList.Add("deviceMode");
 
             // 実行権限を管理者権限とし、プログラムアップデータを実行する
             Process proc = this.StartProcessService.StartProcessAdministrator(directoryPath, "LETSUpdater.exe", argList.ToArray());

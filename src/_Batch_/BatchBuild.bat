@@ -64,6 +64,9 @@ move /y ..\LETSUpdater\LETSUpdater.csproj.bak ..\LETSUpdater\LETSUpdater.csproj
 REM Installerファイル作成
 powershell Compress-Archive -Path ..\LETS-Installer\Release\LETS-Installer.msi,..\LETS-Installer\setup.exe -DestinationPath %VersionFolder%\LETS-device-Installer.zip -Force
 
+REM Updateファイル作成
+powershell Compress-Archive -Path ..\Client.UI\bin\Release\netcoreapp3.1\publish\* -DestinationPath %VersionFolder%\LETS-device-Ver%Version%.zip -Force
+
 
 :NORMALEND
 EXIT /B 0

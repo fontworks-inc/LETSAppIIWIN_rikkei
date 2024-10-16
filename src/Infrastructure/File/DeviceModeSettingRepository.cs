@@ -40,27 +40,33 @@ namespace Infrastructure.File
         /// <returns>設定情報(デバイスモード時)</returns>
         public Core.Entities.DeviceModeSetting GetDeviceModeSetting()
         {
+            Logger.Debug($"GetDeviceModeSetting:Enter");
+            Logger.Warn($"GetDeviceModeSetting:{this.FilePath}");
+
             if (System.IO.File.Exists(this.FilePath))
             {
                 // ファイルが存在する場合、内容を返す
                 try
                 {
+                    Logger.Debug($"GetDeviceModeSetting:ファイルが存在する場合、内容を返す");
+                    Logger.Warn($"GetDeviceModeSetting:ファイルが存在する場合、内容を返す");
                     string jsonString = this.ReadAll();
                     return JsonSerializer.Deserialize<DeviceModeSetting>(jsonString);
                 }
                 catch (Exception ex)
                 {
-                    Logger.Error("DeviceModeSetting:" + ex.StackTrace);
+                    Logger.Error("GetDeviceModeSetting:" + ex.StackTrace);
                     return new DeviceModeSetting();
                 }
             }
             else
             {
                 // ファイルが存在しない場合、新規のオブジェクトを返す
+                Logger.Debug($"GetDeviceModeSetting:ファイルが存在しない場合、新規のオブジェクトを返す");
                 DeviceModeSetting deviceModeSetting = new DeviceModeSetting();
                 Logger.Warn($"DeviceModeSetting 新規作成");
 #if COMPLETELY_OFFLINE
-                Logger.Warn($"完全オフラインモード");
+                Logger.Warn($"GetDeviceModeSetting:完全オフラインモード");
                 deviceModeSetting.IsCompletelyOffline = true;  //完全オフラインモードをtrueにする
                 this.SaveDeviceModeSetting(deviceModeSetting);
 #endif
@@ -74,6 +80,7 @@ namespace Infrastructure.File
         /// <param name="setting">設定情報(デバイスモード時)</param>
         public void SaveDeviceModeSetting(Core.Entities.DeviceModeSetting setting)
         {
+            Logger.Warn($"SaveDeviceModeSetting:{setting}");
             lock (saveLockObject)
             {
                 this.WriteAll(JsonSerializer.Serialize(setting));

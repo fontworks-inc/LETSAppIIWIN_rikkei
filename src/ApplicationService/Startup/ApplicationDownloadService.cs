@@ -7,6 +7,7 @@ using Core.Entities;
 using Core.Interfaces;
 using Microsoft.Win32;
 using NLog;
+using Prism.Ioc;
 
 namespace ApplicationService.Startup
 {
@@ -101,6 +102,8 @@ namespace ApplicationService.Startup
         /// <param name="forceUpdateEvent">アップデートチェック時に時に呼び出されるComponent側のイベント</param>
         public void StartDownloading(DownloadCompletedComponentEvent downloadCompletedComponentEvent, ForceUpdateEvent forceUpdateEvent)
         {
+            Logger.Debug($"StartDownloading:Enter");
+
             // コンポーネントのイベントを設定する
             this.downloadCompletedComponentEvent = downloadCompletedComponentEvent;
             this.forceUpdateEvent = forceUpdateEvent;
@@ -109,6 +112,7 @@ namespace ApplicationService.Startup
             this.Download();
 
             // [共通保存：更新プログラム情報.ダウンロード状態]に「ダウンロード中」を設定する
+            Logger.Debug($"[共通保存：更新プログラム情報.ダウンロード状態]に「ダウンロード中」を設定する");
             ApplicationRuntime applicationRuntime = this.applicationRuntimeRepository.GetApplicationRuntime();
             applicationRuntime.NextVersionInstaller.DownloadStatus = DownloadStatus.Running;
             this.applicationRuntimeRepository.SaveApplicationRuntime(applicationRuntime);
@@ -117,6 +121,7 @@ namespace ApplicationService.Startup
             VolatileSetting volatileSetting = this.volatileSettingRepository.GetVolatileSetting();
             volatileSetting.CompletedDownload = false;
             volatileSetting.IsDownloading = true;
+            Logger.Debug($"StartDownloading:Exit");
         }
 
         /// <summary>
@@ -150,7 +155,7 @@ namespace ApplicationService.Startup
             if (this.applicationRuntimeRepository.GetApplicationRuntime().NextVersionInstaller.ApplicationUpdateType)
             {
                 // 「強制」の場合、「強制アップデートチェック」の処理を行う
-                StartupService startupService = new StartupService(null, null, null, null, this.volatileSettingRepository, this.applicationRuntimeRepository, null, null, null, null, null, null, null, null);
+                StartupService startupService = new StartupService(null, null, null, null, this.volatileSettingRepository, this.applicationRuntimeRepository, null, null, null, null, null, null, null, null,null);
                 startupService.ForceUpdateCheck(this.forceUpdateEvent, () => { });
             }
             else
@@ -166,6 +171,7 @@ namespace ApplicationService.Startup
         /// </summary>
         private void Download()
         {
+            Logger.Debug($"Download:Enter");
             Installer installer = this.applicationRuntimeRepository.GetApplicationRuntime().NextVersionInstaller;
 
             // ダウンロードURL
@@ -180,9 +186,11 @@ namespace ApplicationService.Startup
             string dirPath = Path.Combine($@"{programdataFolder}\Fontworks\LETS", "LETS-Ver" + installer.Version);
             string fileName = string.Format(FileNameTamplate, installer.Version);
             string filePath = Path.Combine(dirPath, fileName);
+            Logger.Debug($"Download:ダウンロード先のファイルパス:{filePath}");
             if (!Directory.Exists(dirPath))
             {
                 // ダウンロードフォルダが存在しなければ作成する
+                Logger.Debug($"Download:ダウンロードフォルダが存在しなければ作成する:{dirPath}");
                 Directory.CreateDirectory(dirPath);
             }
 
@@ -203,6 +211,7 @@ namespace ApplicationService.Startup
 
             // ダウンロードを開始
             this.webClient.DownloadFileAsync(url, filePath);
+            Logger.Debug($"Download:ダウンロードを開始:DownloadFileAsync({url.AbsoluteUri}, {filePath})");
         }
 
         /// <summary>
@@ -210,6 +219,8 @@ namespace ApplicationService.Startup
         /// </summary>
         private void NotifyDownloading(object sender, System.ComponentModel.AsyncCompletedEventArgs e)
         {
+            Logger.Debug($"NotifyDownloading:Enter");
+
             // ダウンロード完了時に解放する
             this.webClient.Dispose();
 

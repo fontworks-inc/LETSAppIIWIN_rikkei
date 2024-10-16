@@ -586,7 +586,7 @@ namespace Client.UI.ViewModels
             {
                 // 配信サーバアクセスでエラーが発生したときは、エラーメッセージを表示
                 var exception = new Exception(this.resouceWrapper.GetString("LOG_ERR_LoginViewModel_Login_Exception"), ex);
-                Logger.Error(exception);
+                Logger.Error(exception.StackTrace);
                 this.ErrorMessage = this.resouceWrapper.GetString("APP_04_01_ERR_Fatal");
                 this.ErrorMessageVisibility = Visibility.Visible;
                 Logger.Error(ex, this.ErrorMessage);
@@ -635,7 +635,7 @@ namespace Client.UI.ViewModels
             catch (GetResetPasswordPageUrlException e)
             {
                 // 配信サーバアクセスでエラーが発生したときは、画面を閉じ以後の処理を行わない
-                Logger.Error(e);
+                Logger.Error(e.StackTrace);
                 this.loginWindow.Close();
             }
         }
@@ -656,7 +656,7 @@ namespace Client.UI.ViewModels
             catch (Exception e)
             {
                 // 配信サーバアクセスでエラーが発生したときは、画面を閉じ以後の処理を行わない
-                Logger.Error(e);
+                Logger.Error(e.StackTrace);
                 this.loginWindow.Close();
             }
         }
@@ -676,7 +676,7 @@ namespace Client.UI.ViewModels
             catch (GetUserRegistrationPageUrlException e)
             {
                 // 配信サーバアクセスでエラーが発生したときは、画面を閉じ以後の処理を行わない
-                Logger.Error(e);
+                Logger.Error(e.StackTrace);
                 this.loginWindow.Close();
             }
         }

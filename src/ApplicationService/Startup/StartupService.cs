@@ -93,6 +93,16 @@ namespace ApplicationService.Startup
         private IFontFileRepository fontInfoRepository = null;
 
         /// <summary>
+        /// 認証情報を格納するリポジトリのインターフェイス
+        /// </summary>
+        private IAuthenticationInformationRepository authenticationInformationRepository = null;
+
+        ///// <summary>
+        ///// エラーダイアログ表示用のイベント
+        ///// </summary>
+        //public ShowErrorDialogEvent ShowErrorDialogEvent { get; set; }
+
+        /// <summary>
         /// インスタンスを初期化する
         /// </summary>
         /// <param name="resourceWrapper">文言の取得を行うインスタンス</param>
@@ -123,7 +133,8 @@ namespace ApplicationService.Startup
             IClientApplicationVersionRepository clientApplicationVersionFileRepository,
             IUnreadNoticeRepository unreadNoticeRepository,
             IFontSecurityRepository fontSecurityRepository,
-            IFontFileRepository fontInfoRepository)
+            IFontFileRepository fontInfoRepository,
+            IAuthenticationInformationRepository authenticationInformationRepository)
         {
             Logger.Debug("StartupService#Constructor(1):Enter");
             this.resourceWrapper = resourceWrapper;
@@ -140,6 +151,7 @@ namespace ApplicationService.Startup
             this.unreadNoticeRepository = unreadNoticeRepository;
             this.fontSecurityRepository = fontSecurityRepository;
             this.fontInfoRepository = fontInfoRepository;
+            this.authenticationInformationRepository = authenticationInformationRepository;
             Logger.Debug("StartupService#Constructor:Exit");
         }
 
@@ -261,12 +273,60 @@ namespace ApplicationService.Startup
                     return false;
                 }
 
+                // フォント同期チェック実行
                 Logger.Debug("StartupService#IsCheckedStartup:Task.Run");
                 Task.Run(() => this.StartupFontCheck(contractsResult.ContractsAggregate.Contracts, detectionFontCopyEvent));
 
+                VolatileSetting volatileSetting = this.volatileSettingRepository.GetVolatileSetting();
+
+                // リフレッシュトークンの再取得
+                if (userStatus.RefreshTokenUpdateSchedule <= DateTime.Now)
+                {
+                    Logger.Debug("リフレッシュトークンの再取得");
+                    if (this.authenticationInformationRepository != null) 
+                    {
+                        try
+                        {
+                            RefreshTokenResponse refreshTokenResponse = this.authenticationInformationRepository.RefreshToken(userStatus.DeviceId, volatileSetting.AccessToken);
+                            if (refreshTokenResponse.Data != null)
+                            {
+                                RefreshTokenData refreshTokenData = refreshTokenResponse.Data;
+                                if (!string.IsNullOrEmpty(refreshTokenData.RefreshToken))
+                                {
+                                    // [メモリ：アクセストークン]に「アクセストークン」を保存
+                                    volatileSetting.AccessToken = refreshTokenData.AccessToken;
+                                    volatileSetting.RefreshToken = refreshTokenData.RefreshToken;
+
+                                    Logger.Debug("AccessToken = " + volatileSetting.AccessToken, string.Empty);
+                                    Logger.Debug("RefreshToken = " + volatileSetting.RefreshToken, string.Empty);
+
+                                    // [ユーザー別保存]に「リフレッシュトークン」を保存
+                                    userStatus.RefreshToken = refreshTokenData.RefreshToken;
+
+                                    // リフレッシュトークン次回取得日時に現在日時+7日+(0～6日)を設定
+                                    int addDays = 7 + new Random().Next(7);
+                                    userStatus.RefreshTokenUpdateSchedule = DateTime.Now.AddDays(addDays);
+
+                                    this.userStatusRepository.SaveStatus(userStatus);
+                                }
+                            }
+                            else
+                            {
+                                if (refreshTokenResponse.Code != 0)
+                                {
+                                    Logger.Error($"StartupService#IsCheckedStartup:RefreshToken Code:{refreshTokenResponse.Code}{Environment.NewLine}Message:{refreshTokenResponse.Message}");
+                                }
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            Logger.Error(e.StackTrace);
+                        }
+                    }
+                }
+
                 // 起動時チェック状態の保存(チェックした日時と「処理済みである」という情報)
                 Logger.Debug("StartupService#IsCheckedStartup:起動時チェック状態の保存(チェックした日時と「処理済みである」という情報)");
-                VolatileSetting volatileSetting = this.volatileSettingRepository.GetVolatileSetting();
                 volatileSetting.CheckedStartupAt = DateTime.Now;
                 volatileSetting.IsCheckedStartup = true;
 
@@ -556,12 +616,15 @@ namespace ApplicationService.Startup
             Logger.Warn($"[INFO] FontCopyCheck");
 
             // ユーザID取得APIを呼び出し、ユーザIDを取得する
+            Logger.Debug("StartupService#FontCopyCheck:ユーザID取得APIを呼び出し、ユーザIDを取得する");
             string userId = null;
             try
             {
+                Logger.Debug("StartupService#FontCopyCheck:Before fontSecurityRepository.GetUserId");
                 UserId userIdData = this.fontSecurityRepository.GetUserId(
                 this.userStatusRepository.GetStatus().DeviceId, this.volatileSettingRepository.GetVolatileSetting().AccessToken);
                 userId = this.FormatFontID7digit0padding(userIdData.ToString());
+                Logger.Debug($"StartupService#FontCopyCheck:After fontSecurityRepository.GetUserId({userId.ToString()}");
             }
             catch (Exception e)
             {
@@ -576,33 +639,46 @@ namespace ApplicationService.Startup
             bool existCopiedFont = false;
 
             // フォント一覧の取得
+            Logger.Debug($"StartupService#FontCopyCheck:フォント一覧の取得");
             var fonts = this.userFontsSettingRepository.GetUserFontsSetting().Fonts;
 
             // ユーザーフォントフォルダ内にあるフォントについて、それぞれ処理を行う
+            Logger.Debug($"StartupService#FontCopyCheck:ユーザーフォントフォルダ内にあるフォントについて、それぞれ処理を行う");
             foreach (string filePath in this.GetFilePathsIntUserFontFile())
             {
+                Logger.Debug($"StartupService#FontCopyCheck:filePath={filePath}");
                 // [フォント：フォント一覧]に同じファイル名のデータが存在するか確認する
+                Logger.Debug($"StartupService#FontCopyCheck:[フォント：フォント一覧]に同じファイル名のデータが存在するか確認する");
                 Font userFont = fonts.FirstOrDefault(f => f.Path == filePath);
                 if (userFont != null && !userFont.IsLETS)
                 {
                     // 同名フォントが存在し、かつ「LETSフォント」ではない場合、次のファイルにスキップする
+                    Logger.Debug($"StartupService#FontCopyCheck:同名フォントが存在し、かつ「LETSフォント」ではない場合、次のファイルにスキップする");
                     continue;
                 }
 
                 // フォントのユーザIDを取得し、自身のユーザIDと比較する
+                Logger.Debug($"StartupService#FontCopyCheck:フォントのユーザIDを取得し、自身のユーザIDと比較する");
                 FontIdInfo fontInfo = this.fontInfoRepository.GetFontInfo(filePath);
+                Logger.Debug($"StartupService#FontCopyCheck:fontInfoRepository.GetFontInfo={fontInfo.ToString()}");
                 string fontUserId = this.FormatFontID7digit0padding(fontInfo.UserId);
+                Logger.Debug($"StartupService#FontCopyCheck:fontUserId={fontUserId}");
                 if (!userId.Equals(fontUserId))
                 {
+                    Logger.Debug($"StartupService#FontCopyCheck:!userId.Equals(fontUserId)");
                     existCopiedFont = true;
 
                     // メモリに「通知あり」と設定し、アイコンを変更
+                    Logger.Debug($"StartupService#FontCopyCheck:メモリに「通知あり」と設定し、アイコンを変更");
                     VolatileSetting volatileSetting = this.volatileSettingRepository.GetVolatileSetting();
                     volatileSetting.IsNoticed = true;
+                    Logger.Debug($"StartupService#FontCopyCheck:Before detectionFontCopyEvent");
                     detectionFontCopyEvent();
+                    Logger.Debug($"StartupService#FontCopyCheck:After detectionFontCopyEvent");
 
                     try
                     {
+                        Logger.Debug($"StartupService#FontCopyCheck:Before fontSecurityRepository.PostFontFileCopyDetection");
                         this.fontSecurityRepository.PostFontFileCopyDetection(
                             this.userStatusRepository.GetStatus().DeviceId,
                             this.volatileSettingRepository.GetVolatileSetting().AccessToken,
@@ -610,6 +686,7 @@ namespace ApplicationService.Startup
                             fontUserId,
                             fontInfo.DeviceId,
                             DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                        Logger.Debug($"StartupService#FontCopyCheck:After fontSecurityRepository.PostFontFileCopyDetection");
                     }
                     catch (Exception e)
                     {
@@ -624,9 +701,11 @@ namespace ApplicationService.Startup
 
             if (!existCopiedFont)
             {
+                Logger.Debug($"StartupService#FontCopyCheck:!existCopiedFont");
                 this.fontSecurityRepository.NotifyVerifiedFonts(
                             this.userStatusRepository.GetStatus().DeviceId,
                             this.volatileSettingRepository.GetVolatileSetting().AccessToken);
+                Logger.Debug($"StartupService#FontCopyCheck:After fontSecurityRepository.NotifyVerifiedFonts");
             }
 
             Logger.Debug("StartupService#FontCopyCheck:return true");

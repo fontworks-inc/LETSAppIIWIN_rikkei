@@ -201,6 +201,45 @@ namespace Infrastructure.API
         }
 
         /// <summary>
+        /// リフレッシュトークンを再取得する
+        /// </summary>
+        /// <param name="deviceId">デバイスID</param>
+        /// <param name="accessToken">アクセストークン</param>
+        /// <returns>リフレッシュトークン</returns>
+        /// <remarks>FUNCTION_08_01_06(リフレッシュトークン再取得API)</remarks>
+        public RefreshTokenResponse RefreshToken(string deviceId, string accessToken)
+        {
+            RefreshTokenResponse response = new RefreshTokenResponse();
+
+            // APIの引数の値をセット(個別処理)
+            this.ApiParam[APIParam.DeviceId] = deviceId;
+            this.ApiParam[APIParam.AccessToken] = accessToken;
+
+            // API通信を行う(リトライ込み)を行う（共通処理）
+            try
+            {
+                this.Invoke(this.CallRefreshTokenApi);
+
+                // 戻り値のセット（個別処理）
+                Logger.Info(string.Format("AuthenticationInformationAPIRepository:AuthenticateAccount 戻り値のセット（個別処理）", string.Empty));
+                var ret = (RefreshTokenResponse)this.ApiResponse;
+                response.Code = ret.Code;
+                response.Message = ret.Message;
+                if (response.Code == (int)ResponseCode.Succeeded || response.Code == (int)ResponseCode.MaximumNumberOfDevicesInUse)
+                {
+                    response.Data = new RefreshTokenData(ret.Data.AccessToken, ret.Data.RefreshToken);
+                }
+            }
+            catch (ApiException)
+            {
+                // 通信に失敗or通信しなかった
+                throw;
+            }
+
+            return response;
+        }
+
+        /// <summary>
         /// ログインの呼び出し
         /// </summary>
         private void CallLoginApi()
@@ -272,6 +311,21 @@ namespace Infrastructure.API
             Logger.Debug("AuthenticationInformationAPIRepository:CallAuthenticateAccountApi apiInstance.AuthenticateAccount:Before");
             this.ApiResponse = apiInstance.AuthenticateAccount(config.UserAgent, body);
             Logger.Debug("AuthenticationInformationAPIRepository:CallAuthenticateAccountApi apiInstance.AuthenticateAccount:After");
+        }
+
+        /// <summary>
+        /// リフレッシュトークン再取得APIの呼び出し
+        /// </summary>
+        private void CallRefreshTokenApi()
+        {
+            Configuration config = new Configuration();
+            config.BasePath = this.BasePath;
+            config.UserAgent = (string)this.ApiParam[APIParam.UserAgent];
+            config.WebProxy = this.APIConfiguration.GetWebProxy(this.BasePath);
+            config.AccessToken = (string)this.ApiParam[APIParam.AccessToken];
+            LoginApi apiInstance = new LoginApi(config);
+            var body = new object();
+            this.ApiResponse = apiInstance.RefreshToken((string)this.ApiParam[APIParam.DeviceId], config.UserAgent, body);
         }
 
     }

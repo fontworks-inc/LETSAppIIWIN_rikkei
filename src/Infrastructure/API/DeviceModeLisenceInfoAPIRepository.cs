@@ -22,7 +22,6 @@ namespace Infrastructure.API
         /// </summary>
         private static readonly Logger Logger = LogManager.GetLogger("nlog.config");
 
-
         /// <summary>
         /// インスタンスの初期化を行う
         /// </summary>
@@ -50,13 +49,15 @@ namespace Infrastructure.API
         /// <summary>
         /// 契約情報を取得する
         /// </summary>
-        /// <param name="deviceId">デバイスID</param>
-        /// <param name="accessToken">アクセストークン</param>
+        /// <param name="offlineDeviceId">デバイスID</param>
+        /// <param name="indefiniteAccessToken">アクセストークン</param>
+        /// <param name="licenceFileKeyPath">ライセンスファイルキーパス</param>
+        /// <param name="licenseDecryptionKey">ライセンスキー</param>
         /// <returns>契約情報の集合体</returns>
         public DeviceModeLicenseInfo GetUpdateLicense(string offlineDeviceId, string indefiniteAccessToken, string licenceFileKeyPath, string licenseDecryptionKey)
         {
+            Logger.Debug($"GetUpdateLicense:Enter offlineDeviceId={offlineDeviceId}, indefiniteAccessToken={indefiniteAccessToken}, licenceFileKeyPath={licenceFileKeyPath}, licenseDecryptionKey={licenseDecryptionKey}");
             UpdateLicenseResponse response = new UpdateLicenseResponse();
-            //DeviceModeLicenseInfo deviceModeLicenseInfo = new DeviceModeLicenseInfo();
             DeviceModeLicenseInfo deviceModeLicenseInfo = null;
 
             // APIの引数の値をセット(個別処理)
@@ -83,6 +84,13 @@ namespace Infrastructure.API
                         // ライセンスキーを解凍する
                         UpdateLicenseData updateLicenseData = ret.Data;
 
+                        if(updateLicenseData.LicenseKey == null)
+                        {
+                            Logger.Debug($"GetUpdateLicense:ライセンスキーがnull(有効な契約が存在しない)");
+                            return new DeviceModeLicenseInfo();
+                        }
+
+                        Logger.Debug($"GetUpdateLicense:ライセンスキーを解凍する:updateLicenseData.LicenseKey={updateLicenseData.LicenseKey}");
                         byte[] encrypted = Convert.FromBase64String(updateLicenseData.LicenseKey);
 
                         // AES復号化を行う
@@ -91,6 +99,7 @@ namespace Infrastructure.API
                         aes.KeySize = 128;
                         aes.Padding = PaddingMode.Zeros;
                         aes.Mode = CipherMode.ECB;
+                        Logger.Debug($"GetUpdateLicense:licenseDecryptionKey={licenseDecryptionKey}");
                         aes.Key = Convert.FromBase64String(licenseDecryptionKey);
 
                         ICryptoTransform decryptor = aes.CreateDecryptor();
@@ -118,10 +127,10 @@ namespace Infrastructure.API
                         deviceModeLicenseInfo = null;   //Jsonエラーのときはnullを返す
                     }
                 }
-                else if (ret.Code == (int)ResponseCode.AuthenticationFailed || ret.Code == (int)ResponseCode.InvalidArgument)
-                {
-                    // NOP 認証エラーの場合はnullを返す
-                }
+                //else if (ret.Code == (int)ResponseCode.AuthenticationFailed || ret.Code == (int)ResponseCode.InvalidArgument)
+                //{
+                //    // NOP 認証エラーの場合はnullを返す
+                //}
                 else
                 {
                     throw new ApiException(ret.Code, ret.Message);
@@ -152,6 +161,7 @@ namespace Infrastructure.API
                 deviceModeLicense.ExpireDate = letsLicense.ExpirationDate;
                 deviceModeLicenseInfo.DeviceModeLicenceList.Add(deviceModeLicense);
             }
+
             deviceModeLicenseInfo.ZipPassword = letsLicenseKey.ZipPassword;
 
             return deviceModeLicenseInfo;

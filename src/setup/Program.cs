@@ -2,6 +2,8 @@
 using System.Diagnostics;
 using System.DirectoryServices.AccountManagement;
 using System.IO;
+using System.Security.AccessControl;
+using System.Security.Principal;
 using System.Text.RegularExpressions;
 using System.Threading;
 
@@ -11,12 +13,12 @@ namespace setup
     {
         static void Main(string[] args)
         {
-            // 管理者権限を持つユーザで実行されているか確認する
-            if (!IsAdministratorsMember())
-            {
-                System.Windows.Forms.MessageBox.Show("管理者権限を持つユーザで実行してください");
-                return;
-            }
+            //// 管理者権限を持つユーザで実行されているか確認する
+            //if (!IsAdministratorsMember())
+            //{
+            //    System.Windows.Forms.MessageBox.Show("管理者権限を持つユーザで実行してください");
+            //    return;
+            //}
 
             // ホームドライブの取得
             string winDir = System.Environment.GetFolderPath(Environment.SpecialFolder.Windows);
@@ -195,6 +197,10 @@ namespace setup
                     return;
                 }
 
+                //  configフォルダにEveryoneのアクセス権限を追加する
+                string configPath = $@"{letsfolder}\config";
+                SetEveryoneAccess(configPath);
+
                 Process p2 = Process.Start(shortcut);
 
                 // チュートリアル画面の起動
@@ -214,42 +220,73 @@ namespace setup
             }
         }
 
-        /// <summary>
-        /// 現在のユーザーがローカルAdministratorsグループのメンバーか調べる
-        /// </summary>
-        /// <returns>メンバーであればtrue。</returns>
-        public static bool IsAdministratorsMember()
+        private static void SetEveryoneAccess(string filePath)
         {
-            ////現在のユーザーを表すWindowsIdentityオブジェクトを取得する
-            //System.Security.Principal.WindowsIdentity wi =
-            //    System.Security.Principal.WindowsIdentity.GetCurrent();
-            ////WindowsPrincipalオブジェクトを作成する
-            //System.Security.Principal.WindowsPrincipal wp =
-            //    new System.Security.Principal.WindowsPrincipal(wi);
-            ////Administratorsグループに属しているか調べる
-            //return wp.IsInRole(
-            //    System.Security.Principal.WindowsBuiltInRole.Administrator);
-
             try
             {
-                //ローカルコンピュータストアのPrincipalContextオブジェクトを作成する
-                using (PrincipalContext pc = new PrincipalContext(ContextType.Machine))
+                FileSystemAccessRule rule = new FileSystemAccessRule(
+                  new NTAccount("everyone"),
+                  FileSystemRights.FullControl,
+                  InheritanceFlags.ObjectInherit | InheritanceFlags.ContainerInherit,
+                  PropagationFlags.None,
+                  AccessControlType.Allow);
+
+                //DirectoryInfo di = new DirectoryInfo(filePath);
+                //DirectorySecurity security = FileSystemAclExtensions.GetAccessControl(di);
+                //security.SetAccessRule(rule);
+                //FileSystemAclExtensions.SetAccessControl(di, security);
+
+                var dirInfo = new DirectoryInfo(filePath);
+                var dirSec = dirInfo.GetAccessControl();
+                dirSec.AddAccessRule(rule);
+                dirInfo.SetAccessControl(dirSec);
+
+                if((dirInfo.Attributes & FileAttributes.ReadOnly) == FileAttributes.ReadOnly)
                 {
-                    //現在のユーザーのプリンシパルを取得する
-                    UserPrincipal up = UserPrincipal.Current;
-                    //ローカルAdministratorsグループを探す
-                    //"S-1-5-32-544"はローカルAdministratorsグループを示すSID
-                    GroupPrincipal gp = GroupPrincipal.FindByIdentity(pc, "S-1-5-32-544");
-                    //グループのメンバーであるか調べる
-                    return up.IsMemberOf(gp);
+                    dirInfo.Attributes = FileAttributes.Normal;
                 }
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
-                //System.Windows.Forms.MessageBox.Show(ex.StackTrace);
-                return true;
+                //  NOP
             }
         }
+        ///// <summary>
+        ///// 現在のユーザーがローカルAdministratorsグループのメンバーか調べる
+        ///// </summary>
+        ///// <returns>メンバーであればtrue。</returns>
+        //public static bool IsAdministratorsMember()
+        //{
+        //    ////現在のユーザーを表すWindowsIdentityオブジェクトを取得する
+        //    //System.Security.Principal.WindowsIdentity wi =
+        //    //    System.Security.Principal.WindowsIdentity.GetCurrent();
+        //    ////WindowsPrincipalオブジェクトを作成する
+        //    //System.Security.Principal.WindowsPrincipal wp =
+        //    //    new System.Security.Principal.WindowsPrincipal(wi);
+        //    ////Administratorsグループに属しているか調べる
+        //    //return wp.IsInRole(
+        //    //    System.Security.Principal.WindowsBuiltInRole.Administrator);
+
+        //    try
+        //    {
+        //        //ローカルコンピュータストアのPrincipalContextオブジェクトを作成する
+        //        using (PrincipalContext pc = new PrincipalContext(ContextType.Machine))
+        //        {
+        //            //現在のユーザーのプリンシパルを取得する
+        //            UserPrincipal up = UserPrincipal.Current;
+        //            //ローカルAdministratorsグループを探す
+        //            //"S-1-5-32-544"はローカルAdministratorsグループを示すSID
+        //            GroupPrincipal gp = GroupPrincipal.FindByIdentity(pc, "S-1-5-32-544");
+        //            //グループのメンバーであるか調べる
+        //            return up.IsMemberOf(gp);
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        //System.Windows.Forms.MessageBox.Show(ex.StackTrace);
+        //        return true;
+        //    }
+        //}
     }
 
 

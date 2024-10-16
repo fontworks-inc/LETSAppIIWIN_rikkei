@@ -10,6 +10,7 @@
 
 
 using Org.OpenAPITools.Client;
+using Org.OpenAPITools.Model;
 using System;
 
 namespace Org.OpenAPITools.Api
@@ -44,6 +45,30 @@ namespace Org.OpenAPITools.Api
         /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
         /// <returns>ApiResponse of Object</returns>
         ApiResponse<Object> GetCustomerWithHttpInfo(string X_LETS_DEVICEID, string userAgent);
+
+        /// <summary>
+        /// ヘルプ画面URL取得API
+        /// </summary>
+        /// <remarks>
+        /// サービスサイトの「ヘルプ画面」のURLを返却する。 
+        /// </remarks>
+        /// <exception cref="Org.OpenAPITools.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="X_LETS_DEVICEID">デバイス固有のIDを設定する。</param>
+        /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
+        /// <returns>Object</returns>
+        UrlResponse GetHelpUrl(string X_LETS_DEVICEID, string userAgent);
+
+        /// <summary>
+        /// ヘルプ画面URL取得API
+        /// </summary>
+        /// <remarks>
+        /// サービスサイトの「ヘルプ画面」のURLを返却する。 
+        /// </remarks>
+        /// <exception cref="Org.OpenAPITools.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="X_LETS_DEVICEID">デバイス固有のIDを設定する。</param>
+        /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
+        /// <returns>ApiResponse of Object</returns>
+        ApiResponse<UrlResponse> GetHelpUrlWithHttpInfo(string X_LETS_DEVICEID, string userAgent);
         #endregion Synchronous Operations
     }
 
@@ -329,6 +354,145 @@ namespace Org.OpenAPITools.Api
             if (this.ExceptionFactory != null)
             {
                 Exception _exception = this.ExceptionFactory("GetCustomer", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// サービスサイトの「ヘルプ画面」のURLを返却する。
+        /// </summary>
+        /// <exception cref="Org.OpenAPITools.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="X_LETS_DEVICEID">デバイス固有のIDを設定する。</param>
+        /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
+        /// <returns>UrlResponse</returns>
+        public UrlResponse GetHelpUrl(string X_LETS_DEVICEID, string userAgent)
+        {
+            Org.OpenAPITools.Client.ApiResponse<UrlResponse> localVarResponse = GetHelpUrlWithHttpInfo(X_LETS_DEVICEID, userAgent);
+            return localVarResponse.Data;
+        }
+
+        /// <summary>
+        /// サービスサイトの「ヘルプ画面」のURLを返却する。
+        /// </summary>
+        /// <exception cref="Org.OpenAPITools.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="X_LETS_DEVICEID">デバイス固有のIDを設定する。</param>
+        /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
+        /// <returns>ApiResponse of UrlResponse</returns>
+        public Org.OpenAPITools.Client.ApiResponse<UrlResponse> GetHelpUrlWithHttpInfo(string X_LETS_DEVICEID, string userAgent)
+        {
+            // verify the required parameter 'X_LETS_DEVICEID' is set
+            if (X_LETS_DEVICEID == null)
+                throw new Org.OpenAPITools.Client.ApiException(400, "Missing required parameter 'X_LETS_DEVICEID' when calling ContractApi->GetHelpUrl");
+
+            // verify the required parameter 'userAgent' is set
+            if (userAgent == null)
+                throw new Org.OpenAPITools.Client.ApiException(400, "Missing required parameter 'userAgent' when calling ContractApi->GetHelpUrl");
+
+            Org.OpenAPITools.Client.RequestOptions localVarRequestOptions = new Org.OpenAPITools.Client.RequestOptions();
+
+            String[] _contentTypes = new String[] {
+            };
+
+            // to determine the Accept header
+            String[] _accepts = new String[] {
+                "application/json; charset=utf-8"
+            };
+
+            var localVarContentType = Org.OpenAPITools.Client.ClientUtils.SelectHeaderContentType(_contentTypes);
+            if (localVarContentType != null) localVarRequestOptions.HeaderParameters.Add("Content-Type", localVarContentType);
+
+            var localVarAccept = Org.OpenAPITools.Client.ClientUtils.SelectHeaderAccept(_accepts);
+            if (localVarAccept != null) localVarRequestOptions.HeaderParameters.Add("Accept", localVarAccept);
+
+            localVarRequestOptions.HeaderParameters.Add("X-LETS-DEVICEID", Org.OpenAPITools.Client.ClientUtils.ParameterToString(X_LETS_DEVICEID)); // header parameter
+            localVarRequestOptions.HeaderParameters.Add("User-Agent", Org.OpenAPITools.Client.ClientUtils.ParameterToString(userAgent)); // header parameter
+
+            // authentication (BearerAuth) required
+            // bearer authentication required
+            if (!String.IsNullOrEmpty(this.Configuration.AccessToken))
+            {
+                localVarRequestOptions.HeaderParameters.Add("Authorization", "Bearer " + this.Configuration.AccessToken);
+            }
+
+            // make the HTTP request
+            var localVarResponse = this.Client.Get<UrlResponse>("/api/v1/screens/help/url", localVarRequestOptions, this.Configuration);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("GetHelpUrl", localVarResponse);
+                if (_exception != null) throw _exception;
+            }
+
+            return localVarResponse;
+        }
+
+        /// <summary>
+        /// サービスサイトの「ヘルプ画面」のURLを返却する。
+        /// </summary>
+        /// <exception cref="Org.OpenAPITools.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="X_LETS_DEVICEID">デバイス固有のIDを設定する。</param>
+        /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
+        /// <returns>Task of UrlResponse</returns>
+        public async System.Threading.Tasks.Task<UrlResponse> GetHelpUrlAsync(string X_LETS_DEVICEID, string userAgent)
+        {
+            Org.OpenAPITools.Client.ApiResponse<UrlResponse> localVarResponse = await GetHelpUrlAsyncWithHttpInfo(X_LETS_DEVICEID, userAgent);
+            return localVarResponse.Data;
+
+        }
+
+        /// <summary>
+        /// サービスサイトの「ヘルプ画面」のURLを返却する。
+        /// </summary>
+        /// <exception cref="Org.OpenAPITools.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <param name="X_LETS_DEVICEID">デバイス固有のIDを設定する。</param>
+        /// <param name="userAgent">LETS/{アプリバージョン} ({OSタイプ} {OSバージョン})</param>
+        /// <returns>Task of ApiResponse (UrlResponse)</returns>
+        public async System.Threading.Tasks.Task<Org.OpenAPITools.Client.ApiResponse<UrlResponse>> GetHelpUrlAsyncWithHttpInfo(string X_LETS_DEVICEID, string userAgent)
+        {
+            // verify the required parameter 'X_LETS_DEVICEID' is set
+            if (X_LETS_DEVICEID == null)
+                throw new Org.OpenAPITools.Client.ApiException(400, "Missing required parameter 'X_LETS_DEVICEID' when calling ContractApi->GetHelpUrl");
+
+            // verify the required parameter 'userAgent' is set
+            if (userAgent == null)
+                throw new Org.OpenAPITools.Client.ApiException(400, "Missing required parameter 'userAgent' when calling ContractApi->GetHelpUrl");
+
+
+            Org.OpenAPITools.Client.RequestOptions localVarRequestOptions = new Org.OpenAPITools.Client.RequestOptions();
+
+            String[] _contentTypes = new String[] {
+            };
+
+            // to determine the Accept header
+            String[] _accepts = new String[] {
+                "application/json; charset=utf-8"
+            };
+
+            foreach (var _contentType in _contentTypes)
+                localVarRequestOptions.HeaderParameters.Add("Content-Type", _contentType);
+
+            foreach (var _accept in _accepts)
+                localVarRequestOptions.HeaderParameters.Add("Accept", _accept);
+
+            localVarRequestOptions.HeaderParameters.Add("X-LETS-DEVICEID", Org.OpenAPITools.Client.ClientUtils.ParameterToString(X_LETS_DEVICEID)); // header parameter
+            localVarRequestOptions.HeaderParameters.Add("User-Agent", Org.OpenAPITools.Client.ClientUtils.ParameterToString(userAgent)); // header parameter
+
+            // authentication (BearerAuth) required
+            // bearer authentication required
+            if (!String.IsNullOrEmpty(this.Configuration.AccessToken))
+            {
+                localVarRequestOptions.HeaderParameters.Add("Authorization", "Bearer " + this.Configuration.AccessToken);
+            }
+
+            // make the HTTP request
+
+            var localVarResponse = await this.AsynchronousClient.GetAsync<UrlResponse>("/api/v1/screens/help/url", localVarRequestOptions, this.Configuration);
+
+            if (this.ExceptionFactory != null)
+            {
+                Exception _exception = this.ExceptionFactory("GetHelpUrl", localVarResponse);
                 if (_exception != null) throw _exception;
             }
 

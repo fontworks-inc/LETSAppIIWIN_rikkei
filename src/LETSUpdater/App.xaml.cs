@@ -42,6 +42,7 @@ namespace Updater
                     // デバイスモードフォント操作対応
                     string param0 = args[0];
                     string param1 = args[1];
+
                     if (param0 == "FontInstall")
                     {
                         DebugLog($"Main:Before FontInstallFromList (param1={param1})");

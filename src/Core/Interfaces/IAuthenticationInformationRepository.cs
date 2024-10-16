@@ -38,5 +38,13 @@ namespace Core.Interfaces
         /// <param name="password">パスワード</param>
         /// <returns>認証情報</returns>
         AuthenticationInformationResponse AuthenticateAccount(string mailAddress, string password);
+
+        /// <summary>
+        /// リフレッシュトークン再取得を行う
+        /// </summary>
+        /// <param name="deviceId">デバイスID</param>
+        /// <param name="accessToken">アクセストークン</param>
+        /// <returns>認証情報</returns>
+        RefreshTokenResponse RefreshToken(string deviceId, string accessToken);
     }
 }

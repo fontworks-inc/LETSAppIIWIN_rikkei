@@ -50,6 +50,11 @@ namespace Client.UI.Components
         private IFontManagerService fontManagerService = null;
 
         /// <summary>
+        /// プログラムからバージョンを取得するサービス
+        /// </summary>
+        private IApplicationVersionService applicationVersionService = null;
+
+        /// <summary>
         /// コンストラクタ
         /// </summary>
         /// <param name="manager">ComponentManager</param>
@@ -69,6 +74,7 @@ namespace Client.UI.Components
             this.urlRepository = containerProvider.Resolve<IUrlRepository>();
             this.customerRepository = containerProvider.Resolve<ICustomerRepository>();
             this.fontManagerService = containerProvider.Resolve<IFontManagerService>();
+            this.applicationVersionService = containerProvider.Resolve<IApplicationVersionService>();
 
             this.InitializeComponent();
 
@@ -150,6 +156,15 @@ namespace Client.UI.Components
         }
 
         /// <summary>
+        /// クイックメニュー－アカウント
+        /// </summary>
+        public MenuItemVersionInfo MenuVersionInfo
+        {
+            get;
+            private set;
+        }
+
+        /// <summary>
         /// クイックメニュー－フォント
         /// </summary>
         public MenuItemFontListPage MenuFontListPage
@@ -180,6 +195,15 @@ namespace Client.UI.Components
         /// クイックメニュー－アップデート
         /// </summary>
         public MenuItemUpdate MenuUpdate
+        {
+            get;
+            private set;
+        }
+
+        /// <summary>
+        /// クイックメニュー－ヘルプ
+        /// </summary>
+        public MenuItemHelp MenuHelp
         {
             get;
             private set;
@@ -267,17 +291,21 @@ namespace Client.UI.Components
             this.MenuDownloadStatus = new MenuItemDownloadStatus(this);
             this.MenuAnnouncePage = new MenuItemAnnouncePage(this, this.volatileSettingRepository, this.userStatusRepository, this.urlRepository);
             this.MenuAccountPage = new MenuItemAccountPage(this, this.resourceWrapper, this.volatileSettingRepository, this.userStatusRepository, this.urlRepository);
+            this.MenuVersionInfo = new MenuItemVersionInfo(this, this.resourceWrapper, this.applicationVersionService);
             this.MenuFontListPage = new MenuItemFontListPage(this, this.resourceWrapper, this.volatileSettingRepository, this.userStatusRepository, this.urlRepository);
             this.MenuFontUpdate = new MenuItemFontUpdate(this, this.resourceWrapper, this.volatileSettingRepository, this.userStatusRepository, this.urlRepository, this.fontManagerService);
+            this.MenuHelp = new MenuItemHelp(this, this.resourceWrapper, this.volatileSettingRepository, this.userStatusRepository, this.urlRepository);
             this.MenuLogout = new MenuItemLogout(this);
             this.MenuUpdate = new MenuItemUpdate(this, this.resourceWrapper);
 
             // クイックメニューアイテムの初期表示状態を設定
             this.MenuAnnouncePage.Show();
             this.MenuAccountPage.Show();
+            this.MenuVersionInfo.Show();
             this.MenuFontListPage.Show();
             this.MenuLogout.Show();
             this.MenuUpdate.Hide();
+            this.MenuHelp.Show();
 
             // レイアウトを再開
             this.ResumeLayout();

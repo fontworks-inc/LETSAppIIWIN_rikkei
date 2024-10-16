@@ -100,50 +100,78 @@ namespace Infrastructure.API
             // UserAgentのセット
             this.SetUserAgent();
 
-            while (true)
+            int retryCount = 5;
+            while (retryCount > 0)
             {
                 try
                 {
                     // 実APIの呼び出し
                     action();
+                    retryCount--;
 
-                    // アクセストークン有効期限切れエラーかチェック
-                    if (this.IsAccessTokenExpired(this.ApiResponse, vSetting.AccessToken))
+                    try
                     {
-                        // アクセストークンの更新
-                        int ret = this.RefreshAccessToken();
-                        if (ret != 0)
+                        Logger.Debug("Invoke:ApiParam");
+                        foreach (KeyValuePair<Core.Entities.APIParam, object> kvp in this.ApiParam)
                         {
-                            // 更新に失敗したのでループを止めてエラーコードを返す。
-                            if (ret == -1)
-                            {
-                                if (action.Method.Name == "CallGetDevicesApi")
-                                {
-                                    if (this.APIConfiguration.ForceLogout != null)
-                                    {
-                                        this.APIConfiguration.ForceLogout();
-                                    }
-                                }
-                            }
-
-                            break;
+                            Logger.Debug($"Invoke:ApiParam:{kvp.Key}={kvp.Value}");
                         }
-
-                        // 改めてAPIを実行する(次のループで実行される)
                     }
-                    else if (this.IsRefreshTokenExpired(this.ApiResponse))
+                    catch (Exception ex)
                     {
-                        if (this.APIConfiguration.ForceLogout != null)
-                        {
-                            this.APIConfiguration.ForceLogout();
-                        }
+                        Logger.Error(ex.StackTrace);
+                    }
 
+                    if (this.ApiParam.ContainsKey(APIParam.OfflineDeviceId) && !string.IsNullOrEmpty((string)this.ApiParam[APIParam.OfflineDeviceId]))
+                    {
+                        Logger.Debug($"Invoke:オフラインデバイスIDが設定されているときはアクセストークン期限切れをチェックしない");
+                        break;
+                    }
+                    else if (!this.ApiParam.ContainsKey(APIParam.DeviceId))
+                    {
+                        Logger.Debug($"Invoke:デバイスIDが設定されていないときはアクセストークン期限切れをチェックしない");
                         break;
                     }
                     else
                     {
-                        // なんかしらの応答が取得できたので終了
-                        break;
+                        // アクセストークン有効期限切れエラーかチェック
+                        if (this.IsAccessTokenExpired(this.ApiResponse, vSetting.AccessToken))
+                        {
+                            // アクセストークンの更新
+                            int ret = this.RefreshAccessToken();
+                            if (ret != 0)
+                            {
+                                // 更新に失敗したのでループを止めてエラーコードを返す。
+                                if (ret == -1)
+                                {
+                                    if (action.Method.Name == "CallGetDevicesApi")
+                                    {
+                                        if (this.APIConfiguration.ForceLogout != null)
+                                        {
+                                            this.APIConfiguration.ForceLogout();
+                                        }
+                                    }
+                                }
+
+                                break;
+                            }
+
+                            // 改めてAPIを実行する(次のループで実行される)
+                        }
+                        else if (this.IsRefreshTokenExpired(this.ApiResponse))
+                        {
+                            if (this.APIConfiguration.ForceLogout != null)
+                            {
+                                this.APIConfiguration.ForceLogout();
+                            }
+
+                            break;
+                        }
+                        else
+                        {
+                            // なんかしらの応答が取得できたので終了
+                            break;
+                        }
                     }
                 }
                 catch (ApiException ex)
@@ -158,7 +186,7 @@ namespace Infrastructure.API
                             // オンライン⇒オフライン
                             vSetting.IsConnected = false;
 
-                            // TODO:メッセージを通知する「オフラインモードへ移行しました」
+                            Logger.Info($"オフラインモードへ移行しました");
                         }
 
                         // フォント配信サーバへ通信を行った日時を更新する
@@ -166,9 +194,10 @@ namespace Infrastructure.API
                         throw;
                     }
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
                     // 予期しない例外
+                    Logger.Error(ex.StackTrace);
                     throw;
                 }
             }
@@ -291,6 +320,18 @@ namespace Infrastructure.API
         {
             if (string.IsNullOrEmpty(accessToken))
             {
+                if (this.ApiParam.ContainsKey(APIParam.OfflineDeviceId) && !string.IsNullOrEmpty((string)this.ApiParam[APIParam.OfflineDeviceId]))
+                {
+                    Logger.Debug($"IsAccessTokenExpired:オフラインデバイスIDが設定されているときはアクセストークン期限切れをチェックしない");
+                    return false;
+                }
+
+                if (!this.ApiParam.ContainsKey(APIParam.DeviceId))
+                {
+                    Logger.Debug($"IsAccessTokenExpired:デバイスIDが設定されていないときはアクセストークン期限切れをチェックしない");
+                    return false;
+                }
+
                 if (this.ApiParam.ContainsKey(APIParam.DeviceId) && (string)this.ApiParam[APIParam.DeviceId] != string.Empty)
                 {
                     return true;
@@ -353,6 +394,10 @@ namespace Infrastructure.API
                 else if (typeof(InlineResponse200) == obj.GetType())
                 {
                     code = ((InlineResponse200)obj).Code;
+                }
+                else if (typeof(UpdateLicenseResponse) == obj.GetType())
+                {
+                    code = ((UpdateLicenseResponse)obj).Code;
                 }
                 else
                 {
@@ -430,12 +475,12 @@ namespace Infrastructure.API
                 }
 
                 {
-                    Logger.Debug("IsAccessTokenExpired:code=" + code.ToString());
+                    Logger.Debug("IsRefreshTokenExpired:code=" + code.ToString());
                 }
             }
             catch (Exception ex)
             {
-                Logger.Debug("IsAccessTokenExpired:" + ex.Message + "\n" + ex.StackTrace);
+                Logger.Debug("IsRefreshTokenExpired:" + ex.Message + "\n" + ex.StackTrace);
             }
 
             return code == (int)ResponseCode.RefreshTokenExpired;

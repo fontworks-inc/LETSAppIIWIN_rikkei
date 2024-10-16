@@ -756,4 +756,40 @@ LETSデスクトップアプリをログアウトしてください。</value>
     <value>フォント同期</value>
     <comment>クイックメニュー[フォント同期]</comment>
   </data>
+  <data name="MENU_FONT_UPDATE_ERROR_CAPTION" xml:space="preserve">
+    <value>フォント同期</value>
+    <comment>クイックメニュー[フォント同期] &gt; エラーダイアログ &gt; タイトル</comment>
+  </data>
+  <data name="MENU_FONT_UPDATE_ERROR_TEXT" xml:space="preserve">
+    <value>フォント同期に失敗しました</value>
+    <comment>クイックメニュー[フォント同期] &gt; エラーダイアログ &gt;本文</comment>
+  </data>
+  <data name="MENU_HELP" xml:space="preserve">
+    <value>ヘルプ</value>
+    <comment>クイックメニュー[ヘルプ]</comment>
+  </data>
+  <data name="MENU_HELP_ERROR_CAPTION" xml:space="preserve">
+    <value>ヘルプの情報取得</value>
+    <comment>クイックメニュー[ヘルプ] &gt; エラーダイアログ &gt; 本文</comment>
+  </data>
+  <data name="MENU_HELP_ERROR_TEXT" xml:space="preserve">
+    <value>ヘルプの情報取得に失敗しました</value>
+    <comment>クイックメニュー[ヘルプ] &gt; エラーダイアログ &gt; 本文</comment>
+  </data>
+  <data name="MENU_VERSION_ERROR_CAPTION" xml:space="preserve">
+    <value>バージョン情報の取得に失敗しました</value>
+    <comment>クイックメニュー[バージョン情報] &gt; エラーダイアログ &gt; タイトル</comment>
+  </data>
+  <data name="MENU_VERSION_ERROR_TEXT" xml:space="preserve">
+    <value>バージョン情報の取得が取得できません</value>
+    <comment>クイックメニュー[バージョン情報] &gt; エラーダイアログ &gt; 本文</comment>
+  </data>
+  <data name="MENU_VERSION_INFO" xml:space="preserve">
+    <value>バージョン情報</value>
+    <comment>クイックメニュー[バージョン情報]</comment>
+  </data>
+  <data name="MENU_VERSION_INFO_CAPTION" xml:space="preserve">
+    <value>LETSデスクトップアプリ</value>
+    <comment>クイックメニュー[バージョン情報] &gt; 情報ダイアログ &gt; タイトル</comment>
+  </data>
 </root>
